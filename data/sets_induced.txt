@@ -1,0 +1,318 @@
+ID	Category	Score	Symbol	URL
+GO:0000823	molecular_function	0.00444	inositol-1,4,5-trisphosphate 6-kinase activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0000823
+GO:0000824	molecular_function	0.00444	inositol tetrakisphosphate 3-kinase activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0000824
+GO:0000910	biological_process	1.1e-05	cytokinesis	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0000910
+GO:0000922	cellular_component	2.1e-06	spindle pole	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0000922
+GO:0001889	biological_process	0.00012	liver development	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0001889
+GO:0005008	molecular_function	0.00444	hepatocyte growth factor-activated receptor activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005008
+GO:0005509	molecular_function	0.00476	calcium ion binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005509
+GO:0005515	molecular_function	0.00971	protein binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005515
+GO:0005813	cellular_component	1.4e-05	centrosome	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005813
+GO:0005815	cellular_component	4.5e-05	microtubule organizing center	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005815
+GO:0005819	cellular_component	6.0e-05	spindle	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005819
+GO:0005856	cellular_component	0.00131	cytoskeleton	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005856
+GO:0005874	cellular_component	0.00253	microtubule	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005874
+GO:0005876	cellular_component	1.7e-05	spindle microtubule	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0005876
+GO:0007431	biological_process	0.00032	salivary gland development	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0007431
+GO:0007435	biological_process	0.00029	salivary gland morphogenesis	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0007435
+GO:0008013	molecular_function	0.00027	beta-catenin binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0008013
+GO:0008083	molecular_function	0.00553	growth factor activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0008083
+GO:0015630	cellular_component	0.00091	microtubule cytoskeleton	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0015630
+GO:0017049	molecular_function	0.00885	GTP-Rho binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0017049
+GO:0017082	molecular_function	0.00444	mineralocorticoid receptor activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0017082
+GO:0019899	molecular_function	3.9e-05	enzyme binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0019899
+GO:0031253	cellular_component	0.00219	cell projection membrane	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0031253
+GO:0031432	molecular_function	2.9e-07	titin binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0031432
+GO:0031996	molecular_function	1.3e-07	thioesterase binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0031996
+GO:0031997	molecular_function	7.3e-08	N-terminal myristoylation domain binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0031997
+GO:0032059	cellular_component	0.00456	bleb	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0032059
+GO:0032465	biological_process	1.7e-05	regulation of cytokinesis	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0032465
+GO:0034394	biological_process	1.7e-05	protein localization to cell surface	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0034394
+GO:0034750	cellular_component	0.00456	Scrib-APC-beta-catenin complex	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0034750
+GO:0042056	molecular_function	0.00082	chemoattractant activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0042056
+GO:0042995	cellular_component	0.00710	cell projection	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0042995
+GO:0043185	molecular_function	0.00885	vascular endothelial growth factor receptor 3 binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0043185
+GO:0043228	cellular_component	0.00362	non-membrane-bounded organelle	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0043228
+GO:0043232	cellular_component	0.00362	intracellular non-membrane-bounded organelle	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0043232
+GO:0043274	molecular_function	5.5e-08	phospholipase binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0043274
+GO:0043548	molecular_function	4.7e-07	phosphatidylinositol 3-kinase binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0043548
+GO:0044422	cellular_component	0.00857	organelle part	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0044422
+GO:0044430	cellular_component	0.00017	cytoskeletal part	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0044430
+GO:0044446	cellular_component	0.00749	intracellular organelle part	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0044446
+GO:0044451	cellular_component	0.00875	nucleoplasm part	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0044451
+GO:0044463	cellular_component	0.00141	cell projection part	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0044463
+GO:0047485	molecular_function	5.1e-06	protein N-terminus binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0047485
+GO:0048012	biological_process	5.8e-05	hepatocyte growth factor receptor signaling pathway	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0048012
+GO:0048306	molecular_function	5.7e-05	calcium-dependent protein binding	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0048306
+GO:0048729	biological_process	0.00031	tissue morphogenesis	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0048729
+GO:0051301	biological_process	3.6e-05	cell division	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0051301
+GO:0051302	biological_process	1.5e-06	regulation of cell division	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0051302
+GO:0051450	biological_process	0.00012	myoblast proliferation	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0051450
+GO:0051765	molecular_function	0.00885	inositol tetrakisphosphate kinase activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0051765
+GO:0060445	biological_process	9.8e-05	branching involved in salivary gland morphogenesis	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0060445
+GO:0060638	biological_process	4.3e-06	mesenchymal-epithelial cell signaling	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0060638
+GO:0060665	biological_process	7.7e-07	regulation of branching involved in salivary gland morphogenesis by mesenchymal-epithelial signaling	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0060665
+GO:0060688	biological_process	7.4e-06	regulation of morphogenesis of a branching structure	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0060688
+GO:0060693	biological_process	4.3e-06	regulation of branching involved in salivary gland morphogenesis	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0060693
+GO:0061008	biological_process	0.00013	hepaticobiliary system development	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0061008
+GO:0070369	cellular_component	0.00911	beta-catenin-TCF7L2 complex	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0070369
+GO:0070848	biological_process	0.00020	response to growth factor stimulus	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0070848
+GO:0071363	biological_process	0.00015	cellular response to growth factor stimulus	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0071363
+GO:2000027	biological_process	0.00029	regulation of organ morphogenesis	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:2000027
+mmu02010	KEGG	1	ABC transporters	http://www.genome.jp/kegg-bin/show_pathway?mmu02010+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05200	KEGG	5.6244048252111e-06	Pathways in cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05200+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05202	KEGG	0.35345622308855	Transcriptional misregulation in cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05202+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05203	KEGG	0.426421315868685	Viral carcinogenesis	http://www.genome.jp/kegg-bin/show_pathway?mmu05203+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05204	KEGG	1	Chemical carcinogenesis	http://www.genome.jp/kegg-bin/show_pathway?mmu05204+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00970	KEGG	1	Aminoacyl-tRNA biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00970+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00740	KEGG	1	Riboflavin metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00740+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04920	KEGG	1	Adipocytokine signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04920+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03022	KEGG	1	Basal transcription factors	http://www.genome.jp/kegg-bin/show_pathway?mmu03022+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03020	KEGG	1	RNA polymerase	http://www.genome.jp/kegg-bin/show_pathway?mmu03020+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04141	KEGG	1	Protein processing in endoplasmic reticulum	http://www.genome.jp/kegg-bin/show_pathway?mmu04141+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00260	KEGG	1	Glycine, serine and threonine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00260+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00072	KEGG	1	Synthesis and degradation of ketone bodies	http://www.genome.jp/kegg-bin/show_pathway?mmu00072+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04640	KEGG	1	Hematopoietic cell lineage	http://www.genome.jp/kegg-bin/show_pathway?mmu04640+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00500	KEGG	1	Starch and sucrose metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00500+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04370	KEGG	0.15134999643363	VEGF signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04370+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu01040	KEGG	1	Biosynthesis of unsaturated fatty acids	http://www.genome.jp/kegg-bin/show_pathway?mmu01040+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00460	KEGG	1	Cyanoamino acid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00460+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04080	KEGG	1	Neuroactive ligand-receptor interaction	http://www.genome.jp/kegg-bin/show_pathway?mmu04080+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04270	KEGG	8.10496566777342e-06	Vascular smooth muscle contraction	http://www.genome.jp/kegg-bin/show_pathway?mmu04270+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03410	KEGG	1	Base excision repair	http://www.genome.jp/kegg-bin/show_pathway?mmu03410+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00980	KEGG	1	Metabolism of xenobiotics by cytochrome P450	http://www.genome.jp/kegg-bin/show_pathway?mmu00980+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04672	KEGG	1	Intestinal immune network for IgA production	http://www.genome.jp/kegg-bin/show_pathway?mmu04672+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00982	KEGG	1	Drug metabolism - cytochrome P450	http://www.genome.jp/kegg-bin/show_pathway?mmu00982+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00983	KEGG	1	Drug metabolism - other enzymes	http://www.genome.jp/kegg-bin/show_pathway?mmu00983+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00010	KEGG	1	Glycolysis / Gluconeogenesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00010+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu01100	KEGG	0.82000792445003	Metabolic pathways	http://www.genome.jp/kegg-bin/show_pathway?mmu01100+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05213	KEGG	0.000257228517390488	Endometrial cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05213+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05212	KEGG	0.0125821057400938	Pancreatic cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05212+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05211	KEGG	2.37052690775156e-05	Renal cell carcinoma	http://www.genome.jp/kegg-bin/show_pathway?mmu05211+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00190	KEGG	1	Oxidative phosphorylation	http://www.genome.jp/kegg-bin/show_pathway?mmu00190+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04742	KEGG	1	Taste transduction	http://www.genome.jp/kegg-bin/show_pathway?mmu04742+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00300	KEGG	1	Lysine biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00300+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04740	KEGG	0.484698792648824	Olfactory transduction	http://www.genome.jp/kegg-bin/show_pathway?mmu04740+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05214	KEGG	1.39142438586443e-05	Glioma	http://www.genome.jp/kegg-bin/show_pathway?mmu05214+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03030	KEGG	1	DNA replication	http://www.genome.jp/kegg-bin/show_pathway?mmu03030+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00750	KEGG	1	Vitamin B6 metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00750+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00860	KEGG	1	Porphyrin and chlorophyll metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00860+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00900	KEGG	1	Terpenoid backbone biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00900+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00592	KEGG	1	alpha-Linolenic acid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00592+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00591	KEGG	1	Linoleic acid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00591+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00590	KEGG	1	Arachidonic acid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00590+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00290	KEGG	1	Valine, leucine and isoleucine biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00290+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05164	KEGG	1	Influenza A	http://www.genome.jp/kegg-bin/show_pathway?mmu05164+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04670	KEGG	0.0335547259167976	Leukocyte transendothelial migration	http://www.genome.jp/kegg-bin/show_pathway?mmu04670+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05166	KEGG	0.147999988389321	HTLV-I infection	http://www.genome.jp/kegg-bin/show_pathway?mmu05166+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05161	KEGG	0.305925052947692	Hepatitis B	http://www.genome.jp/kegg-bin/show_pathway?mmu05161+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04380	KEGG	1	Osteoclast differentiation	http://www.genome.jp/kegg-bin/show_pathway?mmu04380+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05162	KEGG	0.284564099986801	Measles	http://www.genome.jp/kegg-bin/show_pathway?mmu05162+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04340	KEGG	1	Hedgehog signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04340+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05169	KEGG	0.402499921765033	Epstein-Barr virus infection	http://www.genome.jp/kegg-bin/show_pathway?mmu05169+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05168	KEGG	0.391741766095388	Herpes simplex infection	http://www.genome.jp/kegg-bin/show_pathway?mmu05168+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00061	KEGG	1	Fatty acid biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00061+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05010	KEGG	0.000609146279161121	Alzheimer's disease	http://www.genome.jp/kegg-bin/show_pathway?mmu05010+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00100	KEGG	1	Steroid biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00100+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04260	KEGG	1	Cardiac muscle contraction	http://www.genome.jp/kegg-bin/show_pathway?mmu04260+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03420	KEGG	1	Nucleotide excision repair	http://www.genome.jp/kegg-bin/show_pathway?mmu03420+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00514	KEGG	1	Other types of O-glycan biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00514+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00512	KEGG	1	Mucin type O-Glycan biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00512+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00511	KEGG	1	Other glycan degradation	http://www.genome.jp/kegg-bin/show_pathway?mmu00511+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00510	KEGG	1	N-Glycan biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00510+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00561	KEGG	1	Glycerolipid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00561+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05146	KEGG	0.247581783763295	Amoebiasis	http://www.genome.jp/kegg-bin/show_pathway?mmu05146+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00450	KEGG	1	Selenocompound metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00450+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03440	KEGG	1	Homologous recombination	http://www.genome.jp/kegg-bin/show_pathway?mmu03440+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05020	KEGG	1	Prion diseases	http://www.genome.jp/kegg-bin/show_pathway?mmu05020+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04512	KEGG	1	ECM-receptor interaction	http://www.genome.jp/kegg-bin/show_pathway?mmu04512+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04510	KEGG	9.42202720948124e-05	Focal adhesion	http://www.genome.jp/kegg-bin/show_pathway?mmu04510+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05222	KEGG	1	Small cell lung cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05222+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05223	KEGG	0.123359685978681	Non-small cell lung cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05223+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05220	KEGG	0.166071112569057	Chronic myeloid leukemia	http://www.genome.jp/kegg-bin/show_pathway?mmu05220+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04514	KEGG	1	Cell adhesion molecules (CAMs)	http://www.genome.jp/kegg-bin/show_pathway?mmu04514+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03450	KEGG	1	Non-homologous end-joining	http://www.genome.jp/kegg-bin/show_pathway?mmu03450+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03040	KEGG	1	Spliceosome	http://www.genome.jp/kegg-bin/show_pathway?mmu03040+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04720	KEGG	4.59358549037334e-07	Long-term potentiation	http://www.genome.jp/kegg-bin/show_pathway?mmu04720+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00604	KEGG	1	Glycosphingolipid biosynthesis - ganglio series	http://www.genome.jp/kegg-bin/show_pathway?mmu00604+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00603	KEGG	1	Glycosphingolipid biosynthesis - globo series	http://www.genome.jp/kegg-bin/show_pathway?mmu00603+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00601	KEGG	1	Glycosphingolipid biosynthesis - lacto and neolacto series	http://www.genome.jp/kegg-bin/show_pathway?mmu00601+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00600	KEGG	1	Sphingolipid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00600+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00052	KEGG	1	Galactose metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00052+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00053	KEGG	1	Ascorbate and aldarate metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00053+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04666	KEGG	0.0198491335764008	Fc gamma R-mediated phagocytosis	http://www.genome.jp/kegg-bin/show_pathway?mmu04666+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04660	KEGG	0.239972617587981	T cell receptor signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04660+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04662	KEGG	0.17437492343578	B cell receptor signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04662+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04940	KEGG	1	Type I diabetes mellitus	http://www.genome.jp/kegg-bin/show_pathway?mmu04940+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00350	KEGG	1	Tyrosine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00350+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00520	KEGG	1	Amino sugar and nucleotide sugar metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00520+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04723	KEGG	0.224536495500937	Retrograde endocannabinoid signaling	http://www.genome.jp/kegg-bin/show_pathway?mmu04723+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04350	KEGG	0.190749630096383	TGF-beta signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04350+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00524	KEGG	1	Butirosin and neomycin biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00524+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04062	KEGG	0.00971392043096842	Chemokine signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04062+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04060	KEGG	0.0223526091956861	Cytokine-cytokine receptor interaction	http://www.genome.jp/kegg-bin/show_pathway?mmu04060+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04210	KEGG	1	Apoptosis	http://www.genome.jp/kegg-bin/show_pathway?mmu04210+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03430	KEGG	1	Mismatch repair	http://www.genome.jp/kegg-bin/show_pathway?mmu03430+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04064	KEGG	0.210788310438478	NF-kappa B signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04064+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04724	KEGG	0.249472840782222	Glutamatergic synapse	http://www.genome.jp/kegg-bin/show_pathway?mmu04724+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04725	KEGG	0.0294792519021882	Cholinergic synapse	http://www.genome.jp/kegg-bin/show_pathway?mmu04725+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04726	KEGG	0.0383907369711827	Serotonergic synapse	http://www.genome.jp/kegg-bin/show_pathway?mmu04726+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04727	KEGG	1	GABAergic synapse	http://www.genome.jp/kegg-bin/show_pathway?mmu04727+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05033	KEGG	1	Nicotine addiction	http://www.genome.jp/kegg-bin/show_pathway?mmu05033+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04721	KEGG	1	Synaptic vesicle cycle	http://www.genome.jp/kegg-bin/show_pathway?mmu04721+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04722	KEGG	0.000187555540284414	Neurotrophin signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04722+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05030	KEGG	1	Cocaine addiction	http://www.genome.jp/kegg-bin/show_pathway?mmu05030+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05330	KEGG	1	Allograft rejection	http://www.genome.jp/kegg-bin/show_pathway?mmu05330+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05332	KEGG	1	Graft-versus-host disease	http://www.genome.jp/kegg-bin/show_pathway?mmu05332+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04728	KEGG	0.000225724462012234	Dopaminergic synapse	http://www.genome.jp/kegg-bin/show_pathway?mmu04728+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04520	KEGG	2.64321245463221e-05	Adherens junction	http://www.genome.jp/kegg-bin/show_pathway?mmu04520+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00630	KEGG	1	Glyoxylate and dicarboxylate metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00630+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03050	KEGG	1	Proteasome	http://www.genome.jp/kegg-bin/show_pathway?mmu03050+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04810	KEGG	0.00160366988324117	Regulation of actin cytoskeleton	http://www.genome.jp/kegg-bin/show_pathway?mmu04810+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00920	KEGG	1	Sulfur metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00920+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00650	KEGG	1	Butanoate metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00650+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00730	KEGG	1	Thiamine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00730+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00040	KEGG	1	Pentose and glucuronate interconversions	http://www.genome.jp/kegg-bin/show_pathway?mmu00040+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00534	KEGG	1	Glycosaminoglycan biosynthesis - heparan sulfate / heparin	http://www.genome.jp/kegg-bin/show_pathway?mmu00534+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04115	KEGG	1	p53 signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04115+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04114	KEGG	0.0023589482854607	Oocyte meiosis	http://www.genome.jp/kegg-bin/show_pathway?mmu04114+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00531	KEGG	1	Glycosaminoglycan degradation	http://www.genome.jp/kegg-bin/show_pathway?mmu00531+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00533	KEGG	1	Glycosaminoglycan biosynthesis - keratan sulfate	http://www.genome.jp/kegg-bin/show_pathway?mmu00533+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00532	KEGG	1	Glycosaminoglycan biosynthesis - chondroitin sulfate / dermatan sulfate	http://www.genome.jp/kegg-bin/show_pathway?mmu00532+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04610	KEGG	1	Complement and coagulation cascades	http://www.genome.jp/kegg-bin/show_pathway?mmu04610+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04612	KEGG	1	Antigen processing and presentation	http://www.genome.jp/kegg-bin/show_pathway?mmu04612+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03018	KEGG	1	RNA degradation	http://www.genome.jp/kegg-bin/show_pathway?mmu03018+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00430	KEGG	1	Taurine and hypotaurine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00430+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00120	KEGG	1	Primary bile acid biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00120+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04320	KEGG	0.0530670336099454	Dorso-ventral axis formation	http://www.genome.jp/kegg-bin/show_pathway?mmu04320+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03320	KEGG	1	PPAR signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu03320+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00232	KEGG	1	Caffeine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00232+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05340	KEGG	1	Primary immunodeficiency	http://www.genome.jp/kegg-bin/show_pathway?mmu05340+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00230	KEGG	1	Purine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00230+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04530	KEGG	0.00402550744715061	Tight junction	http://www.genome.jp/kegg-bin/show_pathway?mmu04530+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03460	KEGG	1	Fanconi anemia pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu03460+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04730	KEGG	0.00935620575673637	Long-term depression	http://www.genome.jp/kegg-bin/show_pathway?mmu04730+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05323	KEGG	1	Rheumatoid arthritis	http://www.genome.jp/kegg-bin/show_pathway?mmu05323+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05322	KEGG	1	Systemic lupus erythematosus	http://www.genome.jp/kegg-bin/show_pathway?mmu05322+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03060	KEGG	1	Protein export	http://www.genome.jp/kegg-bin/show_pathway?mmu03060+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05320	KEGG	1	Autoimmune thyroid disease	http://www.genome.jp/kegg-bin/show_pathway?mmu05320+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00071	KEGG	1	Fatty acid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00071+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00620	KEGG	1	Pyruvate metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00620+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04930	KEGG	1	Type II diabetes mellitus	http://www.genome.jp/kegg-bin/show_pathway?mmu04930+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00830	KEGG	1	Retinol metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00830+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00330	KEGG	1	Arginine and proline metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00330+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04122	KEGG	1	Sulfur relay system	http://www.genome.jp/kegg-bin/show_pathway?mmu04122+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04120	KEGG	1	Ubiquitin mediated proteolysis	http://www.genome.jp/kegg-bin/show_pathway?mmu04120+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05034	KEGG	0.000992666939238187	Alcoholism	http://www.genome.jp/kegg-bin/show_pathway?mmu05034+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04966	KEGG	1	Collecting duct acid secretion	http://www.genome.jp/kegg-bin/show_pathway?mmu04966+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00130	KEGG	1	Ubiquinone and other terpenoid-quinone biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00130+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04964	KEGG	1	Proximal tubule bicarbonate reclamation	http://www.genome.jp/kegg-bin/show_pathway?mmu04964+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04962	KEGG	1	Vasopressin-regulated water reabsorption	http://www.genome.jp/kegg-bin/show_pathway?mmu04962+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00340	KEGG	1	Histidine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00340+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04960	KEGG	0.00403804118101588	Aldosterone-regulated sodium reabsorption	http://www.genome.jp/kegg-bin/show_pathway?mmu04960+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04961	KEGG	0.129895056817261	Endocrine and other factor-regulated calcium reabsorption	http://www.genome.jp/kegg-bin/show_pathway?mmu04961+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00030	KEGG	1	Pentose phosphate pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu00030+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05134	KEGG	1	Legionellosis	http://www.genome.jp/kegg-bin/show_pathway?mmu05134+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05132	KEGG	0.17643868263319	Salmonella infection	http://www.genome.jp/kegg-bin/show_pathway?mmu05132+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05133	KEGG	0.0007010345892994	Pertussis	http://www.genome.jp/kegg-bin/show_pathway?mmu05133+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00563	KEGG	1	Glycosylphosphatidylinositol(GPI)-anchor biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00563+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00785	KEGG	1	Lipoic acid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00785+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu01120	KEGG	1		http://www.genome.jp/kegg-bin/show_pathway?mmu01120+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00780	KEGG	1	Biotin metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00780+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04614	KEGG	1	Renin-angiotensin system	http://www.genome.jp/kegg-bin/show_pathway?mmu04614+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04540	KEGG	0.0186067205555725	Gap junction	http://www.genome.jp/kegg-bin/show_pathway?mmu04540+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05310	KEGG	1	Asthma	http://www.genome.jp/kegg-bin/show_pathway?mmu05310+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05221	KEGG	0.00847320019017666	Acute myeloid leukemia	http://www.genome.jp/kegg-bin/show_pathway?mmu05221+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04971	KEGG	2.37052690775156e-05	Gastric acid secretion	http://www.genome.jp/kegg-bin/show_pathway?mmu04971+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04970	KEGG	2.64321245463221e-05	Salivary secretion	http://www.genome.jp/kegg-bin/show_pathway?mmu04970+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04973	KEGG	1	Carbohydrate digestion and absorption	http://www.genome.jp/kegg-bin/show_pathway?mmu04973+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04972	KEGG	0.214739592347977	Pancreatic secretion	http://www.genome.jp/kegg-bin/show_pathway?mmu04972+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04975	KEGG	1	Fat digestion and absorption	http://www.genome.jp/kegg-bin/show_pathway?mmu04975+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04130	KEGG	1	SNARE interactions in vesicular transport	http://www.genome.jp/kegg-bin/show_pathway?mmu04130+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04977	KEGG	1	Vitamin digestion and absorption	http://www.genome.jp/kegg-bin/show_pathway?mmu04977+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04976	KEGG	1	Bile secretion	http://www.genome.jp/kegg-bin/show_pathway?mmu04976+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04070	KEGG	1.04091584075808e-06	Phosphatidylinositol signaling system	http://www.genome.jp/kegg-bin/show_pathway?mmu04070+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00410	KEGG	1	beta-Alanine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00410+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00140	KEGG	1	Steroid hormone biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00140+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05410	KEGG	1	Hypertrophic cardiomyopathy (HCM)	http://www.genome.jp/kegg-bin/show_pathway?mmu05410+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00020	KEGG	1	Citrate cycle (TCA cycle)	http://www.genome.jp/kegg-bin/show_pathway?mmu00020+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00250	KEGG	1	Alanine, aspartate and glutamate metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00250+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05414	KEGG	1	Dilated cardiomyopathy	http://www.genome.jp/kegg-bin/show_pathway?mmu05414+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04630	KEGG	1	Jak-STAT signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04630+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05416	KEGG	1	Viral myocarditis	http://www.genome.jp/kegg-bin/show_pathway?mmu05416+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00380	KEGG	1	Tryptophan metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00380+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00270	KEGG	1	Cysteine and methionine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00270+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05031	KEGG	0.000544933886502878	Amphetamine addiction	http://www.genome.jp/kegg-bin/show_pathway?mmu05031+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04950	KEGG	1	Maturity onset diabetes of the young	http://www.genome.jp/kegg-bin/show_pathway?mmu04950+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04974	KEGG	1	Protein digestion and absorption	http://www.genome.jp/kegg-bin/show_pathway?mmu04974+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04650	KEGG	0.260725577856904	Natural killer cell mediated cytotoxicity	http://www.genome.jp/kegg-bin/show_pathway?mmu04650+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05219	KEGG	0.00489237064299089	Bladder cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05219+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05160	KEGG	0.282756369561678	Hepatitis C	http://www.genome.jp/kegg-bin/show_pathway?mmu05160+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03008	KEGG	0.180551644029159	Ribosome biogenesis in eukaryotes	http://www.genome.jp/kegg-bin/show_pathway?mmu03008+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04066	KEGG	0.24378620825768	HIF-1 signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04066+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05218	KEGG	2.2422363227547e-05	Melanoma	http://www.genome.jp/kegg-bin/show_pathway?mmu05218+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00480	KEGG	1	Glutathione metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00480+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04110	KEGG	1	Cell cycle	http://www.genome.jp/kegg-bin/show_pathway?mmu04110+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00760	KEGG	1	Nicotinate and nicotinamide metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00760+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05216	KEGG	4.40524469913308e-05	Thyroid cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05216+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00062	KEGG	1	Fatty acid elongation	http://www.genome.jp/kegg-bin/show_pathway?mmu00062+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00640	KEGG	1	Propanoate metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00640+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00310	KEGG	1	Lysine degradation	http://www.genome.jp/kegg-bin/show_pathway?mmu00310+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04621	KEGG	1	NOD-like receptor signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04621+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04620	KEGG	1	Toll-like receptor signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04620+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04623	KEGG	1	Cytosolic DNA-sensing pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04623+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04622	KEGG	1	RIG-I-like receptor signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04622+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05150	KEGG	1	Staphylococcus aureus infection	http://www.genome.jp/kegg-bin/show_pathway?mmu05150+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00400	KEGG	1	Phenylalanine, tyrosine and tryptophan biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00400+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05152	KEGG	0.0087343695874019	Tuberculosis	http://www.genome.jp/kegg-bin/show_pathway?mmu05152+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04020	KEGG	0.000861695435575059	Calcium signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04020+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04140	KEGG	1	Regulation of autophagy	http://www.genome.jp/kegg-bin/show_pathway?mmu04140+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04310	KEGG	2.54392627392249e-05	Wnt signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04310+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04142	KEGG	1	Lysosome	http://www.genome.jp/kegg-bin/show_pathway?mmu04142+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05100	KEGG	0.0129280743263368	Bacterial invasion of epithelial cells	http://www.genome.jp/kegg-bin/show_pathway?mmu05100+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04144	KEGG	0.0151868822889168	Endocytosis	http://www.genome.jp/kegg-bin/show_pathway?mmu04144+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04145	KEGG	1	Phagosome	http://www.genome.jp/kegg-bin/show_pathway?mmu04145+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04146	KEGG	1	Peroxisome	http://www.genome.jp/kegg-bin/show_pathway?mmu04146+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00240	KEGG	1	Pyrimidine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00240+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05014	KEGG	1	Amyotrophic lateral sclerosis (ALS)	http://www.genome.jp/kegg-bin/show_pathway?mmu05014+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00564	KEGG	1	Glycerophospholipid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00564+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05016	KEGG	0.35345622308855	Huntington's disease	http://www.genome.jp/kegg-bin/show_pathway?mmu05016+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00562	KEGG	0.00041317168850112	Inositol phosphate metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00562+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04744	KEGG	3.95557301579922e-05	Phototransduction	http://www.genome.jp/kegg-bin/show_pathway?mmu04744+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05012	KEGG	1	Parkinson's disease	http://www.genome.jp/kegg-bin/show_pathway?mmu05012+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05210	KEGG	0.000476120447182771	Colorectal cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05210+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04664	KEGG	0.159791739186509	Fc epsilon RI signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04664+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04330	KEGG	1	Notch signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04330+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05217	KEGG	0.00790678642648949	Basal cell carcinoma	http://www.genome.jp/kegg-bin/show_pathway?mmu05217+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05032	KEGG	1	Morphine addiction	http://www.genome.jp/kegg-bin/show_pathway?mmu05032+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00790	KEGG	1	Folate biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00790+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00051	KEGG	1	Fructose and mannose metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00051+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05215	KEGG	0.00124907148282662	Prostate cancer	http://www.genome.jp/kegg-bin/show_pathway?mmu05215+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05412	KEGG	0.0139909142881165	Arrhythmogenic right ventricular cardiomyopathy (ARVC)	http://www.genome.jp/kegg-bin/show_pathway?mmu05412+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03013	KEGG	1	RNA transport	http://www.genome.jp/kegg-bin/show_pathway?mmu03013+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03010	KEGG	1	Ribosome	http://www.genome.jp/kegg-bin/show_pathway?mmu03010+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu03015	KEGG	1	mRNA surveillance pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu03015+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00770	KEGG	1	Pantothenate and CoA biosynthesis	http://www.genome.jp/kegg-bin/show_pathway?mmu00770+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04012	KEGG	0.194795280682972	ErbB signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04012+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04916	KEGG	1.78663904290925e-09	Melanogenesis	http://www.genome.jp/kegg-bin/show_pathway?mmu04916+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04010	KEGG	0.131034886446377	MAPK signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04010+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04914	KEGG	0.194795280682972	Progesterone-mediated oocyte maturation	http://www.genome.jp/kegg-bin/show_pathway?mmu04914+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04912	KEGG	1.77370175520954e-06	GnRH signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04912+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00670	KEGG	1	One carbon pool by folate	http://www.genome.jp/kegg-bin/show_pathway?mmu00670+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04910	KEGG	0.00030139335764436	Insulin signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04910+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00565	KEGG	1	Ether lipid metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00565+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05145	KEGG	1	Toxoplasmosis	http://www.genome.jp/kegg-bin/show_pathway?mmu05145+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05144	KEGG	0.00606723257968267	Malaria	http://www.genome.jp/kegg-bin/show_pathway?mmu05144+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05143	KEGG	0.0785955399428379	African trypanosomiasis	http://www.genome.jp/kegg-bin/show_pathway?mmu05143+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05142	KEGG	0.226482020822143	Chagas disease (American trypanosomiasis)	http://www.genome.jp/kegg-bin/show_pathway?mmu05142+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu05140	KEGG	1	Leishmaniasis	http://www.genome.jp/kegg-bin/show_pathway?mmu05140+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00360	KEGG	1	Phenylalanine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00360+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04151	KEGG	0.000985822553193181	PI3K-Akt signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04151+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04150	KEGG	0.149227122675446	mTOR signaling pathway	http://www.genome.jp/kegg-bin/show_pathway?mmu04150+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04360	KEGG	0.00377649196993132	Axon guidance	http://www.genome.jp/kegg-bin/show_pathway?mmu04360+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00280	KEGG	1	Valine, leucine and isoleucine degradation	http://www.genome.jp/kegg-bin/show_pathway?mmu00280+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00471	KEGG	1	D-Glutamine and D-glutamate metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00471+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu00472	KEGG	1	D-Arginine and D-ornithine metabolism	http://www.genome.jp/kegg-bin/show_pathway?mmu00472+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04710	KEGG	1	Circadian rhythm	http://www.genome.jp/kegg-bin/show_pathway?mmu04710+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04713	KEGG	7.08332599014984e-05	Circadian entrainment	http://www.genome.jp/kegg-bin/show_pathway?mmu04713+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
+mmu04978	KEGG	1	Mineral absorption	http://www.genome.jp/kegg-bin/show_pathway?mmu04978+17295+18720+110784+12314+16653+14205+18798+19877+12313+15234+21415+14178+11845+12315+12387+12995+69718
