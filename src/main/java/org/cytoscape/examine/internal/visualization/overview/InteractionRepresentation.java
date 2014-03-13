@@ -16,7 +16,7 @@ import processing.core.PVector;
 public class InteractionRepresentation extends Representation<DefaultEdge> {
 
     // Opacity.
-    public static final float OPACITY = 0.5f;
+    public static final float OPACITY = 1f;
     
     // Connected proteins.
     public final HNode protein1, protein2;
@@ -51,17 +51,26 @@ public class InteractionRepresentation extends Representation<DefaultEdge> {
         noFill();
 
         // Halo.
+        noFill();
+        float haloWeight = highlight ? 6f : 5f;
         stroke(1f, highlight ? 1f : OPACITY);
-        strokeWeight(highlight ? 8f : 6f);
+        strokeWeight(haloWeight);
         drawLine();
         
+        float endWeight = haloWeight + 2f;
+        noStroke();
+        fill(highlight ? 1f : OPACITY);
+        ellipse(cs[0].x, cs[0].y, endWeight, endWeight);
+        ellipse(cs[cs.length - 1].x, cs[cs.length - 1].y, endWeight, endWeight);
+        
         // Actual edge.
+        noFill();
         float edgeWeight = highlight ? 3f : 2f;
         stroke(highlight ? 0f : 0f, highlight ? 1f: OPACITY);
         strokeWeight(edgeWeight);
         drawLine();
         
-        float endWeight = 2f * edgeWeight;
+        endWeight = 2f * edgeWeight;
         noStroke();
         fill(highlight ? 0f : 0.25f);
         ellipse(cs[0].x, cs[0].y, endWeight, endWeight);

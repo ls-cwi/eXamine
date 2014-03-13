@@ -53,7 +53,7 @@ public class Parameters {
     
     // Tile to protein (of union network) ratio.
     public static final Variable<Float> somTileRatio =
-            som.create("Tile ratio", 1.25f, 1.25f, 2f, 4f, 8f);
+            som.create("Tile ratio", 1.1f, 1.1f, 2f, 4f, 8f);
     
     // Maximum tile radius.
     public static final Variable<Float> somMaxTileRadius =
@@ -71,7 +71,7 @@ public class Parameters {
     };
     
     public static final Variable<DistanceMeasure> somMeasure =
-            som.create("Distance", distanceMeasures[5], distanceMeasures);
+            som.create("Distance", distanceMeasures[6], distanceMeasures);
     
     // Minimum neighborhood size for training.
     public static final Variable<Integer> somNeighborhoodMin =
@@ -114,7 +114,7 @@ public class Parameters {
     
     public static final Variable<Boolean> edgeVisible = new Variable<Boolean>(true);
     
-    public static final Variable<Integer> edgePoints = new Variable<Integer>(3);
+    public static final Variable<Integer> edgePoints = new Variable<Integer>(2);
     
     
     // --- End interaction parameters. ---
