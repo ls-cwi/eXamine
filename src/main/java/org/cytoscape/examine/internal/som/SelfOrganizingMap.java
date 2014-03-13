@@ -41,4 +41,15 @@ public class SelfOrganizingMap {
         this.topology = topology;
     }
     
+    /**
+     * Add weighted noise to neurons.
+     */
+    public void addNoise(float alpha) {
+        for(int i = 0; i < neurons.length; i++) {
+            for(int j = 0; j < neurons[i].length; j++) {
+                neurons[i][j] = alpha * ((float) Math.random()) + (1f - alpha) * neurons[i][j];
+            }
+        }
+    }
+    
 }

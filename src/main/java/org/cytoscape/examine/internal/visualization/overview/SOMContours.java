@@ -121,7 +121,7 @@ public class SOMContours {
         
         // Base tile geometry.
         double roundDilationErosion = SOMOverview.tileSide;
-        int bufferSegments = 8;
+        int bufferSegments = 15;
         int setSize = trainer.learningModel.proteinSets.size() - 1;
         double indexErosion = setSize == 0 ?
                                 0 :

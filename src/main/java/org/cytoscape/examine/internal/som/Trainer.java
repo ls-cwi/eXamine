@@ -40,7 +40,7 @@ public class Trainer {
     public final float INITIAL_LEARNING_RATE = 0.01f;
     public final float ORDERING_END_LEARNING_RATE = 0f;
     public final float CONVERGENCE_LEARNING_RATE = 0f;
-    private float learningRate;
+    private float learningRate; 
     
     public final float INITIAL_NEIGHBORHOOD = 1f;
     public final float ORDERING_END_NEIGHBORHOOD = 0f;
@@ -71,8 +71,8 @@ public class Trainer {
         Arrays.fill(proteinNeurons, -1);
         
         // Normalize training iterations to number of samples.
-        this.ORDERING_ITERATIONS = 100000 / (learningModel.proteins.size() + 1);
-        this.CONVERGENCE_ITERATIONS = 0; //100000 / learningModel.proteins.size();
+        this.ORDERING_ITERATIONS = 500000 / (learningModel.proteins.size() + 1);
+        this.CONVERGENCE_ITERATIONS = 0; //100000 / (learningModel.proteins.size() + 1);
         
         // Training iteration count.
         this.iteration = 1;
@@ -178,6 +178,9 @@ public class Trainer {
                                     (INITIAL_NEIGHBORHOOD - ORDERING_END_NEIGHBORHOOD) * (1f - orderingProgress) :
                                     CONVERGENCE_NEIGHBORHOOD;
         
+        // Add noise.
+        //som.addNoise(0.0001f);
+        
         // Chairs.
         boolean[] neuronTaken = new boolean[som.neurons.length];
         
@@ -220,6 +223,14 @@ public class Trainer {
             // Increase iteration count.
             iteration++;
         }
+        
+        // Flatten non-taken neuron neighborhoods.
+        /*float[] nullVector = new float[som.neurons[0].length];
+        for(int i = 0; i < neuronTaken.length; i++) {
+            if(!neuronTaken[i]) {
+                align(i, nullVector);
+            }
+        }*/
         
         // Update neuron to protein map.
         Arrays.fill(neuronProteins, -1);

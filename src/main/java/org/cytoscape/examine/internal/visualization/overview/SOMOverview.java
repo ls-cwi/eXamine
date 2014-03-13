@@ -364,7 +364,7 @@ public class SOMOverview extends PositionedSnippet {
          */
         private void updateInteractionRepresentations() {            
             // Construct interactions and push to overview.
-            int interactionSegments = edgePoints.get();
+            //int interactionSegments = edgePoints.get();
             List<InteractionRepresentation> iR = new ArrayList<InteractionRepresentation>();
             
             if(edgeVisible.get()) {
@@ -372,14 +372,53 @@ public class SOMOverview extends PositionedSnippet {
                     // End point proteins.
                     HNode sP = contextNetwork.graph.getEdgeSource(iE);
                     HNode tP = contextNetwork.graph.getEdgeTarget(iE);
+                    
+                    // Make source vertex the highest degree.
+                    if(contextNetwork.graph.degreeOf(sP) < contextNetwork.graph.degreeOf(tP)) {
+                        HNode t = sP;
+                        sP = tP;
+                        tP = t;
+                    }
 
                     // Ignore self-loops.
                     if(sP == tP) {
                         continue;
                     }
+                    
+                    PVector[] intCs = new PVector[3];
+                    intCs[0] = somToOverview(trainer.coordinatesMap.get(sP));
+                    intCs[2] = somToOverview(trainer.coordinatesMap.get(tP));
+                    
+                    intCs[1] = add(intCs[0], intCs[2]);
+                    intCs[1].mult(0.5f);
+                    
+                    // Add slight bend to arc.
+                    PVector dBE = sub(intCs[2], intCs[0]);
+                    if(dBE.mag() > 2 * tileRadius) {
+                        dBE.normalize();
+                        dBE.mult(0.25f * tileRadius);
+                        dBE.rotate(0.5f * PI);
+                        
+                        intCs[1] = add(intCs[1], dBE);
+                    }
+                    
+                    // Ellipse space around end points of arc.
+                    float bufferExtent = min(40f, 0.66f * tileRadius);
+                    
+                    dBE = sub(intCs[1], intCs[0]);
+                    dBE.normalize();
+                    dBE.mult(bufferExtent);
+                    dBE.y *= 0.5f; // Ellipse shape.
+                    intCs[0] = add(intCs[0], dBE);
+                    
+                    dBE = sub(intCs[1], intCs[2]);
+                    dBE.normalize();
+                    dBE.mult(bufferExtent);
+                    dBE.y *= 0.5f; // Ellipse shape.
+                    intCs[2] = add(intCs[2], dBE);
 
                     // End point neurons.
-                    int sN = trainer.proteinNeurons[
+                    /*int sN = trainer.proteinNeurons[
                                 learningModel.proteins.indexOf(sP)];
                     int tN = trainer.proteinNeurons[
                                 learningModel.proteins.indexOf(tP)];
