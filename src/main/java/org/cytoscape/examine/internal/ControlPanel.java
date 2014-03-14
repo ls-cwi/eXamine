@@ -183,7 +183,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		private int selectedURLColumn = 0;
 		private int selectedScoreColumn = 0;
 		private Constants.Selection groupSelection = Constants.Selection.NONE;
-		private boolean showScore = false;
+		private boolean showScore = true;
 
 		public boolean getShowScore() {
 			return showScore;
@@ -208,11 +208,22 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				columnNamesSet.add(c.getName());
 
 				if (c.getListElementType() == String.class) {
+					if (c.getName().equals("Pathway")) {
+						selectedGroupColumns.add(allGroupColumns.size());
+					}
 					allGroupColumns.add(i);
 					allGroupColumnSizes.add(Constants.CATEGORY_MAX_SIZE);
 				} else if (c.getType() == String.class) {
+					if (c.getName().equals("URL")) {
+						selectedURLColumn = allStringColumns.size();
+					} else if (c.getName().equals("Symbol")) {
+						selectedLabelColumn = allStringColumns.size();
+					}
 					allStringColumns.add(i);
 				} else if (c.getType() == Double.class) {
+					if (c.getName().equals("Score")) {
+						selectedScoreColumn = allFloatColumns.size();
+					}
 					allFloatColumns.add(i);
 				}
 
@@ -465,6 +476,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	
 			updateUserInterface();
 			updateFeedbackTableModel();
+			updateButtons();
 		} else {
 			disableUserInterface();
 		}
@@ -566,6 +578,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		}
 
 		updateButtons();
+		
+		showScoreCheckBox.setSelected(ns.getShowScore());
 		
 		// Add all itemChangeListeners
 		cmbNodeLabel.addItemListener(itemChangeListener);
