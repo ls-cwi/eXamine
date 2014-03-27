@@ -172,7 +172,10 @@ public class DataSet {
                         	mmNS.add(mmHN);
                     }
                     
-                    Double bScore = mRow.get(scoreColumnName, Double.class);
+                    Double bScore = null;
+                    if (scoreColumnName != null) {
+                    	mRow.get(scoreColumnName, Double.class);
+                    }
                     float score = bScore == null ? Float.NaN : bScore.floatValue();
                     
                     String url = mRow.get(urlColumnName, String.class);

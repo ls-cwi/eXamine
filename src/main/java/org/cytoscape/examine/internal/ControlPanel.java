@@ -229,6 +229,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 
 				i++;
 			}
+			
+			showScore = allFloatColumns.size() > 0;
 		}
 		
 		private List<String> getColumnNames(List<Integer> indices) {
@@ -577,13 +579,13 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		
 		cmbGroupSelection.setSelectedIndex(ns.getGroupSelection().ordinal());
 
-    cmbGroupScore.setEnabled(floatColumns.size() > 0);
-    showScoreCheckBox.setEnabled(floatColumns.size() > 0);
+		cmbGroupScore.setEnabled(floatColumns.size() > 0);
+		showScoreCheckBox.setEnabled(floatColumns.size() > 0);
 		if (floatColumns.size() > 0) {
 			cmbGroupScore.setSelectedIndex(ns.getSelectedScoreColumn());
 		}
 
-    updateButtons();
+		updateButtons();
 		
 		showScoreCheckBox.setSelected(ns.getShowScore());
 		
