@@ -89,13 +89,17 @@ public class DataSet {
             CyRow row = nodeTable.getRow(cyNode.getSUID());
             
             if(row != null) {
+                float score = 0;
+                if (scoreColumnName != null) {
+                  score = row.get(scoreColumnName, Double.class).floatValue();
+                }
                 HNode hN = new HNode(
                             cyNode,
                             row,
                             row.get(CyNetwork.NAME, String.class),
                             row.get(labelColumnName, String.class),
                             row.get(urlColumnName, String.class),
-                            row.get(scoreColumnName, Double.class).floatValue());
+                            score);
                 
                 superGraph.addVertex(hN);
                 nM.put(cyNode, hN);

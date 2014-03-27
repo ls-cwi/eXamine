@@ -384,7 +384,11 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		}
 		
 		public String getSelectedScoreColumnName() {
-			return columnNames.get(allFloatColumns.get(selectedScoreColumn));
+      if (allFloatColumns.size() == 0) {
+        return null;
+      } else {
+  		  return columnNames.get(allFloatColumns.get(selectedScoreColumn));
+      }
 		}
 
 		public List<Integer> getSelectedGroupColumns() {
@@ -573,11 +577,13 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		
 		cmbGroupSelection.setSelectedIndex(ns.getGroupSelection().ordinal());
 
+    cmbGroupScore.setEnabled(floatColumns.size() > 0);
+    showScoreCheckBox.setEnabled(floatColumns.size() > 0);
 		if (floatColumns.size() > 0) {
 			cmbGroupScore.setSelectedIndex(ns.getSelectedScoreColumn());
 		}
 
-		updateButtons();
+    updateButtons();
 		
 		showScoreCheckBox.setSelected(ns.getShowScore());
 		
