@@ -5,4 +5,5 @@
 Bugs:
 
 * Adding new column messes up column order
+* Focus is kept after opening a URL
 
