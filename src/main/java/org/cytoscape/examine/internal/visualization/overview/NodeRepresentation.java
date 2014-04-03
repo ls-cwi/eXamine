@@ -80,7 +80,7 @@ public class NodeRepresentation extends Representation<HNode> {
 
         PVector nodeColor = cytoColor == null ?
                 Color.white :
-                Color.rgb(cytoColor.getRed(), cytoColor.getGreen(), cytoColor.getRed());
+                Color.rgb(cytoColor.getRed(), cytoColor.getGreen(), cytoColor.getBlue());
         stroke(nodeColor);
         strokeWeight(3f);
         
