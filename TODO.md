@@ -4,5 +4,5 @@
 
 Bugs:
 
-* Adding new column messus up column order
+* Adding new column messes up column order
 
