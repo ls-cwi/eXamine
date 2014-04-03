@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
+import org.jgrapht.graph.DefaultEdge;
 
 /**
  * Protein representation.
@@ -100,11 +101,18 @@ public class NodeRepresentation extends Representation<HNode> {
 
     @Override
     public void beginHovered() {
-        // Highlight protein and its member terms.
+        // Highlight protein, its adjacent interactions, and its member terms.
         Set<HNode> hP = new HashSet<HNode>();
         hP.add(element);
         model.highlightedProteins.set(hP);
         
+        // Highlight interactions.
+        Set<DefaultEdge> hI = new HashSet<DefaultEdge>();
+        Set<DefaultEdge> edges = model.activeNetwork.get().graph.edgesOf(element);
+        hI.addAll(edges);
+        model.highlightedInteractions.set(hI);
+        
+        // Highlight member terms.
         Set<HSet> hT = new HashSet<HSet>();
         for(HSet set: element.sets) {
             hT.add(set);
@@ -114,8 +122,9 @@ public class NodeRepresentation extends Representation<HNode> {
 
     @Override
     public void endHovered() {
-        model.highlightedSets.clear();
         model.highlightedProteins.clear();
+        model.highlightedInteractions.clear();
+        model.highlightedSets.clear();
     }
     
     private boolean highlight() {

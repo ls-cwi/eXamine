@@ -38,6 +38,9 @@ public final class Model {
     // Highlighted proteins.
     public final VolatileSet<HNode> highlightedProteins;
     
+    // Highlighted interactions.
+    public final VolatileSet<DefaultEdge> highlightedInteractions;
+    
     // Highlighted protein sets.
     public final VolatileSet<HSet> highlightedSets;
     
@@ -61,6 +64,7 @@ public final class Model {
     public Model() {
         this.selection = new Selection(this);
         this.highlightedProteins = new VolatileSet<HNode>();
+        this.highlightedInteractions = new VolatileSet<DefaultEdge>();
         this.highlightedSets = new VolatileSet<HSet>();
         this.activeNetwork = new Variable<Network>(new SuperNetwork(null,
                                 new Pseudograph<HNode, DefaultEdge>(DefaultEdge.class)));
