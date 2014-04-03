@@ -3,9 +3,12 @@ package org.cytoscape.examine.internal.visualization.overview;
 import static aether.Aether.*;
 import static aether.Math.*;
 import aether.draw.Representation;
+import java.util.HashSet;
+import java.util.Set;
 import static org.cytoscape.examine.internal.Modules.*;
 
 import org.cytoscape.examine.internal.data.HNode;
+import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
 import org.jgrapht.graph.DefaultEdge;
 import processing.core.PVector;
@@ -45,14 +48,16 @@ public class InteractionRepresentation extends Representation<DefaultEdge> {
 
     @Override
     public void draw() {
-        boolean highlight = model.highlightedProteins.get().contains(protein1) ||
-                            model.highlightedProteins.get().contains(protein2);
+        boolean highlight = model.highlightedInteractions.get().contains(element);
+                            //model.highlightedProteins.get().contains(protein1) ||
+                            //model.highlightedProteins.get().contains(protein2);
         
+        picking();
         noFill();
 
         // Halo.
         noFill();
-        float haloWeight = highlight ? 6f : 5f;
+        float haloWeight = highlight ? 10f : 8f;
         stroke(1f, highlight ? 1f : OPACITY);
         strokeWeight(haloWeight);
         drawLine();
@@ -92,6 +97,33 @@ public class InteractionRepresentation extends Representation<DefaultEdge> {
         }
         curveVertex(cs[cs.length - 1]);
         endShape();
+    }
+
+    @Override
+    public void beginHovered() {
+        // Highlight proteins term intersection.
+        Set<HNode> hP = new HashSet<HNode>();
+        hP.add(protein1);
+        hP.add(protein2);
+        model.highlightedProteins.set(hP);
+        
+        // Highlight interactions.
+        Set<DefaultEdge> hI = new HashSet<DefaultEdge>();
+        hI.add(element);
+        model.highlightedInteractions.set(hI);
+        
+        // Intersect annotation sets.
+        Set<HSet> hT = new HashSet<HSet>();
+        hT.addAll(protein1.sets);
+        hT.retainAll(protein2.sets);
+        model.highlightedSets.set(hT);
+    }
+
+    @Override
+    public void endHovered() {
+        model.highlightedProteins.clear();
+        model.highlightedInteractions.clear();
+        model.highlightedSets.clear();
     }
 
 }
