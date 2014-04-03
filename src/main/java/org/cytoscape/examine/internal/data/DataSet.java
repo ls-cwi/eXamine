@@ -90,9 +90,9 @@ public class DataSet {
             
             if(row != null) {
                 float score = 0;
-                if (scoreColumnName != null) {
-                  score = row.get(scoreColumnName, Double.class).floatValue();
-                }
+                //if (scoreColumnName != null) {
+                //  score = row.get(scoreColumnName, Double.class).floatValue();
+                //}
                 HNode hN = new HNode(
                             cyNode,
                             row,
@@ -174,7 +174,7 @@ public class DataSet {
                     
                     Double bScore = null;
                     if (scoreColumnName != null) {
-                    	mRow.get(scoreColumnName, Double.class);
+                    	bScore = mRow.get(scoreColumnName, Double.class);
                     }
                     float score = bScore == null ? Float.NaN : bScore.floatValue();
                     
