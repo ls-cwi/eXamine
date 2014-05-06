@@ -1,9 +1,9 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import static aether.Aether.*;
-import static aether.Math.*;
-import static processing.core.PVector.*;
-import aether.draw.PositionedSnippet;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
+import static org.cytoscape.examine.internal.graphics.Math.*;
+import static java.lang.Math.*;
+import org.cytoscape.examine.internal.graphics.draw.PositionedSnippet;
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.cytoscape.examine.internal.data.Comparators;
@@ -14,11 +14,10 @@ import org.cytoscape.examine.internal.som.Coordinates;
 import org.cytoscape.examine.internal.som.SelfOrganizingMap;
 import org.cytoscape.examine.internal.som.Topology;
 import org.cytoscape.examine.internal.som.Trainer;
-import org.cytoscape.examine.internal.som.metrics.DistanceMeasure;
 
 import static org.cytoscape.examine.internal.Modules.*;
 import static org.cytoscape.examine.internal.visualization.Parameters.*;
-import static aether.draw.Parameters.*;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,9 +25,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import processing.core.PVector;
+import org.cytoscape.examine.internal.graphics.PVector;
 import org.jgrapht.graph.DefaultEdge;
-import processing.core.PConstants;
 
 /**
  *
@@ -51,8 +49,8 @@ public class SOMOverview extends PositionedSnippet {
     public PVector span;
     
     // Tile radius.
-    public static float tileRadius;
-    public static float tileSide;
+    public static double tileRadius;
+    public static double tileSide;
     
     // Updater thread.
     private boolean updateGoAhead;
@@ -127,7 +125,7 @@ public class SOMOverview extends PositionedSnippet {
         PVector[] tilePoints = new PVector[7];
         
         for(int i = 0; i < 7; i++) {
-            tilePoints[i] = PVector.fromAngle(PConstants.PI * (float) (i + 0.5) / 3f);
+            tilePoints[i] = PVector.fromAngle(Math.PI * (i + 0.5) / 3.0);
             tilePoints[i].mult(tileRadius);
         }
         
@@ -167,9 +165,6 @@ public class SOMOverview extends PositionedSnippet {
         
         // Network trainer.
         private Trainer trainer;
-        
-        // Chosen distance metric between (set membership) vectors.
-        private DistanceMeasure measure;
         
         // Set contour generator.
         private SOMContours somContours;
@@ -220,72 +215,55 @@ public class SOMOverview extends PositionedSnippet {
                                      !model.selection.activeSetList.equals(learningModel.proteinSets) ||
                                      !model.selection.activeSetMap.equals(learningModel.proteinSetWeights);
 
-                // Plain network.
-                if(som == null || updatedProteins ||
-                   updateFeatures || updatedTopology ||
-                   measure != somMeasure.get()) {
+            // Plain network.
+            if(som == null || updatedProteins || updateFeatures || updatedTopology) {
+                // Old learning model.
+                LearningModel oldLearningData = learningModel;
 
-                    measure = somMeasure.get();
+                // New learning model.
+                learningModel = new LearningModel(proteinList,
+                                                  contextNetwork,
+                                                  model.selection);
 
-                    // Old learning model.
-                    LearningModel oldLearningData = learningModel;
+                // Old SOM.
+                SelfOrganizingMap oldSom = som;
 
-                    // New learning model.
-                    learningModel = new LearningModel(proteinList,
-                                                      contextNetwork,
-                                                      model.selection);
+                // New SOM.
+                som = new SelfOrganizingMap(learningModel.size,
+                                            topology,
+                                            som == null);
 
-                    // Old SOM.
-                    SelfOrganizingMap oldSom = som;
+                Trainer oldTrainer = trainer;
+                trainer = new Trainer(som, learningModel);
 
-                    // New SOM.
-                    som = new SelfOrganizingMap(learningModel.size,
-                                                topology,
-                                                som == null);
+                // Transfer old SOM configuration as much as possible.
+                if(oldTrainer != null) {                    
+                    // Transfer new proteins.
+                    for(HNode protein: proteinList) {
+                        double[] oldFeatures = oldLearningData.vectorMap.get(protein);
+                        double[] newFeatures = learningModel.vectorMap.get(protein);
 
-                    Trainer oldTrainer = trainer;
-                    trainer = new Trainer(som, learningModel, measure);
+                        if(oldFeatures != null && newFeatures != null) {
+                            // Old topology.
+                            int oldClosestNeuron = oldTrainer.closestNeuron(oldFeatures);
+                            int oldX = oldSom.topology.x[oldClosestNeuron];
+                            int oldY = oldSom.topology.y[oldClosestNeuron];
 
-                    // Transfer old SOM configuration as much as possible.
-                    if(oldTrainer != null) {                    
-                        // Transfer new proteins.
-                        for(HNode protein: proteinList) {
-                            float[] oldFeatures = oldLearningData.vectorMap.get(protein);
-                            float[] newFeatures = learningModel.vectorMap.get(protein);
+                            // Neuron in new topology.
+                            int newX = (int) round(((double) ((som.topology.xSize - 1) * oldX) /
+                                                    (double) (oldSom.topology.xSize - 1)));
+                            int newY = (int) round(((double) ((som.topology.ySize - 1) * oldY) /
+                                                    (double) (oldSom.topology.ySize - 1)));
+                            int newNeuron = som.topology.neuronAt(newX, newY);
 
-                            if(oldFeatures != null && newFeatures != null) {
-                                // Old topology.
-                                int oldClosestNeuron = oldTrainer.closestNeuron(oldFeatures);
-                                int oldX = oldSom.topology.x[oldClosestNeuron];
-                                int oldY = oldSom.topology.y[oldClosestNeuron];
-
-                                // Neuron in new topology.
-                                int newX = (int) round(((float) ((som.topology.xSize - 1) * oldX) /
-                                                        (float) (oldSom.topology.xSize - 1)));
-                                int newY = (int) round(((float) ((som.topology.ySize - 1) * oldY) /
-                                                        (float) (oldSom.topology.ySize - 1)));
-                                int newNeuron = som.topology.neuronAt(newX, newY);
-
-                                trainer.set(newNeuron, newFeatures);
-                            }
+                            trainer.set(newNeuron, newFeatures);
                         }
                     }
-
-                    // Update SOM contours.
-                    somContours = new SOMContours(trainer);
                 }
-            
-            
-            // Train until it is time for a visual update.
-            /*long preTrainTime = System.currentTimeMillis();
-            int it = 0;
-            while(System.currentTimeMillis() < preTrainTime + TRAIN_DURATION) {
-                trainer.trainDancingChairs();
-                it++;
-            }*/
-            //System.out.println("Training at " +
-            //                   ((float) it * 1000f / (float) TRAIN_DURATION) +
-            //                   " samples per second.");
+
+                // Update SOM contours.
+                somContours = new SOMContours(trainer);
+            }
             
             if(!contextNetwork.graph.vertexSet().isEmpty()) {
                 trainer.trainDancingChairsFull();
@@ -341,7 +319,7 @@ public class SOMOverview extends PositionedSnippet {
                 for(int i = 0; i < learningModel.proteins.size(); i++) {
                     HNode p = learningModel.proteins.get(i);
 
-                    float[] vector = learningModel.features[i];
+                    double[] vector = learningModel.features[i];
                     NodeRepresentation pR =
                             new NodeRepresentation(p, vector);
 
@@ -364,114 +342,66 @@ public class SOMOverview extends PositionedSnippet {
          */
         private void updateInteractionRepresentations() {            
             // Construct interactions and push to overview.
-            //int interactionSegments = edgePoints.get();
             List<InteractionRepresentation> iR = new ArrayList<InteractionRepresentation>();
             
-            if(edgeVisible.get()) {
-                for(DefaultEdge iE: contextNetwork.graph.edgeSet()) {
-                    // End point proteins.
-                    HNode sP = contextNetwork.graph.getEdgeSource(iE);
-                    HNode tP = contextNetwork.graph.getEdgeTarget(iE);
-                    
-                    // Make source vertex the highest degree.
-                    if(contextNetwork.graph.degreeOf(sP) < contextNetwork.graph.degreeOf(tP)) {
-                        HNode t = sP;
-                        sP = tP;
-                        tP = t;
-                    }
+            for(DefaultEdge iE: contextNetwork.graph.edgeSet()) {
+                // End point proteins.
+                HNode sP = contextNetwork.graph.getEdgeSource(iE);
+                HNode tP = contextNetwork.graph.getEdgeTarget(iE);
 
-                    // Ignore self-loops.
-                    if(sP == tP) {
-                        continue;
-                    }
-                    
-                    PVector[] intCs = new PVector[3];
-                    intCs[0] = somToOverview(trainer.coordinatesMap.get(sP));
-                    intCs[2] = somToOverview(trainer.coordinatesMap.get(tP));
-                    
-                    intCs[1] = add(intCs[0], intCs[2]);
-                    intCs[1].mult(0.5f);
-                    
-                    // Add slight bend to arc.
-                    PVector dBE = sub(intCs[2], intCs[0]);
-                    if(dBE.mag() > 2 * tileRadius) {
-                        dBE.normalize();
-                        dBE.mult(0.25f * tileRadius);
-                        dBE.rotate(0.5f * PI);
-                        
-                        intCs[1] = add(intCs[1], dBE);
-                    }
-                    
-                    // Ellipse space around end points of arc.
-                    float bufferExtent = min(40f, 0.66f * tileRadius);
-                    
-                    dBE = sub(intCs[1], intCs[0]);
-                    dBE.normalize();
-                    dBE.mult(bufferExtent);
-                    dBE.y *= 0.5f; // Ellipse shape.
-                    intCs[0] = add(intCs[0], dBE);
-                    
-                    dBE = sub(intCs[1], intCs[2]);
-                    dBE.normalize();
-                    dBE.mult(bufferExtent);
-                    dBE.y *= 0.5f; // Ellipse shape.
-                    intCs[2] = add(intCs[2], dBE);
-
-                    // End point neurons.
-                    /*int sN = trainer.proteinNeurons[
-                                learningModel.proteins.indexOf(sP)];
-                    int tN = trainer.proteinNeurons[
-                                learningModel.proteins.indexOf(tP)];
-                    
-                    // Create interpolated coordinates.
-                    PVector[] intCs = new PVector[interactionSegments];
-
-                    // Guarantee unique end points that match protein position.
-                    intCs[0] = somToOverview(trainer.coordinatesMap.get(sP));
-                    intCs[interactionSegments - 1] = somToOverview(trainer.coordinatesMap.get(tP));
-
-                    PVector dBE = sub(intCs[intCs.length - 1], intCs[0]);
-                    dBE.normalize();
-                    dBE.mult(min(40f, 0.66f * tileRadius));
-                    dBE.y *= 0.5f; // Ellipse shape.
-
-                    intCs[0] = add(intCs[0], dBE);
-                    intCs[interactionSegments - 1] = sub(intCs[interactionSegments - 1], dBE);
-
-                    // Draw straight connections for short distances.
-                    PVector d = sub(intCs[interactionSegments - 1], intCs[0]);
-                    if(d.mag() < tileRadius) {
-                        for(int i = 0; i < intCs.length; i++) {
-                            intCs[i] = add(intCs[0], mult(d, (float) i / (float) (intCs.length - 1)));
-                        }
-                    } else {
-                        for(int i = 1; i < interactionSegments - 1; i++) {
-                            float alpha = (float) i / (float) (interactionSegments - 1);                    
-                            intCs[i] = featuresToOverview(sN, tN,
-                                                          intCs[0],
-                                                          intCs[interactionSegments - 1],
-                                                          alpha);
-                        }
-                    }
-                    
-                    // Terminate ends at tile radius.
-                    /*PVector dBE = sub(intCs[1], intCs[0]);
-                    dBE.normalize();
-                    dBE.mult(tileRadius / 2f);
-                    
-                    PVector dEB = sub(intCs[interactionSegments - 2],
-                                      intCs[interactionSegments - 1]);
-                    dEB.normalize();
-                    dEB.mult(tileRadius / 2f);
-                    
-                    intCs[0].add(dBE);
-                    intCs[interactionSegments - 1].add(dEB);*/
-
-                    // Representation.
-                    InteractionRepresentation rep =
-                            new InteractionRepresentation(iE, intCs);
-                    iR.add(rep);
+                // Make source vertex the highest degree.
+                if(contextNetwork.graph.degreeOf(sP) < contextNetwork.graph.degreeOf(tP)) {
+                    HNode t = sP;
+                    sP = tP;
+                    tP = t;
                 }
+
+                // Ignore self-loops.
+                if(sP == tP) {
+                    continue;
+                }
+
+                PVector[] intCs = new PVector[3];
+                intCs[0] = somToOverview(trainer.coordinatesMap.get(sP));
+                intCs[2] = somToOverview(trainer.coordinatesMap.get(tP));
+
+                intCs[1] = PVector.add(intCs[0], intCs[2]);
+                intCs[1].mult(0.5);
+
+                // Add slight bend to arc.
+                PVector dBE = PVector.sub(intCs[2], intCs[0]);
+                dBE.mult(0.1);
+                dBE = dBE.rightOrthogonal();
+
+                intCs[1].add(dBE);
+
+                // Ellipse space around end points of arc.
+                double bufferExtent = (3 * NODE_RADIUS + tileRadius) / 4; //min(40, 0.66 * tileRadius);
+
+                dBE = PVector.sub(intCs[1], intCs[0]);
+                dBE.normalize();
+                dBE.mult(bufferExtent);
+                intCs[0] = PVector.add(intCs[0], dBE);
+
+                dBE = PVector.sub(intCs[1], intCs[2]);
+                dBE.normalize();
+                dBE.mult(bufferExtent);
+                intCs[2] = PVector.add(intCs[2], dBE);
+                
+                // Re-estimate bend.
+                intCs[1] = PVector.add(intCs[0], intCs[2]);
+                intCs[1].mult(0.5);
+                
+                dBE = PVector.sub(intCs[2], intCs[0]);
+                dBE.mult(0.1);
+                dBE = dBE.rightOrthogonal();
+
+                intCs[1].add(dBE);
+
+                // Representation.
+                InteractionRepresentation rep =
+                        new InteractionRepresentation(iE, intCs);
+                iR.add(rep);
             }
             
             // Transfer.
@@ -479,70 +409,6 @@ public class SOMOverview extends PositionedSnippet {
                 interactionRepresentations.clear();
                 interactionRepresentations.addAll(iR);
             }
-        }
-        
-        /**
-         * Determine overview coordinates for an arbitrary (possibly
-         * interpolated) feature vector.
-         */
-        private PVector featuresToOverview(int sourceNeuron,
-                                           int targetNeuron,
-                                           PVector sourceVector,
-                                           PVector targetVector,
-                                           float alpha) {
-            // End point and interpolated feature vectors.
-            float[] sV = trainer.som.neurons[sourceNeuron];
-            float[] tV = trainer.som.neurons[targetNeuron];
-            float[] stV = lerp(sV, tV, alpha);
-                    
-            float x = 0;
-            float y = 0;
-            
-            //float endWeight = endPointsWeight.get();
-            
-            float R = sV.length == 0 ?
-                        0 :
-                        measure.distance(sV, tV);
-            
-            // Apply Inverse Distance Weighting.
-            float weightSum = 0;
-            
-            // For all protein neurons.
-            for(int i = 0; i < som.neurons.length; i++) {
-                float[] neuronVector = som.neurons[i];
-                PVector neuronCs;
-                
-                if(i == sourceNeuron) {
-                    neuronCs = sourceVector;
-                } else if(i == targetNeuron) {
-                    neuronCs = targetVector;
-                } else {
-                    neuronCs = somToOverview(som.topology.coordinatesOf(i));
-                }
-
-                // Assumes distance measure is Euclidian.
-                float distance = neuronVector.length == 0 ?
-                                    0 :
-                                    measure.distance(stV, neuronVector);
-                
-                // Zero distance is all-dominant; return related coordinate.
-                if(distance <= Float.MIN_VALUE) {
-                    return neuronCs;
-                } else if(distance < R) {
-                    double weight = (R - distance) / (R * distance);
-                    weight = weight * weight;
-                    //weight = (float) Math.sqrt(weight);
-                    
-                    weightSum += weight;
-                    x += weight * neuronCs.x;
-                    y += weight * neuronCs.y;
-                }
-            }
-            
-            x /= weightSum;
-            y /= weightSum;
-            
-            return v(x, y);
         }
         
         /**
@@ -562,7 +428,7 @@ public class SOMOverview extends PositionedSnippet {
                                                 null;
                 
                 if(prevRep != null &&
-                   prevRep.outlineShape.compareTo(somContours.setOutlineShapes.get(i)) == 0) {
+                   prevRep.outline.compareTo(somContours.setOutlineShapes.get(i)) == 0) {
                     sR.add(setRepresentations.get(i));
                 } else {
                     Geometry bodyShape = somContours.setBodyShapes.get(i);
@@ -589,17 +455,17 @@ public class SOMOverview extends PositionedSnippet {
             boolean update = false;
             
             if(contextNetwork != null) {
-                float desiredTiles = (float) contextNetwork.graph.vertexSet().size() *
+                double desiredTiles = (double) contextNetwork.graph.vertexSet().size() *
                                      somTileRatio.get();
                 
                 int xNum = (int) (1f * sqrt(desiredTiles)) + 1;
                 int yNum = (int) (1f * sqrt(desiredTiles)) + 1;
                 
                 // Update tile radius and derived values.
-                tileRadius = min(bounds.x / (sqrt(0.75f) * 2f * (float) xNum),
-                                 bounds.y / (1.5f * (float) yNum));
+                tileRadius = min(bounds.x / ((double) sqrt(0.75) * 2 * (double) xNum),
+                                 bounds.y / (1.5 * (double) yNum));
                 tileRadius = min(tileRadius, somMaxTileRadius.get());
-                tileSide = sqrt(0.75f) * tileRadius;
+                tileSide = (double) sqrt(0.75) * tileRadius;
 
                 update = xNum != topology.xSize ||
                          yNum != topology.ySize;

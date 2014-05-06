@@ -1,7 +1,6 @@
 package org.cytoscape.examine.internal.som;
 
 import org.cytoscape.examine.internal.data.HNode;
-import org.cytoscape.examine.internal.som.metrics.DistanceMeasure;
 import org.cytoscape.examine.internal.visualization.Parameters;
 import org.cytoscape.examine.internal.visualization.overview.LearningModel;
 
@@ -12,7 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import static org.cytoscape.examine.internal.graphics.Math.dotProduct;
 
 /**
  * SOM network trainer.
@@ -25,27 +24,21 @@ public class Trainer {
     // Feature vectors to sample from.
     public final LearningModel learningModel;
     
-    // Neuron feature vector distance metric.
-    public final DistanceMeasure distanceMetric;
-    
-    // Random number generator.
-    private Random random;
-    
     // Training iteration.
     private int iteration;
     public final int ORDERING_ITERATIONS;
     public final int CONVERGENCE_ITERATIONS;
     
     // Iteration learning rates.
-    public final float INITIAL_LEARNING_RATE = 0.01f;
-    public final float ORDERING_END_LEARNING_RATE = 0f;
-    public final float CONVERGENCE_LEARNING_RATE = 0f;
-    private float learningRate; 
+    public final double INITIAL_LEARNING_RATE = 0.01f;
+    public final double ORDERING_END_LEARNING_RATE = 0f;
+    public final double CONVERGENCE_LEARNING_RATE = 0f;
+    private double learningRate; 
     
-    public final float INITIAL_NEIGHBORHOOD = 1f;
-    public final float ORDERING_END_NEIGHBORHOOD = 0f;
-    public final float CONVERGENCE_NEIGHBORHOOD = 0f;
-    private float neighborhoodRadius;
+    public final double INITIAL_NEIGHBORHOOD = 1f;
+    public final double ORDERING_END_NEIGHBORHOOD = 0f;
+    public final double CONVERGENCE_NEIGHBORHOOD = 0f;
+    private double neighborhoodRadius;
     
     // Protein position map, by protein learning model index.
     public final int[] proteinNeurons;
@@ -56,13 +49,9 @@ public class Trainer {
     /**
      * Base constructor.
      */
-    public Trainer(SelfOrganizingMap network,
-                   LearningModel learningModel,
-                   DistanceMeasure distanceMetric) {
+    public Trainer(SelfOrganizingMap network, LearningModel learningModel) {
         this.som = network;
         this.learningModel = learningModel;
-        this.distanceMetric = distanceMetric;
-        this.random = new Random();
         this.proteinNeurons = new int[learningModel.proteins.size()];
         this.proteinCoordinates = new Coordinates[learningModel.proteins.size()];
         this.coordinatesMap = new HashMap<HNode, Coordinates>();
@@ -71,7 +60,7 @@ public class Trainer {
         Arrays.fill(proteinNeurons, -1);
         
         // Normalize training iterations to number of samples.
-        this.ORDERING_ITERATIONS = 500000 / (learningModel.proteins.size() + 1);
+        this.ORDERING_ITERATIONS = 1000000 / (learningModel.proteins.size() + 1);
         this.CONVERGENCE_ITERATIONS = 0; //100000 / (learningModel.proteins.size() + 1);
         
         // Training iteration count.
@@ -81,13 +70,13 @@ public class Trainer {
     /**
      * Get the neuron that is closest to the given vector.
      */
-    public int closestNeuron(float[] vector) {
+    public int closestNeuron(double[] vector) {
         int closest = -1;
         
-        float minDistance = Float.POSITIVE_INFINITY;
+        double minDistance = Double.POSITIVE_INFINITY;
         for(int i = 0; i < som.neurons.length; i++) {
-            float[] neuronVector = som.neurons[i];
-            float distance = distanceMetric.distance(neuronVector, vector);
+            double[] neuronVector = som.neurons[i];
+            double distance = distance(neuronVector, vector);
             
             if(distance < minDistance) {
                 minDistance = distance;
@@ -101,7 +90,7 @@ public class Trainer {
     /**
      * Align the neurons in the neighborhood centered at the given neuron.
      */
-    public void align(int neuron, float[] trainVector) {
+    public void align(int neuron, double[] trainVector) {
         // Neuron array coordinates.
         int x = som.topology.x[neuron];
         int y = som.topology.y[neuron];
@@ -111,7 +100,7 @@ public class Trainer {
         int hY = Topology.yArrayToHex(x, y);
         
         // Extent of neighborhood update.
-        float thetaMin = 1 + Parameters.somNeighborhoodMin.get();
+        double thetaMin = 1 + Parameters.somNeighborhoodMin.get();
         int theta = (int) (thetaMin + neighborhoodRadius * Parameters.somNeighborhoodMax.get() *
                           (som.topology.minimumDiameter - thetaMin));
         theta = min(theta, som.topology.maximumDiameter);
@@ -120,12 +109,6 @@ public class Trainer {
         for(int r = 0; r < theta; r++) {
             int[] xOffsets = som.topology.xNeighborhoodOffsets[r];
             int[] yOffsets = som.topology.yNeighborhoodOffsets[r];
-            
-            // Neighborhood distribution (Gaussian).
-            float neighborhoodFactor = //1f - ((float) r / (float) theta);
-                                       //(float) exp((double) -(r * r) /
-                                       //            (double) (2.0 * theta * theta));
-                                       1f;
             
             // For neurons at specific distance.
             for(int i = 0; i < xOffsets.length; i++) {
@@ -141,12 +124,10 @@ public class Trainer {
                 if(0 <= tX && tX < som.topology.xSize &&
                    0 <= tY && tY < som.topology.ySize) {
                     // Align neuron.
-                    float[] neuronVector =
+                    double[] neuronVector =
                             som.neurons[som.topology.neuronAt(new Coordinates(tX, tY))];
                     for(int j = 0; j < neuronVector.length; j++) {
-                        neuronVector[j] += learningRate *
-                                           neighborhoodFactor *
-                                           (trainVector[j] - neuronVector[j]);
+                        neuronVector[j] += learningRate * (trainVector[j] - neuronVector[j]);
                     }
                 }
             }
@@ -156,8 +137,8 @@ public class Trainer {
     /**
      * Set the vector of a neuron.
      */
-    public void set(int neuron, float[] vector) {
-        float[] neuronVector = som.neurons[neuron];
+    public void set(int neuron, double[] vector) {
+        double[] neuronVector = som.neurons[neuron];
         System.arraycopy(vector, 0, neuronVector, 0, neuronVector.length);
     }
     
@@ -166,8 +147,8 @@ public class Trainer {
      */
     public void trainDancingChairs() {
         // Initialize learning rates for new iteration.
-        float orderingProgress = Math.min(1f, (float) iteration /
-                                              (float) ORDERING_ITERATIONS);
+        double orderingProgress = Math.min(1f, (double) iteration /
+                                              (double) ORDERING_ITERATIONS);
         learningRate = iteration < ORDERING_ITERATIONS ?
                             ORDERING_END_LEARNING_RATE +
                             (INITIAL_LEARNING_RATE - ORDERING_END_LEARNING_RATE) * (1f - orderingProgress) :
@@ -177,9 +158,6 @@ public class Trainer {
                                     ORDERING_END_NEIGHBORHOOD +
                                     (INITIAL_NEIGHBORHOOD - ORDERING_END_NEIGHBORHOOD) * (1f - orderingProgress) :
                                     CONVERGENCE_NEIGHBORHOOD;
-        
-        // Add noise.
-        //som.addNoise(0.0001f);
         
         // Chairs.
         boolean[] neuronTaken = new boolean[som.neurons.length];
@@ -194,15 +172,15 @@ public class Trainer {
         // Per protein (feature vector).
         for(int si = 0; si < indexShuffle.size(); si++) {
             int i = indexShuffle.get(si);
-            float[] trainVector = learningModel.features[i];
+            double[] trainVector = learningModel.features[i];
             
             // Find best neuron candidate that has not been taken.
             int neuron = -1;
 
-            float minDistance = Float.POSITIVE_INFINITY;
+            double minDistance = Double.POSITIVE_INFINITY;
             for(int j = 0; j < som.neurons.length; j++) {
-                float[] neuronVector = som.neurons[j];
-                float distance = distanceMetric.distance(neuronVector, trainVector);
+                double[] neuronVector = som.neurons[j];
+                double distance = distance(neuronVector, trainVector);
 
                 if(!neuronTaken[j] && distance < minDistance) {
                     minDistance = distance;
@@ -224,14 +202,6 @@ public class Trainer {
             iteration++;
         }
         
-        // Flatten non-taken neuron neighborhoods.
-        /*float[] nullVector = new float[som.neurons[0].length];
-        for(int i = 0; i < neuronTaken.length; i++) {
-            if(!neuronTaken[i]) {
-                align(i, nullVector);
-            }
-        }*/
-        
         // Update neuron to protein map.
         Arrays.fill(neuronProteins, -1);
         for(int i = 0; i < proteinNeurons.length; i++) {
@@ -239,13 +209,19 @@ public class Trainer {
         }
     }
 
-    /**
-     * Train until iterations have been exhausted.
-     */
+    // Train until iterations have been exhausted.
     public void trainDancingChairsFull() {
         while(iteration < ORDERING_ITERATIONS + CONVERGENCE_ITERATIONS) {
             trainDancingChairs();
         }
+    }
+    
+    // Cosine similarity distance.
+    public double distance(double[] v1, double[] v2) {
+        double combMag = (double) sqrt(dotProduct(v1, v1) * dotProduct(v2, v2));
+        double similarity = combMag > 0 ? dotProduct(v1, v2) / combMag : 0;
+        
+        return 2.0 * Math.acos(similarity) / PI;
     }
     
 }

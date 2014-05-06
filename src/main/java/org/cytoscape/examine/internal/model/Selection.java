@@ -1,6 +1,6 @@
 package org.cytoscape.examine.internal.model;
 
-import aether.signal.Subject;
+import org.cytoscape.examine.internal.signal.Subject;
 
 import org.cytoscape.examine.internal.data.HElement;
 import org.cytoscape.examine.internal.data.HNode;
@@ -24,7 +24,7 @@ public final class Selection {
     public final Subject change;
     
     // Included sets and the weight that has been assigned to them.
-    public final Map<HSet, Float> activeSetMap;
+    public final Map<HSet, Double> activeSetMap;
     
     // List of active sets with a somewhat stable ordering.
     public final List<HSet> activeSetList;
@@ -37,7 +37,7 @@ public final class Selection {
      */
     public Selection(final Model model) {
         this.change = new Subject();
-        this.activeSetMap = new HashMap<HSet, Float>();
+        this.activeSetMap = new HashMap<HSet, Double>();
         this.activeSetList = new ArrayList<HSet>();
         this.selected = null;
     }
@@ -58,7 +58,7 @@ public final class Selection {
      * Add set with an initial weight, report on success
      * (there is a maximum number of selected sets).
      */
-    public boolean add(HSet proteinSet, float weight) {
+    public boolean add(HSet proteinSet, double weight) {
         boolean added = activeSetList.size() < SetColors.palette.length;
         
         if(added) {
@@ -110,9 +110,9 @@ public final class Selection {
     /**
      * Adjust the weight of a set by the given change.
      */
-    public void changeWeight(HSet proteinSet, float weightChange) {
-        float currentWeight = activeSetMap.get(proteinSet);
-        float newWeight = Math.max(0.1f, currentWeight + weightChange);
+    public void changeWeight(HSet proteinSet, double weightChange) {
+        double currentWeight = activeSetMap.get(proteinSet);
+        double newWeight = Math.max(0.1f, currentWeight + weightChange);
         activeSetMap.put(proteinSet, newWeight);
     }
     
@@ -123,11 +123,11 @@ public final class Selection {
     public void update(HSet newProteinSet) {
         // Remove old proteinset with identity of new one.
         if(activeSetMap.containsKey(newProteinSet)) {
-            float weight = activeSetMap.remove(newProteinSet);
+            double weight = activeSetMap.remove(newProteinSet);
             activeSetMap.put(newProteinSet, weight);
             activeSetList.set(activeSetList.indexOf(newProteinSet), newProteinSet);
         } else {
-            activeSetMap.put(newProteinSet, 0f);
+            activeSetMap.put(newProteinSet, 0.0);
         }
         
         change.signal();

@@ -1,7 +1,7 @@
 package org.cytoscape.examine.internal.visualization;
 
-import static aether.color.Color.*;
-import aether.signal.Observer;
+import java.awt.Color;
+import org.cytoscape.examine.internal.signal.Observer;
 import static org.cytoscape.examine.internal.Modules.*;
 
 import org.cytoscape.examine.internal.data.HSet;
@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import processing.core.PVector;
 
 /**
  *
@@ -20,40 +19,40 @@ import processing.core.PVector;
 public class SetColors implements Observer {
     
     // Predefined protein set to color mapping.
-    private final Map<HSet, PVector> predefinedColorMap;
+    private final Map<HSet, Color> predefinedColorMap;
     
     // Dynamic protein set to color mapping.
-    private final Map<HSet, PVector> colorMap;
+    private final Map<HSet, Color> colorMap;
     
     // Available set colors.
-    private final ArrayList<PVector> availableColors;
+    private final ArrayList<Color> availableColors;
     
     // Source color pool.
-    public static final PVector[] palette = new PVector[] {
-            rgb(141, 211, 199),
-            rgb(255, 255, 179),
-            rgb(190, 186, 218),
-            rgb(251, 128, 114),
-            rgb(128, 177, 211),
-            rgb(253, 180, 98),
+    public static final Color[] palette = new Color[] {
+            new Color(141, 211, 199),
+            new Color(255, 255, 179),
+            new Color(190, 186, 218),
+            new Color(251, 128, 114),
+            new Color(128, 177, 211),
+            new Color(253, 180, 98),
             //rgb(179, 222, 105),
-            rgb(252, 205, 229),
-            rgb(217, 217, 217),
-            rgb(188, 128, 189),
-            rgb(204, 235, 197),
-            rgb(255, 237, 111)           
+            new Color(252, 205, 229),
+            new Color(217, 217, 217),
+            new Color(188, 128, 189),
+            new Color(204, 235, 197),
+            new Color(255, 237, 111)           
     };
 
     /**
      * Base constructor.
      */
     public SetColors() {
-        colorMap = new HashMap<HSet, PVector>();
-        availableColors = new ArrayList<PVector>();
+        colorMap = new HashMap<HSet, Color>();
+        availableColors = new ArrayList<Color>();
         availableColors.addAll(Arrays.asList(SetColors.palette));
         
         // Predefined colors for expression sets (log FC and score derived).
-        predefinedColorMap = new HashMap<HSet, PVector>();
+        predefinedColorMap = new HashMap<HSet, Color>();
         
         // Listen to model and parameter changes.
         model.selection.change.subscribe(this);
@@ -87,8 +86,8 @@ public class SetColors implements Observer {
     /**
      * Get the color that has been assigned to the given set.
      */
-    public PVector color(HSet proteinSet) {
-        PVector result = predefinedColorMap.get(proteinSet);
+    public Color color(HSet proteinSet) {
+        Color result = predefinedColorMap.get(proteinSet);
         
         if(result == null) {
             result = colorMap.get(proteinSet);

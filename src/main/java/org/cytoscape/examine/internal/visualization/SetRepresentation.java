@@ -1,13 +1,14 @@
 package org.cytoscape.examine.internal.visualization;
 
-import static aether.Aether.*;
-import aether.draw.PositionedSnippet;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
+import org.cytoscape.examine.internal.graphics.draw.PositionedSnippet;
 import static org.cytoscape.examine.internal.Modules.*;
 
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 
 import java.awt.Desktop;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
@@ -65,7 +66,7 @@ public abstract class SetRepresentation<E extends HSet> extends PositionedSnippe
      * Toggle selection state on mouse click.
      */
     @Override
-    public void mouseClicked() {
+    public void mouseClicked(MouseEvent e) {
         // Open website on ctrl click for relevant sets.
         if(mouseEvent().isControlDown()) {
             // URL to open.
