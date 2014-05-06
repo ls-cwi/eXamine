@@ -14,7 +14,7 @@
 	<packaging>bundle</packaging>
 	<name>eXamine</name>
 
-	<version>1.0.2</version>
+	<version>1.0.4</version>
   
   	<repositories>
   		<repository>

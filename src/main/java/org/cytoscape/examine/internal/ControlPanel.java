@@ -230,7 +230,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				i++;
 			}
 			
-			showScore = allFloatColumns.size() > 0;
+			showScore = allDoubleColumns.size() > 0;
 		}
 		
 		private List<String> getColumnNames(List<Integer> indices) {
