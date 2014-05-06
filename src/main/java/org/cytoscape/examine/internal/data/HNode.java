@@ -20,7 +20,7 @@ public class HNode extends HElement {
     public final String id;
     
     // Score.
-    public final float score;
+    public final double score;
     
     // Sets that protein is associated with.
     public final Set<HSet> sets;
@@ -33,7 +33,7 @@ public class HNode extends HElement {
                  String id,
                  String name,
                  String url,
-                 float score) {
+                 double score) {
         super(name, url);
         
         this.id = id;

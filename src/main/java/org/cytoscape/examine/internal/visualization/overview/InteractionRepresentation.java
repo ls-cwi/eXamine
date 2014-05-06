@@ -1,8 +1,9 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import static aether.Aether.*;
-import static aether.Math.*;
-import aether.draw.Representation;
+import java.awt.Color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
+import static org.cytoscape.examine.internal.graphics.Math.*;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
 import java.util.HashSet;
 import java.util.Set;
 import static org.cytoscape.examine.internal.Modules.*;
@@ -10,16 +11,14 @@ import static org.cytoscape.examine.internal.Modules.*;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
+import org.cytoscape.examine.internal.graphics.PVector;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
 import org.jgrapht.graph.DefaultEdge;
-import processing.core.PVector;
 
 /**
  * Interaction representation.
  */
 public class InteractionRepresentation extends Representation<DefaultEdge> {
-
-    // Opacity.
-    public static final float OPACITY = 1f;
     
     // Connected proteins.
     public final HNode protein1, protein2;
@@ -49,54 +48,31 @@ public class InteractionRepresentation extends Representation<DefaultEdge> {
     @Override
     public void draw() {
         boolean highlight = model.highlightedInteractions.get().contains(element);
-                            //model.highlightedProteins.get().contains(protein1) ||
-                            //model.highlightedProteins.get().contains(protein2);
         
         picking();
-        noFill();
 
         // Halo.
-        noFill();
-        float haloWeight = highlight ? 10f : 8f;
-        stroke(1f, highlight ? 1f : OPACITY);
+        double haloWeight = highlight ? 6f : 4f;
+        color(backgroundColor.get());
         strokeWeight(haloWeight);
         drawLine();
         
-        float endWeight = haloWeight + 2f;
-        noStroke();
-        fill(highlight ? 1f : OPACITY);
-        ellipse(cs[0].x, cs[0].y, endWeight, endWeight);
-        ellipse(cs[cs.length - 1].x, cs[cs.length - 1].y, endWeight, endWeight);
+        fillEllipse(cs[0].x, cs[0].y, haloWeight, haloWeight);
+        fillEllipse(cs[cs.length - 1].x, cs[cs.length - 1].y, haloWeight, haloWeight);
         
         // Actual edge.
-        noFill();
-        float edgeWeight = highlight ? 3f : 2f;
-        stroke(highlight ? 0f : 0f, highlight ? 1f: OPACITY);
+        double edgeWeight = highlight ? 5f : 3f;
+        color(highlight ? Color.BLACK: textColor.get());
         strokeWeight(edgeWeight);
         drawLine();
         
-        endWeight = 2f * edgeWeight;
-        noStroke();
-        fill(highlight ? 0f : 0.25f);
-        ellipse(cs[0].x, cs[0].y, endWeight, endWeight);
-        ellipse(cs[cs.length - 1].x, cs[cs.length - 1].y, endWeight, endWeight);
+        color(highlight ? Color.BLACK: textColor.get());
+        fillEllipse(cs[0].x, cs[0].y, edgeWeight, edgeWeight);
+        fillEllipse(cs[cs.length - 1].x, cs[cs.length - 1].y, edgeWeight, edgeWeight);
     }
     
     private void drawLine() {
-        /*beginShape();
-        for(int i = 0; i < cs.length; i++) {
-            //float alpha = (float) i / (float) (cs.length - 1);
-            vertex(cs[i].x, cs[i].y);
-        }
-        endShape();*/
-        
-        beginShape();
-        curveVertex(cs[0]);
-        for(int i = 0; i < cs.length; i++) {
-            curveVertex(cs[i]);
-        }
-        curveVertex(cs[cs.length - 1]);
-        endShape();
+        drawCurve(cs[0], cs[1], cs[2]);
     }
 
     @Override

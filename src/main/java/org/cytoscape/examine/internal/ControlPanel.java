@@ -177,7 +177,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		private List<Integer> allGroupColumns = new ArrayList<Integer>();
 		private List<Integer> allGroupColumnSizes = new ArrayList<Integer>();
 		private List<Integer> allStringColumns = new ArrayList<Integer>();
-		private List<Integer> allFloatColumns = new ArrayList<Integer>();
+		private List<Integer> allDoubleColumns = new ArrayList<Integer>();
 		private List<Integer> selectedGroupColumns = new ArrayList<Integer>();
 		private int selectedLabelColumn = 0;
 		private int selectedURLColumn = 0;
@@ -213,7 +213,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				} else if (c.getType() == String.class) {
 					allStringColumns.add(i);
 				} else if (c.getType() == Double.class) {
-					allFloatColumns.add(i);
+					allDoubleColumns.add(i);
 				}
 
 				i++;
@@ -256,7 +256,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			} else if (c.getType() == String.class) {
 				allStringColumns.add(i);
 			} else if (c.getType() == Double.class) {
-				allFloatColumns.add(i);
+				allDoubleColumns.add(i);
 			}
 		}
 
@@ -315,8 +315,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			allStringColumns.remove(deletedIdx);
 
 			idx = 0;
-			for (Integer floatIdx : allFloatColumns) {
-				if (floatIdx == deletedIdx) {
+			for (Integer doubleIdx : allDoubleColumns) {
+				if (doubleIdx == deletedIdx) {
 					if (selectedScoreColumn == idx) {
 						selectedScoreColumn = 0;
 					}
@@ -324,7 +324,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				}
 				idx++;
 			}
-			allFloatColumns.remove(deletedIdx);
+			allDoubleColumns.remove(deletedIdx);
 
 			idx = 0;
 			for (Integer grpIdx : allGroupColumns) {
@@ -373,7 +373,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		}
 		
 		public String getSelectedScoreColumnName() {
-			return columnNames.get(allFloatColumns.get(selectedScoreColumn));
+			return columnNames.get(allDoubleColumns.get(selectedScoreColumn));
 		}
 
 		public List<Integer> getSelectedGroupColumns() {
@@ -421,8 +421,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			return allStringColumns;
 		}
 
-		public List<Integer> getAllFloatColumns() {
-			return allFloatColumns;
+		public List<Integer> getAllDoubleColumns() {
+			return allDoubleColumns;
 		}
 
 		public String getColumnName(int i) {
@@ -554,14 +554,14 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 
 		DefaultComboBoxModel mdlCmbGroupScore = (DefaultComboBoxModel) cmbGroupScore.getModel();
 		mdlCmbGroupScore.removeAllElements();
-		List<Integer> floatColumns = ns.getAllFloatColumns();
-		for (Integer j : floatColumns) {
+		List<Integer> doubleColumns = ns.getAllDoubleColumns();
+		for (Integer j : doubleColumns) {
 			mdlCmbGroupScore.addElement(ns.getColumnName(j));
 		}
 		
 		cmbGroupSelection.setSelectedIndex(ns.getGroupSelection().ordinal());
 
-		if (floatColumns.size() > 0) {
+		if (doubleColumns.size() > 0) {
 			cmbGroupScore.setSelectedIndex(ns.getSelectedScoreColumn());
 		}
 

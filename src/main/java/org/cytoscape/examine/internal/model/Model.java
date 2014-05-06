@@ -1,25 +1,23 @@
 package org.cytoscape.examine.internal.model;
 
-import aether.signal.Observer;
-import aether.signal.Variable;
-import aether.signal.VolatileSet;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import org.cytoscape.examine.internal.signal.Observer;
+import org.cytoscape.examine.internal.signal.Variable;
+import org.cytoscape.examine.internal.signal.VolatileSet;
 
 import static org.cytoscape.examine.internal.Modules.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.StaticProteinBasis.Intersection;
-import static org.cytoscape.examine.internal.visualization.Parameters.StaticProteinBasis.Union;
-
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.cytoscape.examine.internal.Constants;
 import org.cytoscape.examine.internal.ViewerAction;
+import org.cytoscape.examine.internal.data.HCategory;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
 import org.cytoscape.examine.internal.data.SuperNetwork;
-import org.cytoscape.examine.internal.visualization.Parameters;
+import org.cytoscape.examine.internal.signal.Volatile;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
@@ -35,6 +33,10 @@ public final class Model {
     // Selected (visualized) sets.
     public final Selection selection;
     
+    // Opened set categories.
+    public final VolatileSet<HCategory> openedCategories;
+    public final Variable<List<HCategory>> orderedCategories;
+    
     // Highlighted proteins.
     public final VolatileSet<HNode> highlightedProteins;
     
@@ -47,7 +49,9 @@ public final class Model {
     // Active network.
     public final Variable<Network> activeNetwork;
     
-    // Selection mode
+    
+    
+    // Selection mode.
     private Constants.Selection selectionMode;
     
     public Constants.Selection getSelectionMode() {
@@ -58,11 +62,14 @@ public final class Model {
 		this.selectionMode = selectionMode;
 	}
 
-	/**
+    /**
      * Base constructor.
      */
     public Model() {
         this.selection = new Selection(this);
+        this.openedCategories = new VolatileSet<HCategory>();
+        this.orderedCategories =
+                new Variable<List<HCategory>>(Collections.<HCategory>emptyList());
         this.highlightedProteins = new VolatileSet<HNode>();
         this.highlightedInteractions = new VolatileSet<DefaultEdge>();
         this.highlightedSets = new VolatileSet<HSet>();
@@ -87,6 +94,30 @@ public final class Model {
         selection.change.subscribe(activeNetworkObserver);
         data.superNetwork.change.subscribe(activeNetworkObserver);
         data.categories.change.subscribe(activeNetworkObserver);
+        
+        // Update ordered category list.
+        Observer categoryObserver = new Observer() {
+
+            public void signal() {
+                List<HCategory> openedCat = new ArrayList<HCategory>();
+                List<HCategory> closedCat = new ArrayList<HCategory>();
+                for(HCategory c: data.categories.get().values()) {
+                    if(openedCategories.get().contains(c)) {
+                        openedCat.add(c);
+                    } else {
+                        closedCat.add(c);
+                    }
+                }
+                
+                openedCat.addAll(closedCat);
+                
+                orderedCategories.set(openedCat);
+            }
+            
+        };
+        
+        openedCategories.change.subscribe(categoryObserver);
+        data.categories.change.subscribe(categoryObserver);
         
         // Update Cytoscape selection view.
         selection.change.subscribe(new Observer() {

@@ -1,10 +1,12 @@
 package org.cytoscape.examine.internal;
 
-import aether.Aether;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import static org.cytoscape.examine.internal.Modules.data;
+import static org.cytoscape.examine.internal.Modules.dispose;
+import static org.cytoscape.examine.internal.Modules.model;
+import static org.cytoscape.examine.internal.Modules.visualization;
 
 import org.cytoscape.examine.internal.data.DataSet;
 import org.cytoscape.examine.internal.model.Model;
@@ -55,7 +57,6 @@ public class Modules {
         });
         
         visualization.setVisible(true);
-        Aether.start();
     }
     
     /**
@@ -64,7 +65,6 @@ public class Modules {
     public static void dispose() {
         if(visualization != null) {
             visualization.setVisible(false);
-            Aether.stop();
             visualization.dispose();
             try {
 				Thread.sleep(500);

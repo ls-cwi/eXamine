@@ -1,6 +1,6 @@
 package org.cytoscape.examine.internal.data;
 
-import aether.signal.Variable;
+import org.cytoscape.examine.internal.signal.Variable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,6 +31,9 @@ public class DataSet {
     // CyNode to HNode map.
     public final Variable<Map<CyNode, HNode>> nodeMap;
     
+    // Minimum and maximum node score (for normalization).
+    public final Variable<Double> minScore, maxScore;
+    
     // Node sets by category.
     public final Variable<Map<String, HCategory>> categories;
     
@@ -43,6 +46,8 @@ public class DataSet {
     public DataSet() {
         this.superNetwork = new Variable<SuperNetwork>(new SuperNetwork(null, new Pseudograph<HNode, DefaultEdge>(DefaultEdge.class)));
         this.nodeMap = new Variable<Map<CyNode, HNode>>(new HashMap<CyNode, HNode>());
+        this.minScore = new Variable<Double>(0.);
+        this.maxScore = new Variable<Double>(1.);
         this.categories = new Variable<Map<String, HCategory>>(new HashMap<String, HCategory>());
         this.setMap = new Variable<Map<CyNode, HSet>>(new HashMap<CyNode, HSet>());
     }
@@ -71,8 +76,6 @@ public class DataSet {
         	}
         }
         
-        System.out.println("Number of nodes to visualize: " +  regularNodes.size());
-        
         // Regular and group node partition.
         List<CyNode> groupNodes = new ArrayList<CyNode>();
         for (CyGroup group: groupManager.getGroupSet(cyNetwork)) {
@@ -95,7 +98,7 @@ public class DataSet {
                             row.get(CyNetwork.NAME, String.class),
                             row.get(labelColumnName, String.class),
                             row.get(urlColumnName, String.class),
-                            row.get(scoreColumnName, Double.class).floatValue());
+                            row.get(scoreColumnName, Double.class).doubleValue());
                 
                 superGraph.addVertex(hN);
                 nM.put(cyNode, hN);
@@ -119,6 +122,8 @@ public class DataSet {
         Map<String, HCategory> cs = new HashMap<String, HCategory>();
         
         // Determine category groups.
+        double minScr = 1;
+        double maxScr = 0;
         Map<CyNode, HSet> sM = new HashMap<CyNode, HSet>();
         for(CyNode gN: groupNodes) {
             CyRow row = nodeTable.getRow(gN.getSUID());
@@ -169,7 +174,12 @@ public class DataSet {
                     }
                     
                     Double bScore = mRow.get(scoreColumnName, Double.class);
-                    float score = bScore == null ? Float.NaN : bScore.floatValue();
+                    double score = bScore == null ? Double.NaN : bScore.doubleValue();
+                    
+                    if(!Double.isNaN(score)) {
+                        minScr = Math.min(minScr, score);
+                        maxScr = Math.max(maxScr, score);
+                    }
                     
                     String url = mRow.get(urlColumnName, String.class);
                     
@@ -188,12 +198,15 @@ public class DataSet {
                 
                 cs.put(catName, hC);
             } // End for every category node.
+            
+            // Transfer node scores.
+            this.minScore.set(minScr);
+            this.maxScore.set(maxScr);
         }
         
         superNetwork.set(sN);
         nodeMap.set(nM);
         categories.set(cs);
-        
                                 
         // Clear active sets in model.
         Modules.model.selection.clear();

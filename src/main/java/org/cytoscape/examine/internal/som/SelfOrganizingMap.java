@@ -8,7 +8,7 @@ import java.util.Random;
 public class SelfOrganizingMap {
     
     // Neurons weight vectors, by neuron index.
-    public final float[][] neurons;
+    public final double[][] neurons;
     
     // Topology.
     public final Topology topology;
@@ -22,13 +22,13 @@ public class SelfOrganizingMap {
         this.topology = topology;
         
         int numberOfNeurons = topology.size;
-        neurons = new float[numberOfNeurons][vectorSize];
+        neurons = new double[numberOfNeurons][vectorSize];
         
         // Random weight vector initialization.
         Random rand = new Random();
         for(int i = 0; i < neurons.length; i++) {
             for(int j = 0; j < neurons[i].length; j++) {
-                neurons[i][j] = randomized ? rand.nextFloat() : 0f;
+                neurons[i][j] = randomized ? rand.nextDouble() : 0f;
             }
         }
     }
@@ -36,7 +36,7 @@ public class SelfOrganizingMap {
     /**
      * Constructor for predefined neurons.
      */
-    public SelfOrganizingMap(float[][] neurons, Topology topology) {
+    public SelfOrganizingMap(double[][] neurons, Topology topology) {
         this.neurons = neurons;
         this.topology = topology;
     }
@@ -44,10 +44,10 @@ public class SelfOrganizingMap {
     /**
      * Add weighted noise to neurons.
      */
-    public void addNoise(float alpha) {
+    public void addNoise(double alpha) {
         for(int i = 0; i < neurons.length; i++) {
             for(int j = 0; j < neurons[i].length; j++) {
-                neurons[i][j] = alpha * ((float) Math.random()) + (1f - alpha) * neurons[i][j];
+                neurons[i][j] = alpha * ((double) Math.random()) + (1f - alpha) * neurons[i][j];
             }
         }
     }

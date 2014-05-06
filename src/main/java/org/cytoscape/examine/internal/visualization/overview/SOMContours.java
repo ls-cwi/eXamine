@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import processing.core.PVector;
-import static aether.Math.*;
+import org.cytoscape.examine.internal.graphics.PVector;
 
 /**
  * Generates set contours for a SOM.
@@ -34,7 +33,7 @@ public class SOMContours {
     private final boolean[][] filleds;
     
     // Fuzzy level required for empty tile to be marked as part of a set.
-    public float emptyMembershipThreshold;
+    public double emptyMembershipThreshold;
     
     // Neighborhood offset coordinates, ordered clockwise.
     private Coordinates[] neighborhoodOffsets;
@@ -95,19 +94,15 @@ public class SOMContours {
     
     private void updateSet(int setIndex) {
         HSet set = trainer.learningModel.proteinSets.get(setIndex);
-        float setWeight = trainer.learningModel.proteinSetWeights.get(set);
+        double setWeight = trainer.learningModel.proteinSetWeights.get(set);
         
         // Set membership map.
         for(int i = 0; i < som.neurons.length; i++) {
-            float value = som.neurons[i][setIndex] / setWeight;
-            float ridgeValue = ridgeValue(i, setIndex, setWeight);
+            double value = som.neurons[i][setIndex] / setWeight;
             
             int x = som.topology.x[i];
             int y = som.topology.y[i];
-            memberships[x][y] = //value * ridgeValue > emptyMembershipThreshold;
-                                //(value + ridgeValue) / 2f > emptyMembershipThreshold;
-                                value > emptyMembershipThreshold;
-                                //ridgeValue > emptyMembershipThreshold;
+            memberships[x][y] = value > emptyMembershipThreshold;
             filleds[x][y] = false;
         }
         
@@ -120,13 +115,14 @@ public class SOMContours {
         }
         
         // Base tile geometry.
+        double rimWidth = 10;
         double roundDilationErosion = SOMOverview.tileSide;
-        int bufferSegments = 15;
         int setSize = trainer.learningModel.proteinSets.size() - 1;
         double indexErosion = setSize == 0 ?
                                 0 :
-                                0.5f * SOMOverview.tileSide *
-                                (double) setIndex / (double) setSize;
+                                Math.min((rimWidth + 2) * setIndex,
+                                    (SOMOverview.tileSide - Parameters.NODE_RADIUS) *
+                                    (double) setIndex / (double) setSize);
         
         // Membership tiles.
         List<Geometry> tiles = new ArrayList<Geometry>();
@@ -162,7 +158,7 @@ public class SOMContours {
                         PVector partialP = position.get();
                         partialP.add(nghPos[i]);
                         partialP.add(nghPos[(i+1) % 6]);
-                        partialP.div(3f);
+                        partialP.div(3);
 
                         partialCs.add(new Coordinate(partialP.x, partialP.y));
                     }
@@ -180,77 +176,22 @@ public class SOMContours {
             }
         }
         Geometry tileUnion = Util.geometryFactory.buildGeometry(tiles)
-                                 .buffer(1f)
+                                 .buffer(1)
                                  .union()
-                                 .buffer(-roundDilationErosion, bufferSegments)
-                                 .buffer(2f * roundDilationErosion, bufferSegments)
-                                 .buffer(-roundDilationErosion - indexErosion, bufferSegments);
+                                 .buffer(-roundDilationErosion)
+                                 .buffer(2 * roundDilationErosion)
+                                 .buffer(-roundDilationErosion - indexErosion);
         
         setOutlineShapes.add(tileUnion);
         
-        double rimWidth = 10f;
-        Geometry tileInnerContour = tileUnion.buffer(-rimWidth, bufferSegments);
-        Geometry dilatedInnerContour = tileInnerContour.buffer(rimWidth, bufferSegments);
+        Geometry tileInnerContour = tileUnion.buffer(-rimWidth);
+        Geometry dilatedInnerContour = tileInnerContour.buffer(rimWidth);
         Geometry roundedInnerContour = dilatedInnerContour
-                                       .buffer(-2f * rimWidth, bufferSegments)
-                                       .buffer(rimWidth, bufferSegments);
+                                       .buffer(-2 * rimWidth)
+                                       .buffer(rimWidth);
         Geometry tileBody = tileUnion.symDifference(roundedInnerContour);
         
         setBodyShapes.add(tileBody);
     }
-    
-    /**
-     * Ridge detection by consulting values of neighboring tiles.
-     */
-    private float ridgeValue(int neuron, int setIndex, float setWeight) {
-        float posF = 1f / 3f;
-        float negF = -1f / 4f;
-        
-        // Invariant center neuron value.
-        float baseV = posF * som.neurons[neuron][setIndex] / setWeight;
-        
-        // Neighboring values.
-        Coordinates cs = som.topology.coordinatesOf(neuron);
-        float[] nghMbs = new float[6];
-        for(int i = 0; i < neighborhoodOffsets.length; i++) {
-            Coordinates nO = neighborhoodOffsets[i];
-            Coordinates nCs = cs.hexagonallyTranslated(nO);
-
-            nghMbs[i] = 0 <= nCs.x && nCs.x < memberships.length &&
-                        0 <= nCs.y && nCs.y < memberships[0].length ?
-                            som.neurons[som.topology.neuronAt(nCs)][setIndex] / setWeight :
-                            0f;
-        }
-        
-        // Take maximum of all kernel forms.
-        float magnitude = 0;
-        for(int i = 0; i < kernelSigns.length; i++) {
-            float kernSum = baseV;
-            
-            for(int j = 0; j < nghMbs.length; j++) {
-                kernSum += (kernelSigns[i][j] < 0 ? negF : posF) * nghMbs[j];
-            }
-            
-            magnitude += kernSum * kernSum;
-        }
-        
-        return sqrt(magnitude);
-    }
-    
-    // Series of kernel weights to apply to neighbors as ridge detection.
-    private float[][] kernelSigns = new float[][] {
-        // Straight.
-        {1, -1, -1, 1, -1, -1},
-        {-1, 1, -1, -1, 1, -1},
-        {-1, -1, 1, -1, -1, 1},
-        
-        // Bent.
-        /*{1, -1, 1, -1, -1, -1},
-        {-1, 1, -1, 1, -1, -1},
-        {-1, -1, 1, -1, 1, -1},
-        {-1, -1, -1, 1, -1, 1},
-        {1, -1, -1, -1, 1, -1},
-        {-1, 1, -1, -1, -1, 1}*/
-    };
     
 }

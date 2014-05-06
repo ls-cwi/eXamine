@@ -14,7 +14,7 @@ public class HSet extends HElement {
     public final CyGroup cyGroup;
     
     // Optional score (lower is better -> p-value).
-    public final float score;
+    public final double score;
     
     // Wrapped set.
     public final List<HNode> elements;
@@ -22,7 +22,7 @@ public class HSet extends HElement {
     /**
      * Base constructor.
      */
-    public HSet(CyGroup cyGroup, String name, float score, String url, List<HNode> members) {
+    public HSet(CyGroup cyGroup, String name, double score, String url, List<HNode> members) {
         super(name, url);
         
         this.cyGroup = cyGroup;

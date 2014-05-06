@@ -28,16 +28,16 @@ public class LearningModel {
     
     // Encoded protein sets and weights.
     public final List<HSet> proteinSets;
-    public final Map<HSet, Float> proteinSetWeights;
+    public final Map<HSet, Double> proteinSetWeights;
     
     // Induced protein sets.
     public final List<Set<HNode>> inducedProteinSets;
 
     // Features, according to protein list.
-    public final float[][] features;
+    public final double[][] features;
 
     // Protein to feature vector map.
-    public final Map<HNode, float[]> vectorMap;
+    public final Map<HNode, double[]> vectorMap;
     
     // Feature vector size.
     public final int size, topologySetSize;
@@ -50,7 +50,7 @@ public class LearningModel {
                          Selection selectedSets) {
         this.proteins = proteins;
         this.proteinSets = new ArrayList<HSet>();
-        this.proteinSetWeights = new HashMap<HSet, Float>();
+        this.proteinSetWeights = new HashMap<HSet, Double>();
         
         // Selected sets.
         proteinSets.addAll(selectedSets.activeSetList);
@@ -68,8 +68,8 @@ public class LearningModel {
             inducedProteinSets.add(set);
         }
         
-        features = new float[proteins.size()][];
-        vectorMap = new HashMap<HNode, float[]>();
+        features = new double[proteins.size()][];
+        vectorMap = new HashMap<HNode, double[]>();
         
         // Combine proteins by identical neighborhood.
         Map<HNode, Set<HNode>> proteinToNgh = new HashMap<HNode, Set<HNode>>();
@@ -114,7 +114,7 @@ public class LearningModel {
             HNode protein = proteins.get(i);
 
             // Features for protein.
-            float[] fs = new float[size];
+            double[] fs = new double[size];
             features[i] = fs;
             
             // Every protein set to a dimension,
@@ -136,7 +136,7 @@ public class LearningModel {
         }
 
         // Encode topology, where set weights are normalized to acc. to 1.
-        float activated = 1f; // / (float) topologySetSize;
+        double activated = 1f; // / (double) topologySetSize;
         
         if(tE == TopologyEncoding.Compact) {
             int i = 0;

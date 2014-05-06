@@ -1,8 +1,6 @@
 package org.cytoscape.examine.internal.visualization;
 
-import aether.color.Color;
-import processing.core.PVector;
-import static aether.color.Color.*;
+import java.awt.Color;
 
 /**
  * Maps node scores to colors in the form of HSB vectors.
@@ -19,19 +17,19 @@ public class ScoreColorMap {
      * - [2.5, 5) to green;
      * - [5, inf) to dark green.
      */
-    public static final PVector darkPurple = rgb(118, 42, 131);
-    public static final PVector purple = rgb(175, 141, 195);
-    public static final PVector brightPurple = rgb(231, 212, 232);
-    public static final PVector white = rgb(247, 247, 247);
-    public static final PVector brightGreen = rgb(217, 240, 211);
-    public static final PVector green = rgb(127, 191, 123);
-    public static final PVector darkGreen = rgb(27, 120, 55);
+    public static final Color darkPurple = new Color(118, 42, 131);
+    public static final Color purple = new Color(175, 141, 195);
+    public static final Color brightPurple = new Color(231, 212, 232);
+    public static final Color white = new Color(247, 247, 247);
+    public static final Color brightGreen = new Color(217, 240, 211);
+    public static final Color green = new Color(127, 191, 123);
+    public static final Color darkGreen = new Color(27, 120, 55);
             
     /**
      * Get the color for a given value.
      */
-    public static PVector color(float value) {
-        PVector result;
+    public static Color color(double value) {
+        Color result;
         
         // Purple range.
         if(value < 0) {

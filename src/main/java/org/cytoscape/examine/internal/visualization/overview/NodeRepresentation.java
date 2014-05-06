@@ -1,30 +1,30 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import aether.Aether;
-import static aether.Aether.*;
-import static aether.Math.*;
-import aether.color.Color;
-import static aether.draw.Parameters.*;
-import aether.draw.Representation;
+import java.awt.Color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
+import static org.cytoscape.examine.internal.graphics.Math.*;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
+import static org.cytoscape.examine.internal.visualization.Parameters.*;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
 
-import org.cytoscape.examine.internal.Constants;
 import org.cytoscape.examine.internal.ViewerAction;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.visualization.SetRepresentation;
 
 import static org.cytoscape.examine.internal.Modules.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
 
 import java.util.HashSet;
 import java.util.Set;
-import processing.core.PVector;
 import java.awt.Desktop;
 import java.awt.Paint;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.cytoscape.examine.internal.graphics.Colors;
+import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.jgrapht.graph.DefaultEdge;
@@ -35,17 +35,17 @@ import org.jgrapht.graph.DefaultEdge;
 public class NodeRepresentation extends Representation<HNode> {
     
     // Auxiliary protein color.
-    public final PVector AUXILIARY_COLOR = Color.grey(0.75f);
+    public final Color AUXILIARY_COLOR = Colors.grey(0.75f);
     
     // Represented feature vector.
-    public final float[] vector;
+    public final double[] vector;
     
-    private float textSpan;
+    private double textSpan;
 
     /**
      * Base constructor.
      */
-    public NodeRepresentation(HNode element, float[] vector) {
+    public NodeRepresentation(HNode element, double[] vector) {
         super(element);
         
         this.vector = vector;
@@ -59,41 +59,51 @@ public class NodeRepresentation extends Representation<HNode> {
 
     @Override
     public void draw() {
-        fill(0f);
+        color(Color.BLACK);
         translate(topLeft);
         
         if(textSpan < 0) {
             textSpan = textWidth(element.toString());
         }
         
-        translate(-textSpan / 2f, -textAscent() / 2f);
+        translate(-textSpan / 2f, -textHeight() / 2f);
         
-        VisualMappingFunction<?, Paint> mappingFuction = ViewerAction
-        								.visualMappingManager
-        								.getCurrentVisualStyle()
-        								.getVisualMappingFunction(BasicVisualLexicon.NODE_FILL_COLOR);
+        VisualMappingFunction<?, Paint> mappingFunction =
+            ViewerAction.visualMappingManager
+                        .getCurrentVisualStyle()
+                        .getVisualMappingFunction(BasicVisualLexicon.NODE_FILL_COLOR);
         
-        // Rounded rectangle backdrop.
-        java.awt.Color cytoColor = null;
-        if (mappingFuction != null) {
-            cytoColor = (java.awt.Color) mappingFuction.getMappedValue(element.cyRow);        	
+        // Foreground outline with color coding.
+        Color cytoColor = mappingFunction != null ?
+            (Color) mappingFunction.getMappedValue(element.cyRow) : Color.WHITE;
+        
+        // Background rectangle.
+        if(highlight()) {
+            color(containmentColor.get());
+        } else {
+            color(cytoColor.brighter());
         }
-
-        PVector nodeColor = cytoColor == null ?
-                Color.white :
-                Color.rgb(cytoColor.getRed(), cytoColor.getGreen(), cytoColor.getBlue());
-        stroke(nodeColor);
-        strokeWeight(3f);
         
-        fill(highlight() ? containmentColor.get() : Color.white);
-        rect(-2f, -2f, textSpan + 4f, textAscent() + 4f, 6f);
+        double radius = NODE_RADIUS; //0.5 * SOMOverview.tileRadius;
+        fillEllipse(textSpan / 2f, textHeight() / 2f, radius, radius);
+        //fillRect(-LABEL_PADDING, -LABEL_PADDING,
+        //         textSpan + LABEL_DOUBLE_PADDING, textHeight() + LABEL_DOUBLE_PADDING, 
+        //         LABEL_ROUNDING);
         
-        // Small font face.
-        translate(0f, -textAscent() / 2f + 1.5f);
+        color(cytoColor);
+        strokeWeight(4f);
+        
+        //drawRect(-LABEL_PADDING, -LABEL_PADDING,
+        //         textSpan + LABEL_DOUBLE_PADDING, textHeight() + LABEL_DOUBLE_PADDING,
+        //         LABEL_ROUNDING);
+        
+        drawEllipse(textSpan / 2f, textHeight() / 2f, radius, radius);
+        
+        // Label; small font face.
+        //translate(0f, -textAscent() / 2f);
         
         textFont(labelFont.get());
-        noStroke();
-        fill(highlight() ? textContainedColor.get() : textColor.get());
+        color(highlight() ? textContainedColor.get() : textColor.get());
         
         picking();
         text(element.toString());
@@ -132,7 +142,7 @@ public class NodeRepresentation extends Representation<HNode> {
     }
 
     @Override
-    public void mouseClicked() {
+    public void mouseClicked(MouseEvent e) {
         // Open website(s) on ctrl click.
         if(mouseEvent().isControlDown()) {
             try {
@@ -151,4 +161,5 @@ public class NodeRepresentation extends Representation<HNode> {
             model.selection.select(element);
         }
     }
+    
 }
