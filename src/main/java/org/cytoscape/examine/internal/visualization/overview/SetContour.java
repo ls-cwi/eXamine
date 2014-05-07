@@ -2,6 +2,7 @@ package org.cytoscape.examine.internal.visualization.overview;
 
 import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
 import static org.cytoscape.examine.internal.graphics.Math.*;
+
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.cytoscape.examine.internal.Modules;
@@ -12,8 +13,10 @@ import org.cytoscape.examine.internal.visualization.Util;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Shape;
+
 import org.cytoscape.examine.internal.graphics.Colors;
 import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.StaticGraphics;
 
 /**
  * Contour representation of a set.
@@ -76,7 +79,7 @@ public class SetContour extends SetRepresentation<HSet> {
         // Solid outline in back.
         color(highlight ? OUTLINE_HIGHLIGHT_COLOR : OUTLINE_COLOR);
         strokeWeight(highlight ? OUTLINE_HIGHLIGHT_WEIGHT : OUTLINE_WEIGHT);
-        draw(outlineShape);
+        StaticGraphics.draw(outlineShape);
     }
     
     /**
@@ -98,7 +101,7 @@ public class SetContour extends SetRepresentation<HSet> {
                 0f);
         stroke(pen);
         
-        draw(outlineShape);
+        StaticGraphics.draw(outlineShape);
         
         popStyle();
     }
