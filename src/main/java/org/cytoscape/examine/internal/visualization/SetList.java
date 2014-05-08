@@ -76,13 +76,13 @@ public class SetList extends Representation<HCategory> {
         // Arrows.
         pushTransform();
         if(isOpened()) {
-            translate(textHeight(), 0.5 * (textHeight() - textWidth("‹ ›")));
+            translate(textHeight(), 0.5 * (textHeight() - textWidth("<>")));
             rotate(0.5 * Math.PI);
         } else {
             translate(0, 0);
             rotate(0);
         }
-        text("‹ ›");
+        text("<>");
         popTransform();
         
         

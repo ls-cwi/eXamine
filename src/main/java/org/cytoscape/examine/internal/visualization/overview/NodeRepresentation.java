@@ -81,23 +81,22 @@ public class NodeRepresentation extends Representation<HNode> {
         if(highlight()) {
             color(containmentColor.get());
         } else {
-            color(cytoColor.brighter());
+            color(Color.WHITE); //cytoColor.brighter());
         }
         
-        double radius = NODE_RADIUS; //0.5 * SOMOverview.tileRadius;
-        fillEllipse(textSpan / 2f, textHeight() / 2f, radius, radius);
-        //fillRect(-LABEL_PADDING, -LABEL_PADDING,
-        //         textSpan + LABEL_DOUBLE_PADDING, textHeight() + LABEL_DOUBLE_PADDING, 
-        //         LABEL_ROUNDING);
+        //double radius = NODE_RADIUS; //0.5 * SOMOverview.tileRadius;
+        //fillEllipse(textSpan / 2f, textHeight() / 2f, radius, radius);
+        fillRect(-LABEL_DOUBLE_PADDING, -LABEL_DOUBLE_PADDING,
+                 textSpan + 2 * LABEL_DOUBLE_PADDING, textHeight() + 2 * LABEL_DOUBLE_PADDING, 
+                 textHeight() + 2 * LABEL_DOUBLE_PADDING); //LABEL_ROUNDING);
         
         color(cytoColor);
         strokeWeight(4f);
         
-        //drawRect(-LABEL_PADDING, -LABEL_PADDING,
-        //         textSpan + LABEL_DOUBLE_PADDING, textHeight() + LABEL_DOUBLE_PADDING,
-        //         LABEL_ROUNDING);
-        
-        drawEllipse(textSpan / 2f, textHeight() / 2f, radius, radius);
+        //drawEllipse(textSpan / 2f, textHeight() / 2f, radius, radius);
+        drawRect(-LABEL_DOUBLE_PADDING, -LABEL_DOUBLE_PADDING,
+                 textSpan + 2 * LABEL_DOUBLE_PADDING, textHeight() + 2 * LABEL_DOUBLE_PADDING, 
+                 textHeight() + 2 * LABEL_DOUBLE_PADDING);
         
         // Label; small font face.
         //translate(0f, -textAscent() / 2f);
