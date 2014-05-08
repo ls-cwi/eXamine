@@ -12,7 +12,7 @@ public class Constants {
     public static final String CATEGORY_PREFIX = "Category_";
     
     // Category list size limit.
-    public static final int CATEGORY_MAX_SIZE = 20;
+    public static final int CATEGORY_MAX_SIZE = 50;
     
     // Selection mechanism
     public enum Selection { 
