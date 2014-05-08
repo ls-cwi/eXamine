@@ -1,6 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<properties>
 		<bundle.symbolicName>eXamine</bundle.symbolicName>
 		<bundle.namespace>org.cytoscape.examine.internal</bundle.namespace>
@@ -8,16 +9,16 @@
 		<maven-bundle-plugin.version>2.3.4</maven-bundle-plugin.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
 	</properties>
-	
+
 	<groupId>org.cytoscape.examine</groupId>
 	<artifactId>examine</artifactId>
 	<packaging>bundle</packaging>
 	<name>eXamine</name>
 
 	<version>1.0.4</version>
-  
-  	<repositories>
-  		<repository>
+
+	<repositories>
+		<repository>
 			<id>custom_rep</id>
 			<name>Custom Repository</name>
 			<url>file://${project.basedir}/lib</url>
@@ -60,65 +61,63 @@
 						<Export-Package>!${bundle.namespace}.*</Export-Package>
 						<Private-Package>${bundle.namespace}.*</Private-Package>
 						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
-                                                
-                                                <!-- embed all compile and runtime scope dependencies -->
-                                                <Embed-Dependency>
-                                                    jgrapht-jdk1.5;groupId=org.jgrapht;inline=true,
-                                                    opencsv;groupId=net.sf.opencsv;inline=true,
-                                                    Aether2D;groupId=org.cytoscape.examine;inline=true,
-                                                    processing;groupId=org.cytoscape.examine;inline=true,
-                                                    jts;groupId=com.vividsolutions;inline=true
-                                                </Embed-Dependency>                                               
-                                                <Import-Package>*;resolution:=optional</Import-Package>
+
+						<!-- embed all compile and runtime scope dependencies -->
+						<Embed-Dependency>
+							jgrapht-jdk1.5;groupId=org.jgrapht;inline=true,
+							opencsv;groupId=net.sf.opencsv;inline=true,
+							jts;groupId=com.vividsolutions;inline=true
+						</Embed-Dependency>
+						<Import-Package>*;resolution:=optional</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-    
-  	<dependencies>
+
+	<dependencies>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>swing-application-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
-  	   <dependency>
-  	      <groupId>org.cytoscape</groupId>
-  	      <artifactId>group-api</artifactId>
-  	      <version>${cytoscape.api.version}</version>
-  	   </dependency>
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>group-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>work-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
-			<dependency>
+		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>service-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>${osgi.api.version}</version>
 		</dependency>
-  	   <dependency>
-  	      <groupId>org.jgrapht</groupId>
-  	      <artifactId>jgrapht-jdk1.5</artifactId>
-  	      <version>0.7.3</version>
-  	   </dependency>
-  	   <dependency>
-  	      <groupId>net.sf.opencsv</groupId>
-  	      <artifactId>opencsv</artifactId>
-  	      <version>2.3</version>
-  	   </dependency>
-  	   <dependency>
-  	      <groupId>com.vividsolutions</groupId>
-  	      <artifactId>jts</artifactId>
-  	      <version>1.13</version>
-  	   </dependency>
-  	</dependencies>
-  
-  	<description>eXamine is a set-oriented visual analysis approach for annotated modules that displays set membership as contours on top of a node-link layout. eXamine extends upon Self Organizing Maps to simultaneously lay out nodes, links, and set contours.</description>
+		<dependency>
+			<groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-jdk1.5</artifactId>
+			<version>0.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vividsolutions</groupId>
+			<artifactId>jts</artifactId>
+			<version>1.13</version>
+		</dependency>
+	</dependencies>
+
+	<description>eXamine is a set-oriented visual analysis approach for annotated modules that displays set membership as contours on top of a node-link layout. eXamine extends upon Self Organizing Maps to simultaneously lay out nodes, links, and set contours.</description>
 </project>
