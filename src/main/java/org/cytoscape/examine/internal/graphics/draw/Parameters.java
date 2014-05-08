@@ -31,6 +31,9 @@ public class Parameters {
     // Label font.
     public static final Variable<Font> labelFont = new Variable<Font>(null);
     
+    // Footnote font.
+    public static final Variable<Font> noteFont = new Variable<Font>(null);
+    
     // Text base color.
     public static final Variable<Color> textColor = new Variable<Color>(Colors.grey(0.25f));
     

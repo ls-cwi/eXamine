@@ -192,11 +192,13 @@ public abstract class Application extends JFrame {
             
             font.set(inputFont.deriveFont(18f));
             labelFont.set(inputFont.deriveFont(14f));
+            noteFont.set(inputFont.deriveFont(8f));
         } catch(Exception ex) {
             System.out.println("Font load exception: " + ex.getLocalizedMessage());
             
             font.set(new Font("Arial", Font.PLAIN, 18));
             labelFont.set(new Font("Arial", Font.PLAIN, 14));
+            noteFont.set(new Font("Arial", Font.PLAIN, 8));
         }
         
         // Initialize implementing class.

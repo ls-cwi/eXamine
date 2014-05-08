@@ -16,7 +16,7 @@ public class Parameters {
     public static final double LABEL_DOUBLE_PADDING = 2 * LABEL_PADDING;
     public static final double LABEL_ROUNDING = 16;
     public static final double LABEL_MARKER_RADIUS = 6;
-    public static final double LABEL_BAR_HEIGHT = 30;
+    public static final double LABEL_BAR_HEIGHT = 25;
     public static final double SCORE_MIN_RADIUS = 3;
     public static final double NODE_RADIUS = 30;
             

@@ -11,6 +11,7 @@ import java.util.List;
 import org.cytoscape.examine.internal.Modules;
 import org.cytoscape.examine.internal.data.HCategory;
 import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.StaticGraphics;
 
 /**
  * Visual list of significantly expressed GO terms of a specific domain.
@@ -23,6 +24,8 @@ public class SetList extends Representation<HCategory> {
     // Internal set list scroll.
     private int positionScroll;
     
+    private String labelText;
+    
     /**
      * Base constructor.
      */
@@ -31,6 +34,8 @@ public class SetList extends Representation<HCategory> {
         
         this.labels = labels;
         this.positionScroll = 0;
+        
+        this.labelText = "     " + element.toString();
     }
 
     @Override
@@ -41,7 +46,7 @@ public class SetList extends Representation<HCategory> {
         
         double space = org.cytoscape.examine.internal.graphics.draw.Parameters.spacing.get();
         //PVector domainBounds = v(textWidth(element.toString()), textHeight() + space);
-        PVector domainBounds = v(textWidth(element.toString()),
+        PVector domainBounds = v(textWidth(labelText),
                                  textHeight() + space + LABEL_BAR_HEIGHT + space);
         
         if(isOpened()) {
@@ -66,7 +71,21 @@ public class SetList extends Representation<HCategory> {
         picking();
         textFont(font.get());
         color(isOpened() ? textColor.get() : textColor.get().brighter().brighter());
-        text(element.toString());
+        text(labelText);
+        
+        // Arrows.
+        pushTransform();
+        if(isOpened()) {
+            translate(textHeight(), 0.5 * (textHeight() - textWidth("‹ ›")));
+            rotate(0.5 * Math.PI);
+        } else {
+            translate(0, 0);
+            rotate(0);
+        }
+        text("‹ ›");
+        popTransform();
+        
+        
         noPicking();
         
         popTransform();

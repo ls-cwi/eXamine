@@ -30,6 +30,8 @@ public class SetLabel extends SetRepresentation<HSet> {
     private final SetText setText;
     
     public boolean opened;
+    
+    private String shortExponent;
 
     /**
      * Base constructor.
@@ -76,8 +78,10 @@ public class SetLabel extends SetRepresentation<HSet> {
             DecimalFormat df = new DecimalFormat("0.0E0");
             txt = df.format(element.score) + "  " + txt;
     	}
-        
         this.text = txt;
+        
+        this.shortExponent = "-" + Double.toString(exponent(element.score));
+        this.shortExponent = shortExponent.substring(0, shortExponent.length() - 2);
         
         this.setText = new SetText(element);
     }
@@ -91,7 +95,7 @@ public class SetLabel extends SetRepresentation<HSet> {
             maxLabelWidth = Math.max(maxLabelWidth, textWidth(line));
         }
         
-        return v(LABEL_PADDING + 2 * LABEL_MARKER_RADIUS + LABEL_DOUBLE_PADDING
+        return v(LABEL_PADDING + 2 * LABEL_MARKER_RADIUS + 2 * LABEL_DOUBLE_PADDING
                  + maxLabelWidth + LABEL_PADDING,
                  linedText.length * textHeight() + LABEL_DOUBLE_PADDING);
     }
@@ -173,13 +177,21 @@ public class SetLabel extends SetRepresentation<HSet> {
                  selected ? visualization.setColors.color(element) : Colors.grey(1f),
                  selected || hL ? 1f : 0f);
             fillRect(0f, 0f, dim.x, dim.y, LABEL_ROUNDING);
+            
+            // Score label.
+            color(hL ? textContainedColor.get() :
+                  selected ? textHighlightColor.get() : textColor.get()); 
+            
+            if(Modules.showScore) {
+                textFont(noteFont.get());
+                text(shortExponent, 2 * LABEL_MARKER_RADIUS + 3,
+                                    0.5 * dim.y - LABEL_MARKER_RADIUS);
+            }
 
             // Set label.
-            color(hL ? textContainedColor.get() :
-                  selected ? textHighlightColor.get() : textColor.get());        
-
             picking();
-            translate(LABEL_PADDING + 2 * LABEL_MARKER_RADIUS + LABEL_DOUBLE_PADDING,
+            textFont(labelFont.get());
+            translate(LABEL_PADDING + 2 * LABEL_MARKER_RADIUS + 2 * LABEL_DOUBLE_PADDING,
                       LABEL_PADDING);
             //text(text);
             for(String line: linedText) {
