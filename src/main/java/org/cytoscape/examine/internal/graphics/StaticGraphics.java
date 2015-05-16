@@ -1,16 +1,18 @@
 package org.cytoscape.examine.internal.graphics;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import static org.cytoscape.examine.internal.graphics.Math.*;
 import org.cytoscape.examine.internal.graphics.draw.Snippet;
 import org.cytoscape.examine.internal.signal.gui.SidePane;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Path2D;
@@ -18,6 +20,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Collection;
+import static org.cytoscape.examine.internal.graphics.PVector.sub;
 import org.cytoscape.examine.internal.graphics.draw.PickingGraphics2D;
 
 /**
@@ -25,7 +28,6 @@ import org.cytoscape.examine.internal.graphics.draw.PickingGraphics2D;
  * methods (when they are statically imported).
  */
 public class StaticGraphics {
-    
     // Draw manager and XPApplet instances to delegate to.
     protected static DrawManager dm;
     protected static Application application;
@@ -66,6 +68,10 @@ public class StaticGraphics {
         }
         
         return result;
+    }
+    
+    public static PVector t(PVector v) {
+        return new PVector(t(v.x), t(v.y));
     }
 
     /**
@@ -181,15 +187,30 @@ public class StaticGraphics {
         dm.pg.fill(shape);
     }
     
+    public static void drawLine(PVector origin, PVector target) {
+        Path2D.Double line = new Path2D.Double();
+        line.moveTo(t(origin.x), t(origin.y));
+        line.lineTo(t(target.x), t(target.y));
+        dm.pg.draw(line);
+    }
+    
+    public static void drawLineString(LineString lineString) {
+        Coordinate[] cs = lineString.getCoordinates();
+        
+        Path2D.Double line = new Path2D.Double();
+        line.moveTo(t(cs[0].x), t(cs[0].y));
+        for(int i = 1; i < cs.length; i++) {
+            line.lineTo(t(cs[i].x), t(cs[i].y));
+        }
+        dm.pg.draw(line);
+    }
+    
     public static void drawCurve(PVector origin, PVector control, PVector target) {
         Path2D.Double curve = new Path2D.Double();
         curve.moveTo(t(origin.x), t(origin.y));
-        
         double midX = t(control.x);
         double midY = t(control.y);
         curve.curveTo(midX, midY, midX, midY, t(target.x), t(target.y));
-        
-        //curve.quadTo(t(control.x), t(control.y), t(target.x), t(target.y));
         dm.pg.draw(curve);
     }
     
@@ -208,6 +229,60 @@ public class StaticGraphics {
     public static void fillEllipse(double a, double b, double c, double d) {
         dm.pg.fill(new Ellipse2D.Double(t(a - c), t(b - d), 2 * t(c), 2 * t(d)));
     }
+    
+    public static void circleArc(PVector p1, PVector p2, PVector p3) {
+        dm.pg.draw(getArc(t(p1), t(p2), t(p3)));
+    }
+    
+    public static Shape getArc(PVector p1, PVector p2, PVector p3) {
+        Shape path;
+        
+        PVector v21 = PVector.sub(p2, p1);
+        double d21 = v21.dot(v21);
+        PVector v31 = PVector.sub(p3, p1);
+        double d31 = v31.dot(v31);
+        double a4 = 2 * v21.crossZ(v31);
+        //double a123 = Math.abs(PVector.angle(p1, p2, p3));
+        
+        double d13 = PVector.distance(p1, p3);
+        boolean wellFormed = PVector.distance(p1, p2) < d13 &&
+                             PVector.distance(p2, p3) < d13;
+        
+        if(wellFormed /*a123 > 0.001 * Math.PI*/ && Math.abs(a4) > 0.001) {
+            PVector center = new PVector(p1.x + (v31.y*d21-v21.y*d31)/a4,
+                                         p1.y + (v21.x*d31-v31.x*d21)/a4);
+            double radius =
+                    Math.sqrt(d21*d31*(
+                            Math.pow(p3.x-p2.x,2) +
+                            Math.pow(p3.y-p2.y,2))) /
+                    Math.abs(a4);
+            
+            Arc2D arc = new Arc2D.Double(Arc2D.OPEN);
+            arc.setFrame(center.x - radius, center.y - radius,
+                         2 * radius, 2 * radius);
+            
+            boolean cross = sub(p2, p1).crossZ(sub(p3, p2)) < 0;
+            if(cross) arc.setAngles(p1.x, p1.y, p3.x, p3.y);
+            else {
+                arc.setAngles(p3.x, p3.y, p1.x, p1.y);
+                double extent = arc.getAngleExtent();
+                arc.setAngleStart(arc.getAngleStart() + extent);
+                arc.setAngleExtent(-extent);
+            }
+            
+            path = arc;
+        }
+        // There is no circle, so take a straight line between p0 and p1.
+        else {
+            Path2D.Double line = new Path2D.Double();
+            line.moveTo(p1.x, p1.y);
+            line.lineTo(p3.x, p3.y);
+            
+            path = line;
+        }
+        
+        return path;
+    }
 
     public static void pushTransform() {
         dm.transformStack.add(dm.pg.getTransform());
@@ -223,6 +298,14 @@ public class StaticGraphics {
     
     public static void translate(PVector t) {
         translate(t.x, t.y);
+    }
+    
+    public static void scale(double sx, double sy) {
+        dm.pg.scale(t(sx), t(sy));
+    }
+    
+    public static void scale(PVector s) {
+        dm.pg.scale(s.x, s.y);
     }
 
     public static void rotate(double angle) {
@@ -336,9 +419,9 @@ public class StaticGraphics {
     
     // Returns the mouse coordinates according to the current coordinate space (2D).
     public static PVector mouseLocal() {
-        PVector mouseLocal = v();
+        PVector mouseLocal = PVector.v();
         
-        PVector global = v(mouseX(), mouseY());
+        PVector global = PVector.v(mouseX(), mouseY());
         
         AffineTransform globalToLocal = dm.pg.getTransform();
         try {
@@ -380,7 +463,7 @@ public class StaticGraphics {
     
     // Sketch area dimensions.
     public static PVector sketchDimensions() {
-        return v(sketchWidth(), sketchHeight());
+        return PVector.v(sketchWidth(), sketchHeight());
     }
 
     public static void cursor(Cursor cursor) {

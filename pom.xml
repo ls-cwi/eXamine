@@ -15,7 +15,7 @@
 	<packaging>bundle</packaging>
 	<name>eXamine</name>
 
-	<version>1.1</version>
+	<version>2.0.0</version>
 
 	<repositories>
 		<repository>
@@ -64,9 +64,18 @@
 
 						<!-- embed all compile and runtime scope dependencies -->
 						<Embed-Dependency>
-							jgrapht-jdk1.5;groupId=org.jgrapht;inline=true,
-							opencsv;groupId=net.sf.opencsv;inline=true,
-							jts;groupId=com.vividsolutions;inline=true
+                                                    opencsv;groupId=net.sf.opencsv;inline=true,
+                                                    jts;groupId=com.vividsolutions;inline=true,
+                                                    xml-apis;groupId=xml-apis;inline=true,
+                                                    xml-apis-ext;groupId=xml-apis;inline=true,
+                                                    batik-dom;groupId=org.apache.xmlgraphics;inline=true,
+                                                    batik-svggen;groupId=org.apache.xmlgraphics;inline=true,
+                                                    batik-awt-util;groupId=org.apache.xmlgraphics;inline=true,
+                                                    batik-xml;groupId=org.apache.xmlgraphics;inline=true,
+                                                    batik-util;groupId=org.apache.xmlgraphics;inline=true,
+                                                    batik-ext;groupId=org.apache.xmlgraphics;inline=true,
+                                                    batik-css;groupId=org.apache.xmlgraphics;inline=true,
+                                                    jgrapht-core;groupId=org.jgrapht;inline=true
 						</Embed-Dependency>
 						<Import-Package>*;resolution:=optional</Import-Package>
 					</instructions>
@@ -103,11 +112,6 @@
 			<version>${osgi.api.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jgrapht</groupId>
-			<artifactId>jgrapht-jdk1.5</artifactId>
-			<version>0.7.3</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sf.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
 			<version>2.3</version>
@@ -117,6 +121,56 @@
 			<artifactId>jts</artifactId>
 			<version>1.13</version>
 		</dependency>
+	 <dependency>
+	  <groupId>org.jgrapht</groupId>
+	  <artifactId>jgrapht-core</artifactId>
+	  <version>0.9.0</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.apache.xmlgraphics</groupId>
+	  <artifactId>batik-dom</artifactId>
+	  <version>1.7</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.apache.xmlgraphics</groupId>
+	  <artifactId>batik-svggen</artifactId>
+	  <version>1.7</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.apache.xmlgraphics</groupId>
+	  <artifactId>batik-awt-util</artifactId>
+	  <version>1.7</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.apache.xmlgraphics</groupId>
+	  <artifactId>batik-css</artifactId>
+	  <version>1.7</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.apache.xmlgraphics</groupId>
+	  <artifactId>batik-ext</artifactId>
+	  <version>1.7</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.apache.xmlgraphics</groupId>
+	  <artifactId>batik-util</artifactId>
+	  <version>1.7</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>org.apache.xmlgraphics</groupId>
+	  <artifactId>batik-xml</artifactId>
+	  <version>1.7</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>xml-apis</groupId>
+	  <artifactId>xml-apis</artifactId>
+	  <version>1.3.04</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>xml-apis</groupId>
+	  <artifactId>xml-apis-ext</artifactId>
+	  <version>1.3.04</version>
+	 </dependency>
 	</dependencies>
 
 	<description>eXamine is a set-oriented visual analysis approach for annotated modules that displays set membership as contours on top of a node-link layout. eXamine extends upon Self Organizing Maps to simultaneously lay out nodes, links, and set contours.</description>

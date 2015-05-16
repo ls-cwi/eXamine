@@ -3,7 +3,6 @@ package org.cytoscape.examine.internal.signal.gui;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.Math.*;
 import static java.lang.Math.*;
 import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
 import org.cytoscape.examine.internal.graphics.draw.Representation;
@@ -15,10 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import org.cytoscape.examine.internal.graphics.PVector;
 
-/**
- * Facilitates the interactive manipulation of a variable,
- * constrained to a small list of given values.
- */
+// Facilitates the interactive manipulation of a variable,
+// constrained to a small list of given values.
 public class ChoiceRepresentation<E> extends Representation<Variable<E>> {
 
     // User friendly name.
@@ -62,24 +59,22 @@ public class ChoiceRepresentation<E> extends Representation<Variable<E>> {
     public void draw() {
         translate(topLeft);
         
-        double space = spacing.get();
-        
         // Label, use base font.
-        textFont(font.get());
-        color(contained ? textContainedColor.get() : textColor.get());
+        textFont(font);
+        color(contained ? textContainedColor : textColor);
         text(label);
         
         // Next line and ident.
-        translate(space + dotSize() + space, textHeight() + space);
+        translate(spacing + dotSize() + spacing, textHeight() + spacing);
         
         // Place selection dot.
         int dotIndex = values.indexOf(element.get());
         if(dotIndex >= 0) {
-            color(contained ? textContainedHighlightColor.get() : textHighlightColor.get());
-            drawEllipse(-(space + dotSize()) / 2f,
-                    dotIndex * textHeight() + textMiddle(),
-                    dotSize(),
-                    dotSize());
+            color(contained ? textContainedHighlightColor : textHighlightColor);
+            drawEllipse(-(spacing + dotSize()) / 2f,
+                        dotIndex * textHeight() + textMiddle(),
+                        dotSize(),
+                        dotSize());
         }
         
         // Value labels.
@@ -91,39 +86,31 @@ public class ChoiceRepresentation<E> extends Representation<Variable<E>> {
     
     public double dotSize() {
         // Use label font.
-        textFont(labelFont.get());
+        textFont(labelFont);
         
-        return textHeight() / 2f;
+        return 0.5f * textHeight();
     }
 
     @Override
     public PVector dimensions() {
-        double space = spacing.get() / 2f;
+        double space = 0.5f * spacing;
         
-        textFont(font.get());
+        textFont(font);
         double width = textWidth(label);
         
-        textFont(labelFont.get());
+        textFont(labelFont);
         for(E value: values) {
             width = max(width,
                         textWidth(value.toString()) + dotSize() + 2f * space);
         }
         
-        return v(width, textHeight() + space + values.size() * textHeight());
+        return PVector.v(width, textHeight() + space + values.size() * textHeight());
     }
     
-    
-    /**
-     * Value snippet.
-     */
+    // Value snippet.
     private class ValueSnippet extends Snippet {
-        
-        // Wrapped value.
-        public final E value;
+        public final E value;   // Wrapped value.
 
-        /**
-         * Base constructor.
-         */
         public ValueSnippet(E value) {
             this.value = value;
         }
@@ -133,27 +120,24 @@ public class ChoiceRepresentation<E> extends Representation<Variable<E>> {
             picking();
             
             boolean selected = element.get().equals(value);
-            Color color = contained ? (isHovered() ? textContainedHoverColor.get() :
-                                             selected ? textContainedHighlightColor.get() :
-                                                        textContainedColor.get()) :
-                                        (isHovered() ? textHoverColor.get() :
-                                             selected ? textHighlightColor.get() :
-                                                        textColor.get());
-                                                        
+            Color color = contained ? (isHovered() ? textContainedHoverColor :
+                                          selected ? textContainedHighlightColor :
+                                                     textContainedColor) :
+                                      (isHovered() ? textHoverColor :
+                                          selected ? textHighlightColor :
+                                                     textColor);
+            
             // Value label.
-            textFont(labelFont.get());
+            textFont(labelFont);
             color(color);
             text(value.toString());
         }
     
-        /**
-         * Switch variable state on click.
-         */
+        // Switch variable state on click.
         @Override
         public void mouseClicked(MouseEvent e) {
             element.set(value);
         }
-        
     }
     
 }

@@ -1,7 +1,6 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
 import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.Math.*;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -13,16 +12,17 @@ import org.cytoscape.examine.internal.visualization.Util;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Shape;
+import java.util.HashSet;
+import java.util.Set;
+import static org.cytoscape.examine.internal.Modules.model;
+import org.cytoscape.examine.internal.data.HNode;
 
 import org.cytoscape.examine.internal.graphics.Colors;
 import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.examine.internal.graphics.StaticGraphics;
 
-/**
- * Contour representation of a set.
- */
-public class SetContour extends SetRepresentation<HSet> {
-    
+// Contour representation of a set.
+public class SetContour extends SetRepresentation {
     // Outline color weight and color.
     public static final double OUTLINE_WEIGHT = 1.75f;
     public static final Color OUTLINE_COLOR = Colors.grey(0.33f);
@@ -42,31 +42,24 @@ public class SetContour extends SetRepresentation<HSet> {
     public final Geometry body, outline;
     public final Shape bodyShape, outlineShape;
     
-    /**
-     * Base constructor.
-     */
     public SetContour(HSet set, int index, Geometry body, Geometry outline) {
         super(set);
         
         this.set = set;
         this.index = index;
         this.body = body;
-        this.bodyShape = Util.geometryToShape(body);
+        this.bodyShape = Util.geometryToShape(body, 0); //0.0001);
         this.outline = outline;
-        this.outlineShape = Util.geometryToShape(outline);
+        this.outlineShape = Util.geometryToShape(outline, 0); // 0.0001);
     }
     
-    /**
-     * Color of the set.
-     */
+    // Color of the set.
     private Color bandColor() {
         Color color = Modules.visualization.setColors.color(set);
         return color == null ? Colors.grey(0.5f) : color;
     }
 
-    /**
-     * Draw body.
-     */
+    // Draw body.
     @Override
     public void draw() {
         boolean highlight = highlight();
@@ -82,9 +75,7 @@ public class SetContour extends SetRepresentation<HSet> {
         StaticGraphics.draw(outlineShape);
     }
     
-    /**
-     * Draw outline.
-     */
+    // Draw outline.
     public void drawOutline() {
         boolean highlight = highlight();
         
@@ -108,7 +99,38 @@ public class SetContour extends SetRepresentation<HSet> {
 
     @Override
     public PVector dimensions() {
-        return v();
+        return PVector.v();
     }
     
+    @Override
+    public void beginHovered() {
+        // Highlight proteins term intersection.
+        Set<HNode> hP = new HashSet<HNode>();
+        hP.addAll(element.elements);
+        model.highlightedProteins.set(hP);
+        
+        // Highlight annotation sets that contain all elements of this set.
+        Set<HSet> hT = new HashSet<HSet>();
+        hT.addAll(element.elements.get(0).sets);
+        for(int i = 1; i < element.elements.size(); i++) {
+            hT.retainAll(element.elements.get(i).sets);
+        }
+        model.highlightedSets.set(hT);
+    }
+
+    @Override
+    public void endHovered() {
+        model.highlightedProteins.clear();
+        model.highlightedSets.clear();
+    }
+
+    @Override
+    public int hashCode() {
+        return Object.class.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return Object.class.equals(obj);
+    }
 }

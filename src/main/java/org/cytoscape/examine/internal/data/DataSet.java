@@ -37,7 +37,7 @@ public class DataSet {
     // Node sets by category.
     public final Variable<Map<String, HCategory>> categories;
     
-    // CySet to Hset map.
+    // CySet to HSet map.
     public final Variable<Map<CyNode, HSet>> setMap;
     
     /**
@@ -181,7 +181,7 @@ public class DataSet {
                     if (scoreColumnName != null) {
                     	bScore = mRow.get(scoreColumnName, Double.class);
                     }
-                    double score = bScore == null ? Double.NaN : bScore.doubleValue();
+                    double score = bScore == null ? Double.NaN : bScore;
                     
                     if(!Double.isNaN(score)) {
                         minScr = Math.min(minScr, score);

@@ -1,7 +1,6 @@
 package org.cytoscape.examine.internal.visualization;
 
 import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.draw.PositionedSnippet;
 import static org.cytoscape.examine.internal.Modules.*;
 
 import org.cytoscape.examine.internal.data.HNode;
@@ -15,21 +14,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
+import org.jgrapht.graph.DefaultEdge;
 
-/**
- * ProteinSet representation.
- */
-public abstract class SetRepresentation<E extends HSet> extends PositionedSnippet { //extends Representation<E> {
-
-    public final E element;
+// ProteinSet representation.
+public abstract class SetRepresentation extends Representation<HSet> {
     
-    /**
-     * Base constructor.
-     */
-    public SetRepresentation(E element) {
-        //super(element);
-        
-        this.element = element;
+    // Base constructor.
+    public SetRepresentation(HSet element) {
+        super(element); 
     }
     
     public boolean highlight() {
@@ -37,8 +30,8 @@ public abstract class SetRepresentation<E extends HSet> extends PositionedSnippe
     }
 
     @Override
+    // Highlight term and its member proteins.
     public void beginHovered() {
-        // Highlight term and its member proteins.
         Set<HSet> hT = new HashSet<HSet>();
         hT.add(element);
         model.highlightedSets.set(hT);
@@ -52,35 +45,23 @@ public abstract class SetRepresentation<E extends HSet> extends PositionedSnippe
     public void endHovered() {
         model.highlightedSets.clear();
         model.highlightedProteins.clear();
-    }  
+    }
 
     @Override
+    // Adjust weight if set is selected.
     public void mouseWheel(int rotation) {
-        // Adjust weight if set is selected.
         if(model.selection.activeSetMap.keySet().contains(element)) {
             model.selection.changeWeight(element, -rotation);
         }
     }
 
-    /**
-     * Toggle selection state on mouse click.
-     */
     @Override
+    // Toggle selection state on mouse click.
     public void mouseClicked(MouseEvent e) {
         // Open website on ctrl click for relevant sets.
         if(mouseEvent().isControlDown()) {
             // URL to open.
             String url = element.url;
-            
-            if(element instanceof HSet) {
-                // TODO: fix this. For identifiers and specified URL.
-                
-                /*
-                GOTerm term = ((GOProteinSet) element).term;
-                
-                url = term.hyperLink; //"http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=" + term.id;
-                */
-            }
             
             // Try to open browser if URL is specified.
             if(url != null && url.trim().length() > 0) {
@@ -96,5 +77,4 @@ public abstract class SetRepresentation<E extends HSet> extends PositionedSnippe
             model.selection.select(element);
         }
     }
-    
 }

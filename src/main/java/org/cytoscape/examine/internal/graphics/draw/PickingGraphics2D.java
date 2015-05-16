@@ -27,26 +27,14 @@ import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
 
-/**
- *
- * @author kdinkla
- */
 public class PickingGraphics2D extends Graphics2D {
+    public int snippetId;                           // ID of drawn representation.
+    public int activeId;                            // ID that is used to draw.
+    public static final int nullId = -16777216;     // ID of null snippet (none).
+    public static final int firstId = nullId + 1;   // First ID.
     
     private BufferedImage parentImage;
     private Graphics2D parent;
-    
-    // ID of drawn representation.
-    public int snippetId;
-    
-    // ID that is used to draw.
-    public int activeId;
-    
-    // ID of null snippet (none).
-    public static final int nullId = -16777216;
-    
-    // First ID.
-    public static final int firstId = nullId + 1;
     
     public PickingGraphics2D(Graphics2D parent, int width, int height) {
         this.parentImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -100,7 +88,7 @@ public class PickingGraphics2D extends Graphics2D {
         //parent.loadPixels();
         
         // Limit radius by window bounds.
-        int radius = min(Parameters.cursorRadius.get(),
+        int radius = min(Parameters.cursorRadius,
                          min(min(parentImage.getWidth() - x, x),
                              min(parentImage.getHeight() - y, y)));
         
@@ -110,17 +98,9 @@ public class PickingGraphics2D extends Graphics2D {
             for(int dx = -1; dx <= 1; dx += 1) {
                 // For -r, 0 and r (top and bottom). 
                 for(int dy = -1; dy <= 1; dy += 1) {
-                    //int ac = (y + dy * r) * parentImage.getWidth() + (x + dx * r);
-                    int pv = parentImage.getRGB(x + dx * r, y + dy * r); //parent.pixels[ac];
-                    
-                    if(pv != nullId) {
-                        //System.out.println("pick id: " + pv);
-                        //System.out.println("radius: " + r);
-                        //System.out.println("ac: " + ac);
-                        //System.out.println("pos: (" + (x + dx * r) + "," + (y + dy * r) + ")");
-                        
+                    int pv = parentImage.getRGB(x + dx * r, y + dy * r);
+                    if(pv != nullId)
                         return pv;
-                    }
                 }
             }
         }

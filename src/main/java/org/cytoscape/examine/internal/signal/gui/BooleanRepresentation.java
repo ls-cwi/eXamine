@@ -3,26 +3,16 @@ package org.cytoscape.examine.internal.signal.gui;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.Math.*;
 import org.cytoscape.examine.internal.graphics.PVector;
 import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
 import org.cytoscape.examine.internal.graphics.draw.Representation;
 import org.cytoscape.examine.internal.signal.Variable;
 
-/**
- * Facilitates the interactive manipulation of a boolean variable.
- */
+// Facilitates the interactive manipulation of a boolean variable.
 public class BooleanRepresentation extends Representation<Variable<Boolean>> {
-
-    // Stroke weight.
-    public final double strokeWeight = 1.75f;
+    public final double strokeWeight = 1.75f;   // Stroke weight.
+    public final String label;                  // User friendly name.
     
-    // User friendly name.
-    public final String label;
-    
-    /**
-     * Base constructor.
-     */
     public BooleanRepresentation(Variable<Boolean> variable, String label) {
         super(variable);
         
@@ -34,21 +24,20 @@ public class BooleanRepresentation extends Representation<Variable<Boolean>> {
         translate(topLeft);
         
         // Use label font.
-        textFont(labelFont.get());
+        textFont(labelFont);
         
         boolean selected = element.get();
-        Color color = isHovered() ? textContainedHoverColor.get() :
-                                      selected ? textContainedHighlightColor.get() :
-                                                 textContainedColor.get();
+        Color color = isHovered() ? textContainedHoverColor :
+                                      selected ? textContainedHighlightColor :
+                                                 textContainedColor;
         
         picking();
         
         // Dot; filled when selected, empty otherwise.
         color(color, selected ? 1f : 0f);
-        fillEllipse(dotSize() / 2f, textMiddle(), dotSize(), dotSize());
+        fillEllipse(0.5f * dotSize(), textMiddle(), dotSize(), dotSize());
         color(color);
         strokeWeight(strokeWeight);
-        
         
         // Label.
         color(color);
@@ -58,29 +47,26 @@ public class BooleanRepresentation extends Representation<Variable<Boolean>> {
     
     public double dotSize() {
         // Use label font.
-        textFont(labelFont.get());
+        textFont(labelFont);
         
         return textHeight() / 2f - strokeWeight;
     }
     
     public double space() {
-        return spacing.get() / 2f;
+        return 0.5f * spacing;
     }
 
     @Override
     public PVector dimensions() {
         // Use label font.
-        textFont(labelFont.get());
+        textFont(labelFont);
         
-        return v(dotSize() + space() + textWidth(label), textHeight());
+        return PVector.v(dotSize() + space() + textWidth(label), textHeight());
     }
     
-    /**
-     * Switch variable state on click.
-     */
+    // Switch variable state on click.
     @Override
     public void mouseClicked(MouseEvent e) {
         element.set(!element.get());
     }
-    
 }

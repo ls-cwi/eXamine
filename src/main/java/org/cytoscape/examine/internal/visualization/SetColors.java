@@ -13,19 +13,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- */
+// Selected set to color map.
 public class SetColors implements Observer {
-    
-    // Predefined protein set to color mapping.
-    private final Map<HSet, Color> predefinedColorMap;
-    
-    // Dynamic protein set to color mapping.
-    private final Map<HSet, Color> colorMap;
-    
-    // Available set colors.
-    private final ArrayList<Color> availableColors;
+    private final Map<HSet, Color> predefinedColorMap;  // Predefined protein set to color mapping.
+    private final Map<HSet, Color> colorMap;            // Dynamic protein set to color mapping.
+    private final ArrayList<Color> availableColors;     // Available set colors.
     
     // Source color pool.
     public static final Color[] palette = new Color[] {
@@ -37,15 +29,12 @@ public class SetColors implements Observer {
             new Color(253, 180, 98),
             //rgb(179, 222, 105),
             new Color(252, 205, 229),
-            new Color(217, 217, 217),
+            //new Color(217, 217, 217),
             new Color(188, 128, 189),
             new Color(204, 235, 197),
-            new Color(255, 237, 111)           
+            new Color(255, 237, 111)
     };
-
-    /**
-     * Base constructor.
-     */
+    
     public SetColors() {
         colorMap = new HashMap<HSet, Color>();
         availableColors = new ArrayList<Color>();
@@ -83,9 +72,7 @@ public class SetColors implements Observer {
         }
     }
     
-    /**
-     * Get the color that has been assigned to the given set.
-     */
+    // Get the color that has been assigned to the given set.
     public Color color(HSet proteinSet) {
         Color result = predefinedColorMap.get(proteinSet);
         
@@ -95,5 +82,4 @@ public class SetColors implements Observer {
         
         return result;
     }
-    
 }

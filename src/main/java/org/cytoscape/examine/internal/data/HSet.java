@@ -1,8 +1,9 @@
 package org.cytoscape.examine.internal.data;
 
+import java.util.HashSet;
 import java.util.List;
 
-import org.cytoscape.examine.internal.Modules;
+import java.util.Set;
 import org.cytoscape.group.CyGroup;
 
 /**
@@ -18,6 +19,7 @@ public class HSet extends HElement {
     
     // Wrapped set.
     public final List<HNode> elements;
+    public final Set<HNode> set;
     
     /**
      * Base constructor.
@@ -26,8 +28,9 @@ public class HSet extends HElement {
         super(name, url);
         
         this.cyGroup = cyGroup;
-        this.score = score;
+        this.score = score; // Double.isNaN(score) || score > 0.9 ? 0.9 : score; // Default score to 1.
         this.elements = members;
+        this.set = new HashSet<HNode>(members);
     }
     
     /**

@@ -8,42 +8,44 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
 import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
 import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
 import org.cytoscape.examine.internal.graphics.draw.Snippet;
 import org.cytoscape.examine.internal.signal.gui.SidePane;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 
-/**
- * XProcessing application, sports scene drawing code and initialization.
- */
+// Graphics application.
 public abstract class Application extends JFrame {
+    private final JPanel rootPanel;     // Main content panel.
+    private SidePane sidePane;          // Side pane (for GUI).
+    protected Snippet rootSnippet;      // Root snippet.
+    private DrawManager drawManager;    // Snippet manager.
     
-    // Side pane (for GUI).
-    private SidePane sidePane;
-    
-    // Root snippet.
-    protected Snippet rootSnippet;
-    
-    // Snippet manager.
-    private DrawManager drawManager;
-    
-    // Mouse event information.
-    protected int mouseX, mouseY;
+    protected int mouseX, mouseY;       // Mouse event information.
     protected MouseEvent mouseEvent;
     
-    /**
-     * Base constructor.
-     */
     public Application() {
         // Fair default size, but maximize.
         setSize(1400, 800);
@@ -53,9 +55,6 @@ public abstract class Application extends JFrame {
         // Set title to class name by default.
         setTitle(getClass().getSimpleName());
         
-        // Set background color.
-        setBackground(Color.WHITE);
-        
         // Side pane.
         sidePane = new SidePane();
         
@@ -63,11 +62,11 @@ public abstract class Application extends JFrame {
         setup();
         
         //this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        JPanel pane = new JPanel() {
+        rootPanel = new JPanel() {
 
             @Override
             public void paint(Graphics g) {
-                super.paint(g);
+                super.paint(g); // Clears screen?
         
                 Graphics2D g2 = (Graphics2D) g;
                 dm.defaultGraphics = g2;
@@ -86,7 +85,7 @@ public abstract class Application extends JFrame {
                                     RenderingHints.VALUE_COLOR_RENDER_QUALITY);
 
                 // Clear screen.
-                g2.clearRect(0, 0, getWidth(), getHeight());
+                //g2.clearRect(0, 0, getWidth(), getHeight());
 
                 rootDraw();
 
@@ -106,10 +105,11 @@ public abstract class Application extends JFrame {
             }
             
         };
-        ToolTipManager.sharedInstance().registerComponent(pane);
+        rootPanel.setBackground(Color.WHITE);
+        ToolTipManager.sharedInstance().registerComponent(rootPanel);
         
-        pane.setDoubleBuffered(true);
-        setContentPane(pane);
+        rootPanel.setDoubleBuffered(true);
+        setContentPane(rootPanel);
         
         // Root snippet, contains application rootDraw calls.
         rootSnippet = new Snippet() {
@@ -117,7 +117,7 @@ public abstract class Application extends JFrame {
             @Override
             public void draw() {
                 // Font.
-                textFont(font.get());
+                textFont(font);
                 
                 // Make room for side pane.
                 pushTransform();
@@ -134,15 +134,9 @@ public abstract class Application extends JFrame {
         };
         
         // Event listeners.
-        pane.addMouseListener(new LocalMouseListener());
-        pane.addMouseMotionListener(new LocalMouseMotionListener());
-    }
-
-    @Override
-    public void dispose() {
-        // TODO: stop animation process.
-        
-        super.dispose();
+        rootPanel.addMouseListener(new LocalMouseListener());
+        rootPanel.addMouseMotionListener(new LocalMouseMotionListener());
+        this.addKeyListener(new LocalKeyListener());
     }
     
     public final void setup() {
@@ -190,15 +184,15 @@ public abstract class Application extends JFrame {
             InputStream input = Application.class.getResourceAsStream("/font/OpenSans-Regular.ttf");
             Font inputFont = Font.createFont(Font.TRUETYPE_FONT, input);
             
-            font.set(inputFont.deriveFont(18f));
-            labelFont.set(inputFont.deriveFont(14f));
-            noteFont.set(inputFont.deriveFont(8f));
+            font = inputFont.deriveFont(24f);
+            labelFont = inputFont.deriveFont(14f);
+            noteFont = inputFont.deriveFont(8f);
         } catch(Exception ex) {
             System.out.println("Font load exception: " + ex.getLocalizedMessage());
             
-            font.set(new Font("Arial", Font.PLAIN, 18));
-            labelFont.set(new Font("Arial", Font.PLAIN, 14));
-            noteFont.set(new Font("Arial", Font.PLAIN, 8));
+            font = new Font("Arial", Font.PLAIN, 18);
+            labelFont = new Font("Arial", Font.PLAIN, 14);
+            noteFont = new Font("Arial", Font.PLAIN, 8);
         }
         
         // Initialize implementing class.
@@ -227,11 +221,8 @@ public abstract class Application extends JFrame {
         // Manager global post rootDraw.
         drawManager.post();
     }
-
     
-    /**
-     * Input methods.
-     */
+    // Input methods.
     private void storeEvent(MouseEvent me) {
         mouseX = me.getX();
         mouseY = me.getY();
@@ -298,51 +289,86 @@ public abstract class Application extends JFrame {
         }
         
     }
+    
+    private class LocalKeyListener implements KeyListener {
 
-    public void keyPressed(KeyEvent e) {        
-        // Send event to hovered item.
-        if(drawManager.hovered != null) {
-            drawManager.hovered.keyPressed(e);
-        }
-    }
-
-    public void keyReleased(KeyEvent e) {
-        // Send event to hovered item.
-        if(drawManager.hovered != null) {
-            drawManager.hovered.keyReleased(e);
-        }
-    }
-
-    public void keyTyped(KeyEvent e) {
-        // Expand options pane by pressing Ctrl + o.
-        if(e.getKeyChar() == 'o') {
-            System.out.println("Press o");
-            if(sidePane.root().active) {
-                sidePane.activate(sidePane.root());
-            } else {
-                sidePane.deactivate(sidePane.root());
+        public void keyPressed(KeyEvent e) {        
+            // Send event to hovered item.
+            if(drawManager.hovered != null) {
+                drawManager.hovered.keyPressed(e);
             }
+
+            // Delegate.
+            Application.this.keyPressed(e);
+        }
+
+        public void keyReleased(KeyEvent e) {
+            // Send event to hovered item.
+            if(drawManager.hovered != null) {
+                drawManager.hovered.keyReleased(e);
+            }
+
+            // Delegate.
+            Application.this.keyReleased(e);
+        }
+
+        public void keyTyped(KeyEvent e) {
+            // Expand options pane by pressing Ctrl + o.
+            if(e.getKeyChar() == 'o') {
+                System.out.println("Press o");
+                if(sidePane.root().active) {
+                    sidePane.activate(sidePane.root());
+                } else {
+                    sidePane.deactivate(sidePane.root());
+                }
+            }
+
+            // Send event to hovered item.
+            if(drawManager.hovered != null) {
+                drawManager.hovered.keyTyped(e);
+            }
+
+            // Delegate.
+            Application.this.keyTyped(e);
+        }
+
+        public void keyPressed() {
+            // Send event to hovered item.
+            if(drawManager.hovered != null) {
+                drawManager.hovered.keyPressed();
+            }
+
+            Application.this.keyPressed();
+        }
+
+        public void keyReleased() {
+            // Send event to hovered item.
+            if(drawManager.hovered != null) {
+                drawManager.hovered.keyReleased();
+            }
+
+            Application.this.keyReleased();
         }
         
-        // Send event to hovered item.
-        if(drawManager.hovered != null) {
-            drawManager.hovered.keyTyped(e);
+    }
+
+    public void keyPressed(KeyEvent e) {
+        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_P) {
+            try {
+                exportSVG();
+            } catch (IOException ex) {
+                Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
-    public void keyPressed() {
-        // Send event to hovered item.
-        if(drawManager.hovered != null) {
-            drawManager.hovered.keyPressed();
-        }
-    }
+    public void keyReleased(KeyEvent e) {}
 
-    public void keyReleased() {
-        // Send event to hovered item.
-        if(drawManager.hovered != null) {
-            drawManager.hovered.keyReleased();
-        }
-    }
+    public void keyTyped(KeyEvent e) {}
+
+    public void keyPressed() {}
+
+    public void keyReleased() {}
 
     // Draw initialization commands, to be implemented.
     public abstract void initialize();
@@ -350,4 +376,31 @@ public abstract class Application extends JFrame {
     // Draw commands, to be implemented.
     public abstract void draw();
     
+    // Export application paint to SVG file.
+    public void exportSVG() throws IOException {
+        // Get a DOMImplementation.
+        DOMImplementation domImpl =
+          GenericDOMImplementation.getDOMImplementation();
+
+        // Create an instance of org.w3c.dom.Document.
+        String svgNS = "http://www.w3.org/2000/svg";
+        Document document = domImpl.createDocument(svgNS, "svg", null);
+
+        // Paint application to SVG structure.
+        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+        rootPanel.paint(svgGenerator);
+        
+        // Target file via dialog.
+        final JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setName("Export SVG");
+        fileChooser.setSelectedFile(new File("eXamine_export.svg"));
+        int fileConfirm = fileChooser.showSaveDialog(rootPanel);
+
+        // Output to valid file.
+        if(fileConfirm == JFileChooser.APPROVE_OPTION) {
+            boolean useCSS = true; // we want to use CSS style attributes
+            Writer out = new FileWriter(fileChooser.getSelectedFile());
+            svgGenerator.stream(out, useCSS);
+        }
+    }
 }

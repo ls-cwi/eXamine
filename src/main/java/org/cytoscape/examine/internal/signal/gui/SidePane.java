@@ -1,7 +1,6 @@
 package org.cytoscape.examine.internal.signal.gui;
 
 import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.Math.*;
 import static java.lang.Math.*;
 import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
 import org.cytoscape.examine.internal.graphics.draw.Representation;
@@ -77,7 +76,7 @@ public class SidePane extends Snippet {
         updateLayout();
         
         // Draw pane backdrop.
-        color(containmentColor.get());
+        color(containmentColor);
         fillRect(0, 0, paneWidth, applicationHeight());
         
         // Otherwise, draw full pane.
@@ -99,36 +98,34 @@ public class SidePane extends Snippet {
         }
     }
     
-    /**
-     * Update layout.
-     */
+    // Update layout.
     final void updateLayout() {
-        double space = spacing.get();
+        double space = spacing;
         
         // Only root.
         if(categoryTrail.isEmpty()) {
-            root.position = v(space, 0);
+            root.position = PVector.v(space, 0);
         }
         // Otherwise, full pane.
         else {
             // Stack category trail, put space to left, top, and below categories.
-            PVector p = v(space, space);
+            PVector p = PVector.v(space, space);
             for(Category c: categoryTrail) {
                 c.position = p;
-                p = PVector.add(p, v(0, c.height() + space));
+                p = PVector.add(p, PVector.v(0, c.height() + space));
             }
             
             // Indent for next block.
-            p = PVector.add(p, v(2f * space, 0));
+            p = PVector.add(p, PVector.v(2f * space, 0));
                 
             // Children of trail end for navigation.
             for(Category c: nextChildren()) {
                 c.position = p;
-                p = PVector.add(p, v(0, c.height() + space));
+                p = PVector.add(p, PVector.v(0, c.height() + space));
             }
             
             // Space for next block.
-            PVector repTopLeft = PVector.add(p, v(0, 2 * space));
+            PVector repTopLeft = PVector.add(p, PVector.v(0, 2 * space));
             
             // Fill left over space from top to bottom, left to right.
             double repWidth = 0;
@@ -139,7 +136,7 @@ public class SidePane extends Snippet {
                 
                 // Move to next column when there is too little height.
                 if(repPos.y + r.dimensions().y > sketchHeight()) {
-                    repTopLeft = PVector.add(repTopLeft, v(repWidth + 2 * space, 0));
+                    repTopLeft = PVector.add(repTopLeft, PVector.v(repWidth + 2 * space, 0));
                     repWidth = 0;
                     repPos = repTopLeft;
                 }
@@ -148,7 +145,7 @@ public class SidePane extends Snippet {
                 r.topLeft(repPos);
                 
                 // Move to next row.
-                repPos = PVector.add(repPos, v(0, r.dimensions().y + 2 * space));
+                repPos = PVector.add(repPos, PVector.v(0, r.dimensions().y + 2 * space));
                 repWidth = max(repWidth, r.dimensions().x);
             }
         }
@@ -169,10 +166,7 @@ public class SidePane extends Snippet {
         }
     }
     
-    /**
-     * Active the given category, closing incompatible
-     * categories of the trail.
-     */
+    // Active the given category, closing incompatible categories of the trail.
     public void activate(Category category) {
         // Deactive entire trail.
         for(Category c: categoryTrail) {
@@ -189,10 +183,7 @@ public class SidePane extends Snippet {
         Collections.reverse(categoryTrail);
     }
     
-    /**
-     * Deactivate the given category, closing any subsequent
-     * category of the trail.
-     */
+    // Deactivate the given category, closing any subsequent category of the trail.
     public void deactivate(Category category) {
         // Category has to be in the trail.
         if(category.active) {
@@ -206,9 +197,7 @@ public class SidePane extends Snippet {
         }
     }
     
-    /**
-     * Category of GUI elements.
-     */
+    // Category of GUI elements.
     public class Category extends Snippet implements Comparable<Category> {
         
         // Name.
@@ -229,15 +218,12 @@ public class SidePane extends Snippet {
         // Whether category is active.
         public boolean active;
         
-        /**
-         * Base constructor.
-         */
         public Category(String name, Category parent) {
             this.name = name;
             this.parent = parent;
             this.children = new ArrayList<Category>();
             this.representations = new ArrayList<Representation>();
-            this.position = v();
+            this.position = PVector.v();
             this.active = false;
             
             // Add to children of parent.
@@ -247,44 +233,31 @@ public class SidePane extends Snippet {
             }
         }
         
-        /**
-         * Get name.
-         */
         public String name() {
             return name;
         }
         
-        /**
-         * Get sub categories.
-         */
+        // Get sub categories.
         public List<Category> children() {
             return Collections.unmodifiableList(children);
         }
         
-        /**
-         * Create new category as a child of this category.
-         */
+        // Create new category as a child of this category.
         public Category add(String name) {
             return new Category(name, this);
         }
         
-        /**
-         * Whether category is root.
-         */
+        // Whether category is root.
         public final boolean isRoot() {
             return parent == null;
         }
         
-        /**
-         * Remove this category.
-         */
+        // Remove this category.
         public void remove() {
             parent.children.remove(this);
         }
 
-        /**
-         * Order categories by name, lexicographically.
-         */
+        // Order categories by name, lexicographically.
         @Override
         public int compareTo(Category that) {
             return this.name.compareTo(that.name);
@@ -293,7 +266,7 @@ public class SidePane extends Snippet {
         @Override
         public void draw() {
             // Use base font.
-            textFont(font.get());
+            textFont(font);
             
             double arrowSize = textHeight() / 4f;
             double middle = textMiddle();
@@ -302,9 +275,9 @@ public class SidePane extends Snippet {
             
             translate(position);
             
-            color(isHovered() ? textContainedHoverColor.get() :
-                               active ? textContainedHighlightColor.get() :
-                                        textContainedColor.get());
+            color(isHovered() ? textContainedHoverColor :
+                               active ? textContainedHighlightColor :
+                                        textContainedColor);
             
             // State arrow.
             pushTransform();
@@ -320,35 +293,29 @@ public class SidePane extends Snippet {
             
             popTransform();
             
-            translate(textHeight() / 2f + spacing.get(), 0);
+            translate(textHeight() / 2f + spacing, 0);
             
             // Label.
             text(name);
         }
         
-        /**
-         * Get width.
-         */
+        // Get width.
         public double width() {
             // Use base font.
-            textFont(font.get());
+            textFont(font);
             
-            return textWidth(name) + textHeight() / 2f + spacing.get();
+            return textWidth(name) + textHeight() / 2f + spacing;
         }
         
-        /**
-         * Get height.
-         */
+        // Get height.
         public double height() {
             // Use base font.
-            textFont(font.get());
+            textFont(font);
             
             return textHeight();
         }
 
-        /**
-         * (De-)Activate on mouse click.
-         */
+        // (De-)Activate on mouse click.
         @Override
         public void mouseClicked(MouseEvent e) {
             if(active) {

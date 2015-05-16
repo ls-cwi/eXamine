@@ -1,7 +1,6 @@
 package org.cytoscape.examine.internal.model;
 
 import org.cytoscape.examine.internal.signal.Subject;
-
 import org.cytoscape.examine.internal.data.HElement;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
@@ -32,9 +31,6 @@ public final class Selection {
     // Selected set or protein.
     public HElement selected;
     
-    /**
-     * Base constructor.
-     */
     public Selection(final Model model) {
         this.change = new Subject();
         this.activeSetMap = new HashMap<HSet, Double>();
@@ -99,12 +95,6 @@ public final class Selection {
         } else {
             change.signal();
         }
-        
-        /*if(element == null) {
-            System.out.println("No element has been selected.");
-        } else {
-            System.out.println("Selected element: " + element.name);
-        }*/
     }
     
     /**
@@ -112,14 +102,13 @@ public final class Selection {
      */
     public void changeWeight(HSet proteinSet, double weightChange) {
         double currentWeight = activeSetMap.get(proteinSet);
-        double newWeight = Math.max(0.1f, currentWeight + weightChange);
+        double newWeight = Math.max(1f, currentWeight + weightChange);
         activeSetMap.put(proteinSet, newWeight);
+        
+        change.signal();
     }
     
-    /**
-     * Change the contents of a protein set
-     * (and propagate change signal).
-     */
+    // Change the contents of a protein set (and propagate change signal).
     public void update(HSet newProteinSet) {
         // Remove old proteinset with identity of new one.
         if(activeSetMap.containsKey(newProteinSet)) {
@@ -127,7 +116,7 @@ public final class Selection {
             activeSetMap.put(newProteinSet, weight);
             activeSetList.set(activeSetList.indexOf(newProteinSet), newProteinSet);
         } else {
-            activeSetMap.put(newProteinSet, 0.0);
+            activeSetMap.put(newProteinSet, 1.0);
         }
         
         change.signal();
@@ -141,26 +130,18 @@ public final class Selection {
         Set<HNode> result = new HashSet<HNode>();
         
         if (intersection) {
-        	if (activeSetList.size() > 0) {
-	        	result.addAll(activeSetList.get(0).elements);
-	  	        for(HSet s: activeSetList) {
-		            result.retainAll(s.elements);
-		        }
-        	}
+            if (activeSetList.size() > 0) {
+                    result.addAll(activeSetList.get(0).elements);
+                    for(HSet s: activeSetList) {
+                        result.retainAll(s.elements);
+                    }
+            }
         } else {
-	        for(HSet s: activeSetList) {
-	            result.addAll(s.elements);
-	        }
+            for(HSet s: activeSetList) {
+                result.addAll(s.elements);
+            }
         }
-        
-        /*if(selected instanceof HNode) {
-            result.add((HNode) selected);
-        } else if(selected instanceof HSet) {
-            result.addAll(((HSet) selected).elements);
-        }*/
         
         return result;
     }
-    
-    
 }

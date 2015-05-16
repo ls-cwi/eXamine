@@ -2,12 +2,10 @@ package org.cytoscape.examine.internal.visualization.overview;
 
 import java.awt.Color;
 import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.Math.*;
 import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
 import static org.cytoscape.examine.internal.visualization.Parameters.*;
 import org.cytoscape.examine.internal.graphics.draw.Representation;
 
-import org.cytoscape.examine.internal.ViewerAction;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.visualization.SetRepresentation;
@@ -17,44 +15,34 @@ import static org.cytoscape.examine.internal.Modules.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.awt.Desktop;
-import java.awt.Paint;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Path2D;
+import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.cytoscape.examine.internal.graphics.Colors;
 import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.StaticGraphics;
+import org.cytoscape.examine.internal.layout.Layout;
+import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.view.vizmap.VisualMappingFunction;
+import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
+import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.jgrapht.graph.DefaultEdge;
 
-/**
- * Protein representation.
- */
+// Node representation.
 public class NodeRepresentation extends Representation<HNode> {
     
-    // Auxiliary protein color.
-    public final Color AUXILIARY_COLOR = Colors.grey(0.75f);
-    
-    // Represented feature vector.
-    public final double[] vector;
-    
-    private double textSpan;
-
-    /**
-     * Base constructor.
-     */
-    public NodeRepresentation(HNode element, double[] vector) {
+    public NodeRepresentation(HNode element) {
         super(element);
-        
-        this.vector = vector;
-        this.textSpan = -1;
     }
 
     @Override
     public PVector dimensions() {
-        return v();
+        return PVector.v();
     }
 
     @Override
@@ -62,50 +50,81 @@ public class NodeRepresentation extends Representation<HNode> {
         color(Color.BLACK);
         translate(topLeft);
         
-        if(textSpan < 0) {
-            textSpan = textWidth(element.toString());
-        }
-        
-        translate(-textSpan / 2f, -textHeight() / 2f);
-        
-        VisualMappingFunction<?, Paint> mappingFunction =
-            ViewerAction.visualMappingManager
-                        .getCurrentVisualStyle()
-                        .getVisualMappingFunction(BasicVisualLexicon.NODE_FILL_COLOR);
-        
-        // Foreground outline with color coding.
-        Color cytoColor = mappingFunction != null ?
-            (Color) mappingFunction.getMappedValue(element.cyRow) : Color.WHITE;
+        // Get label bounds, but also sets label font.
+        PVector bounds = Layout.labelDimensions(element, true);
+        Shape shape = shape(bounds);
+        translate(-0.5 * bounds.x, -0.5 * bounds.y);
         
         // Background rectangle.
-        if(highlight()) {
-            color(containmentColor.get());
-        } else {
-            color(Color.WHITE); //cytoColor.brighter());
-        }
+        color(highlight() ? containmentColor :
+                            (Color) styleValue(BasicVisualLexicon.NODE_FILL_COLOR));
+        fill(shape);
+        //fillRect(0, 0, bounds.x, bounds.y, bounds.y);
         
-        //double radius = NODE_RADIUS; //0.5 * SOMOverview.tileRadius;
-        //fillEllipse(textSpan / 2f, textHeight() / 2f, radius, radius);
-        fillRect(-LABEL_DOUBLE_PADDING, -LABEL_DOUBLE_PADDING,
-                 textSpan + 2 * LABEL_DOUBLE_PADDING, textHeight() + 2 * LABEL_DOUBLE_PADDING, 
-                 textHeight() + 2 * LABEL_DOUBLE_PADDING); //LABEL_ROUNDING);
-        
-        color(cytoColor);
-        strokeWeight(4f);
-        
-        //drawEllipse(textSpan / 2f, textHeight() / 2f, radius, radius);
-        drawRect(-LABEL_DOUBLE_PADDING, -LABEL_DOUBLE_PADDING,
-                 textSpan + 2 * LABEL_DOUBLE_PADDING, textHeight() + 2 * LABEL_DOUBLE_PADDING, 
-                 textHeight() + 2 * LABEL_DOUBLE_PADDING);
-        
-        // Label; small font face.
-        //translate(0f, -textAscent() / 2f);
-        
-        textFont(labelFont.get());
-        color(highlight() ? textContainedColor.get() : textColor.get());
+        // Foreground outline with color coding.
+        color((Color) styleValue(BasicVisualLexicon.NODE_BORDER_PAINT));
+        strokeWeight(styleValue(BasicVisualLexicon.NODE_BORDER_WIDTH));
+        StaticGraphics.draw(shape);
+        //drawRect(0, 0, bounds.x, bounds.y, bounds.y);
         
         picking();
-        text(element.toString());
+        color(highlight() ? textContainedColor :
+                            (Color) styleValue(BasicVisualLexicon.NODE_LABEL_COLOR));
+        text(element.toString(), 0.5 * (bounds.y + NODE_OUTLINE) - 3,
+                                 bounds.y - NODE_OUTLINE - 3);
+    }
+    
+    private Shape shape(PVector bounds) {
+        Shape result;
+        
+        NodeShape cyShape = styleValue(BasicVisualLexicon.NODE_SHAPE);
+        
+        // Hexagon.
+        if(cyShape.equals(NodeShapeVisualProperty.HEXAGON)) {
+            double r = 0.5 * bounds.y;
+            double hr = 0.5 * r;
+            
+            Path2D path = new Path2D.Double();
+            path.moveTo(0, r);
+            path.lineTo(hr, 0);
+            path.lineTo(bounds.x - hr, 0);
+            path.lineTo(bounds.x, r);
+            path.lineTo(bounds.x - hr, bounds.y);
+            path.lineTo(hr, bounds.y);
+            path.closePath();
+            
+            result = path;
+        }
+        // Octagon.
+        else if(cyShape.equals(NodeShapeVisualProperty.OCTAGON)) {
+            double hhr = 0.3 * bounds.y;
+            
+            Path2D path = new Path2D.Double();
+            path.moveTo(0, hhr);
+            path.lineTo(hhr, 0);
+            path.lineTo(bounds.x - hhr, 0);
+            path.lineTo(bounds.x, hhr);
+            path.lineTo(bounds.x, bounds.y - hhr);
+            path.lineTo(bounds.x - hhr, bounds.y);
+            path.lineTo(hhr, bounds.y);
+            path.lineTo(0, bounds.y - hhr);
+            path.closePath();
+            
+            result = path;
+        }
+        // Rounded rectangle.
+        else {
+            result = new RoundRectangle2D.Double(
+                        0, 0,
+                        bounds.x, bounds.y,
+                        bounds.y, bounds.y);
+        }
+        
+        return result;
+    }
+    
+    private <V> V styleValue(VisualProperty<V> property) {
+        return Model.styleValue(property, element.cyRow);
     }
 
     @Override
@@ -144,21 +163,15 @@ public class NodeRepresentation extends Representation<HNode> {
     public void mouseClicked(MouseEvent e) {
         // Open website(s) on ctrl click.
         if(mouseEvent().isControlDown()) {
-            try {
-                String url = null;
-                if(element.url != null && element.url.trim().length() > 0) {
-                    url = element.url;
+            if(element.url != null && element.url.trim().length() > 0) {
+                try {
+                    Desktop.getDesktop().browse(URI.create(element.url));
+                } catch(IOException ex) {
+                    Logger.getLogger(SetRepresentation.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                
-                if(url != null) {
-                    Desktop.getDesktop().browse(URI.create(url));
-                }
-            } catch(IOException ex) {
-                Logger.getLogger(SetRepresentation.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             model.selection.select(element);
         }
     }
-    
 }

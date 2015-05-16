@@ -1,10 +1,9 @@
 package org.cytoscape.examine.internal.graphics;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import static java.lang.Math.*;
 
-/**
- * Two dimensional vector.
- */
+// Two dimensional vector.
 public class PVector {
     public double x, y;
 
@@ -73,9 +72,29 @@ public class PVector {
         y -= that.y;
     }
     
+    // Dot product with the given vector.
+    public double dot(PVector that) {
+        return this.x * that.x + this.y * that.y;
+    }
+    
+    // Cross product with the given vector.
+    public double crossZ(PVector that) {
+        return this.x * that.y - that.x * this.y;
+    }
+    
+    // Euclidian distance between two vectors.
+    public static double distance(PVector v1, PVector v2) {
+        return sub(v1, v2).magnitude();
+    }
+    
     // Subtract one vector from another
     public static PVector sub(PVector v, PVector toSubtract) {
         return new PVector(v.x - toSubtract.x, v.y - toSubtract.y);
+    }
+    
+    // Multiply given vector by given scalar, returning a new vector.
+    public static PVector mul(double s, PVector v) {
+        return new PVector(s * v.x, s * v.y);
     }
     
     // Counter clock-wise rotate vector.
@@ -86,7 +105,17 @@ public class PVector {
     
     // Get the heading (angle) of the vector.
     public double heading2D() {
-        return atan2(x, y);
+        return atan2(y, x);
+    }
+    
+    // Get the angle between two vectors.
+    public static double angle(PVector v1, PVector v2) {
+        return v1.heading2D() - v2.heading2D();
+    }
+    
+    // Get the angle between three points as vectors.
+    public static double angle(PVector v1, PVector v2, PVector v3) {
+        return angle(sub(v2,v1), sub(v3,v1));
     }
     
     // Normalize this vector.
@@ -123,5 +152,26 @@ public class PVector {
     public PVector leftOrthogonal() {
         return new PVector(-y, x);
     }
+
+    // Create 0D PVector.
+    public static PVector v() {
+        return new PVector();
+    }
+
+    // Create 2D PVector.
+    public static PVector v(double x, double y) {
+        return new PVector(x, y);
+    }
     
+    // Convert JTS coordinate to vector.
+    public static PVector v(Coordinate c) {
+        return new PVector(c.x, c.y);
+    }
+    public static PVector[] v(Coordinate[] cs) {
+        PVector[] vs = new PVector[cs.length];
+        for(int i = 0; i < cs.length; i++) {
+            vs[i] = v(cs[i]);
+        }
+        return vs;
+    }
 }

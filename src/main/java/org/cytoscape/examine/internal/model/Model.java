@@ -17,54 +17,28 @@ import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
 import org.cytoscape.examine.internal.data.SuperNetwork;
-import org.cytoscape.examine.internal.signal.Volatile;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTableUtil;
+import org.cytoscape.view.model.VisualProperty;
+import org.cytoscape.view.vizmap.VisualMappingFunction;
+import org.cytoscape.view.vizmap.VisualStyle;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Pseudograph;
 
-/**
- * Model module. Manages enriched data that includes
- * information provided via user interaction.
- */
+// Model module. Manages enriched data that includes
+// information provided via user interaction.
 public final class Model {
-    
-    // Selected (visualized) sets.
-    public final Selection selection;
-    
-    // Opened set categories.
-    public final VolatileSet<HCategory> openedCategories;
+    public final Selection selection;                               // Selected (visualized) sets.
+    public final VolatileSet<HCategory> openedCategories;           // Opened set categories.
     public final Variable<List<HCategory>> orderedCategories;
-    
-    // Highlighted proteins.
-    public final VolatileSet<HNode> highlightedProteins;
-    
-    // Highlighted interactions.
-    public final VolatileSet<DefaultEdge> highlightedInteractions;
-    
-    // Highlighted protein sets.
-    public final VolatileSet<HSet> highlightedSets;
-    
-    // Active network.
-    public final Variable<Network> activeNetwork;
-    
-    
-    
-    // Selection mode.
-    private Constants.Selection selectionMode;
-    
-    public Constants.Selection getSelectionMode() {
-		return selectionMode;
-	}
+    public final VolatileSet<HNode> highlightedProteins;            // Highlighted proteins.
+    public final VolatileSet<DefaultEdge> highlightedInteractions;  // Highlighted interactions.
+    public final VolatileSet<HSet> highlightedSets;                 // Highlighted protein sets.
+    public final Variable<Network> activeNetwork;                   // Active network.
+    private Constants.Selection selectionMode;                      // Selection mode.
 
-	public void setSelectionMode(Constants.Selection selectionMode) {
-		this.selectionMode = selectionMode;
-	}
-
-    /**
-     * Base constructor.
-     */
     public Model() {
         this.selection = new Selection(this);
         this.openedCategories = new VolatileSet<HCategory>();
@@ -79,7 +53,6 @@ public final class Model {
     }
     
     public void initListeners() {
-        
         // Update active network that is to be visualized.
         Observer activeNetworkObserver = new Observer() {
 
@@ -121,7 +94,6 @@ public final class Model {
         
         // Update Cytoscape selection view.
         selection.change.subscribe(new Observer() {
-
             public void signal() {
                 if (selectionMode != Constants.Selection.NONE) {
 	                Set<HNode> selectedNode = 
@@ -144,5 +116,27 @@ public final class Model {
                 }
             }
         });
+    }
+    
+    public Constants.Selection getSelectionMode() {
+            return selectionMode;
+    }
+
+    public void setSelectionMode(Constants.Selection selectionMode) {
+            this.selectionMode = selectionMode;
+    }
+    
+    public static <V> V styleValue(VisualProperty<V> property, CyRow cyRow) {
+        V result;
+        
+        VisualStyle style = ViewerAction.visualMappingManager.getCurrentVisualStyle();
+        VisualMappingFunction<?, V> colorFunction = style.getVisualMappingFunction(property);
+        if(colorFunction != null) {
+            result = colorFunction.getMappedValue(cyRow);
+        } else {
+            result = style.getDefaultValue(property);
+        }
+        
+        return result;
     }
 }

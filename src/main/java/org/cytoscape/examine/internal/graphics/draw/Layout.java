@@ -1,6 +1,5 @@
 package org.cytoscape.examine.internal.graphics.draw;
 
-import static org.cytoscape.examine.internal.graphics.Math.*;
 import static java.lang.Math.*;
 import java.util.Iterator;
 import org.cytoscape.examine.internal.graphics.PVector;
@@ -116,7 +115,7 @@ public class Layout {
                 // Next column.
                 if(s.topLeft.y + s.dimensions().y +
                    space + toPlace.dimensions().y > verticalBound) {
-                    place(toPlace, v(maxWidth + space, topLeft.y));
+                    place(toPlace, PVector.v(maxWidth + space, topLeft.y));
                 }
                 // Next row.
                 else {
@@ -151,11 +150,11 @@ public class Layout {
                 maxY = max(maxY, s.topLeft.y + sD.y);
             }
             
-            bounds = v(maxX - minX, maxY - minY);
+            bounds = PVector.v(maxX - minX, maxY - minY);
         }
         // No snippets.
         else {
-            bounds = v();
+            bounds = PVector.v();
         }
         
         return bounds;

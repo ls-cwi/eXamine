@@ -5,11 +5,7 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
 
-/**
- *
- */
 public class Style {
-    
     public final Paint paint;
     public final Stroke stroke;
     
@@ -22,5 +18,4 @@ public class Style {
         this.paint = paint;
         this.stroke = stroke;
     }
-    
 }

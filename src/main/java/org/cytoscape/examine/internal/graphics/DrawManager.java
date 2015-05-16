@@ -13,9 +13,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import org.cytoscape.examine.internal.graphics.draw.PickingGraphics2D;
 
-/**
- * Manages the draw functionality of a XApplet.
- */
+// Draw and animation manager.
 public class DrawManager {
     
     // Parent application.
@@ -128,9 +126,6 @@ public class DrawManager {
         // Entering post screenphase.
         postScreen = true;
         
-        // Presence duration.
-        double pD = presenceDuration.get();
-        
         // Fade away and/or remove redundant snippets.
         Iterator<Entry<Snippet, SnippetValues>> rIt = snippets.entrySet().iterator();
         while(rIt.hasNext()) {
@@ -139,7 +134,7 @@ public class DrawManager {
             
             // Fade in.
             if(sv.drawn) {
-                sv.presence = min(1f, sv.presence + dT / pD);
+                sv.presence = min(1f, sv.presence + dT / presenceDuration);
             }
             // Fade out and remove.
             else {
@@ -149,7 +144,7 @@ public class DrawManager {
                 }
                 // Fade out.
                 else {
-                    sv.presence -= dT / pD;
+                    sv.presence -= dT / presenceDuration;
                 }
             }
         }
@@ -303,12 +298,9 @@ public class DrawManager {
         StaticGraphics.noPicking();
     }
     
-    protected double mD = moveDuration.get() / 2f;
+    protected double mD = 0.5f * moveDuration;
     
-    /**
-     * Additional information that is maintained
-     * for a snippet during its lifespan.
-     */
+    // Additional information that is maintained for a snippet during its lifespan.
     public class SnippetValues {
         
         // Whether snippet has been drawn (for fade-out).
@@ -324,14 +316,12 @@ public class DrawManager {
         protected int id;
         
         // Extent of presence in the scene, includes delay.
-        protected double presence = -moveDuration.get() / presenceDuration.get();
+        protected double presence = -moveDuration / presenceDuration;
         
         // Intermediate state of doubles that are transitioned over.
         private Intermediate[] intermediates = new Intermediate[20];
         
-        /**
-         * Transition value to target, returns intermediate.
-         */
+        // Transition value to target, returns intermediate.
         protected double transition(int index, double target) {            
             // Add value entry.
             if(intermediates.length <= index) {
@@ -359,11 +349,12 @@ public class DrawManager {
 
                     // Apply velocity.
                     double ad = dT * im.change;
-                    if(ad > 0) {
+                    im.value += ad;
+                    /*if(ad > 0) {
                         im.value = min(target, im.value + ad);
                     } else if(ad < 0) {
                         im.value = max(target, im.value + ad);
-                    }
+                    }*/
                 } else {
                     im.value = target;
                 }
@@ -375,7 +366,6 @@ public class DrawManager {
         private class Intermediate {
             double value, change;
         }
-        
     }
     
 }
