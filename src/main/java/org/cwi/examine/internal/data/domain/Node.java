@@ -5,24 +5,7 @@ package org.cwi.examine.internal.data.domain;
  */
 public class Node extends Element {
 
-    private double score, logFC;
     private String module, processes, functions, components, pathways;
-
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
-    public double getLogFC() {
-        return logFC;
-    }
-
-    public void setLogFC(double logFC) {
-        this.logFC = logFC;
-    }
 
     public String getModule() {
         return module;
@@ -67,9 +50,7 @@ public class Node extends Element {
     @Override
     public String toString() {
         return "Node{" +
-                "score=" + score +
-                ", logFC=" + logFC +
-                ", module='" + module + '\'' +
+                "module='" + module + '\'' +
                 ", processes='" + processes + '\'' +
                 ", functions='" + functions + '\'' +
                 ", components='" + components + '\'' +

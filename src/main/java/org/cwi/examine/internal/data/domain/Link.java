@@ -4,7 +4,7 @@ package org.cwi.examine.internal.data.domain;
 /**
  *
  */
-public class Edge {
+public class Link {
 
     private String source, target;
 
@@ -26,7 +26,7 @@ public class Edge {
 
     @Override
     public String toString() {
-        return "Edge{" +
+        return "Link{" +
                 "source='" + source + '\'' +
                 ", target='" + target + '\'' +
                 '}';

@@ -116,7 +116,7 @@ public class GraphLayout<V, E> {
             }
             
         });
-        for(ShortestPaths.Edge e: distanceEdges) {
+        for(ShortestPaths.Link e: distanceEdges) {
             G[e.source()][e.target()] = 1;
             G[e.target()][e.source()] = 1;
         }*/

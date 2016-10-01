@@ -6,7 +6,6 @@ package org.cwi.examine.internal.data.domain;
 public class Annotation extends Element {
 
     private String category;
-    private double score;
 
     public String getCategory() {
         return category;
@@ -16,19 +15,10 @@ public class Annotation extends Element {
         this.category = category;
     }
 
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
     @Override
     public String toString() {
         return "Annotation{" +
-                "category='" + category + '\'' +
-                ", score=" + score +
+                "category='" + category +
                 "} extends " + super.toString();
     }
 }

@@ -8,6 +8,7 @@ public class Element {
     private String identifier;
     private String name;
     private String url;
+    private double score;
 
     public String getIdentifier() {
         return identifier;
@@ -33,12 +34,21 @@ public class Element {
         this.url = url;
     }
 
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
     @Override
     public String toString() {
         return "Element{" +
                 "identifier='" + identifier + '\'' +
                 ", name='" + name + '\'' +
                 ", url='" + url + '\'' +
+                ", score=" + score +
                 '}';
     }
 }

@@ -6,7 +6,7 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 import org.cwi.examine.internal.data.domain.Annotation;
-import org.cwi.examine.internal.data.domain.Edge;
+import org.cwi.examine.internal.data.domain.Link;
 import org.cwi.examine.internal.data.domain.Node;
 import org.cwi.examine.internal.signal.Variable;
 
@@ -40,10 +40,10 @@ public class DataSet {
     /**
      * Load dataSet set from files.
      */
-    public Network beansToNetwork(final List<Node> nodes, final List<Edge> edges, final List<Annotation> annotations) {
+    public Network beansToNetwork(final List<Node> nodes, final List<Link> links, final List<Annotation> annotations) {
         final List<HNode> graphNodes = nodes.stream()
                 .filter(node -> !node.getModule().isEmpty())
-                .map(node -> new HNode(node.getIdentifier(), node.getName(), node.getUrl(), node.getLogFC()))
+                .map(node -> new HNode(node.getIdentifier(), node.getName(), node.getUrl(), node.getScore()))
                 .collect(Collectors.toList());
         final Map<String, HNode> idToGraphNode = mapIdToElement(graphNodes);
 
@@ -52,9 +52,9 @@ public class DataSet {
         graphNodes.forEach(superGraph::addVertex);
 
         // Node <-> Node.
-        edges.forEach(edge -> {
-            if(idToGraphNode.containsKey(edge.getSource()) && idToGraphNode.containsKey(edge.getTarget())) {
-                superGraph.addEdge(idToGraphNode.get(edge.getSource()), idToGraphNode.get(edge.getTarget()));
+        links.forEach(link -> {
+            if(idToGraphNode.containsKey(link.getSource()) && idToGraphNode.containsKey(link.getTarget())) {
+                superGraph.addEdge(idToGraphNode.get(link.getSource()), idToGraphNode.get(link.getTarget()));
             }
         });
 
@@ -105,18 +105,13 @@ public class DataSet {
      * Load data set from files.
      */
     public void load() throws FileNotFoundException {
-        final File edgeFile = resolveFile("edges.txt");
-        final List<Edge> edges = csvToBean(edgeFile, Edge.class, "source", "target");
-        //edges.forEach(System.out::println);
-
-        final File nodeFile = resolveFile("nodes.txt");
+        final File nodeFile = resolveFile("nodes.tsv");
         final Map<String, String> nodeColumns = new HashMap<>();
         nodeColumns.put("ID", "identifier");
         nodeColumns.put("Symbol", "name");
         nodeColumns.put("URL", "url");
-        nodeColumns.put("Score", "score");
         nodeColumns.put("Module", "module");
-        nodeColumns.put("LogFC", "logFC");
+        nodeColumns.put("Score", "logFC");
         nodeColumns.put("Process", "processes");
         nodeColumns.put("Function", "functions");
         nodeColumns.put("Component", "components");
@@ -124,7 +119,11 @@ public class DataSet {
         final List<Node> nodes = csvToBean(nodeFile, Node.class, nodeColumns);
         //nodes.forEach(System.out::println);
 
-        final File annotationFile = resolveFile("annotations.txt");
+        final File linkFile = resolveFile("links.tsv");
+        final List<Link> links = csvToBean(linkFile, Link.class, "source", "target");
+        //edges.forEach(System.out::println);
+
+        final File annotationFile = resolveFile("annotations.tsv");
         final Map<String, String> annotationColumns = new HashMap<>();
         annotationColumns.put("ID", "identifier");
         annotationColumns.put("Symbol", "name");
@@ -135,7 +134,7 @@ public class DataSet {
         //annotations.forEach(System.out::println);
 
         // Update model.
-        superNetwork.set(beansToNetwork(nodes, edges, annotations));
+        superNetwork.set(beansToNetwork(nodes, links, annotations));
     }
 
     private File resolveFile(final String name) {
