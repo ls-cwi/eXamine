@@ -8,12 +8,10 @@ import java.util.Set;
  */
 public class HNode extends HElement {
 
-    public final double score;
     public final Set<HAnnotation> annotations;
 
     public HNode(final String id, final String name, final String url, final double score) {
-        super(id, name, url);
-        this.score = score;
+        super(id, name, url, score);
         this.annotations = new HashSet<>();
     }
 
@@ -25,5 +23,4 @@ public class HNode extends HElement {
     public String toString() {
         return name;
     }
-
 }

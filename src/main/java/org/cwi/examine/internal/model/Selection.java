@@ -1,17 +1,15 @@
 package org.cwi.examine.internal.model;
 
-import org.cwi.examine.internal.data.HElement;
-import org.cwi.examine.internal.data.HNode;
-import org.cwi.examine.internal.signal.Subject;
-import org.cwi.examine.internal.visualization.SetColors;
+import com.sun.javafx.collections.ObservableListWrapper;
+import com.sun.javafx.collections.ObservableMapWrapper;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import org.cwi.examine.internal.data.HAnnotation;
+import org.cwi.examine.internal.data.HElement;
+import org.cwi.examine.internal.visualization.SetColors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The sets that are to be displayed, including additional
@@ -20,21 +18,21 @@ import java.util.Set;
 public final class Selection {
     
     // Change signal.
-    public final Subject change;
+    //public final Subject change;
     
     // Included sets and the weight that has been assigned to them.
-    public final Map<HAnnotation, Double> activeSetMap;
+    public final ObservableMap<HAnnotation, Double> activeSetMap;
     
     // List of active sets with a somewhat stable ordering.
-    public final List<HAnnotation> activeSetList;
-    
+    public final ObservableList<HAnnotation> activeSetList;
+
     // Selected set or protein.
     public HElement selected;
     
     public Selection(final Model model) {
-        this.change = new Subject();
-        this.activeSetMap = new HashMap<HAnnotation, Double>();
-        this.activeSetList = new ArrayList<HAnnotation>();
+        //this.change = new Subject();
+        this.activeSetMap = new ObservableMapWrapper<>(new HashMap<>());
+        this.activeSetList = new ObservableListWrapper<>(new ArrayList<>());
         this.selected = null;
     }
     
@@ -47,7 +45,7 @@ public final class Selection {
         this.activeSetList.clear();
         this.selected = null;
         
-        this.change.signal();
+        //this.change.signal();
     }
     
     /**
@@ -61,7 +59,7 @@ public final class Selection {
             activeSetMap.put(proteinSet, weight);
             activeSetList.add(proteinSet);
             
-            change.signal();
+            //change.signal();
         }
         
         return added;
@@ -74,7 +72,7 @@ public final class Selection {
         activeSetMap.remove(proteinSet);
         activeSetList.remove(proteinSet);
         
-        change.signal();
+        //change.signal();
     }
     
     /**
@@ -93,7 +91,7 @@ public final class Selection {
                 add(elSet, 1);
             }
         } else {
-            change.signal();
+            //change.signal();
         }
     }
     
@@ -105,43 +103,6 @@ public final class Selection {
         double newWeight = Math.max(1f, currentWeight + weightChange);
         activeSetMap.put(proteinSet, newWeight);
         
-        change.signal();
-    }
-    
-    // Change the contents of a protein set (and propagate change signal).
-    public void update(HAnnotation newProteinSet) {
-        // Remove old proteinset with identity of new one.
-        if(activeSetMap.containsKey(newProteinSet)) {
-            double weight = activeSetMap.remove(newProteinSet);
-            activeSetMap.put(newProteinSet, weight);
-            activeSetList.set(activeSetList.indexOf(newProteinSet), newProteinSet);
-        } else {
-            activeSetMap.put(newProteinSet, 1.0);
-        }
-        
-        change.signal();
-    }
-    
-    /**
-     * Get the nodes that are selected (either a single selected node,
-     * or the nodes of a selected set).
-     */
-    public Set<HNode> selectedNodes(boolean intersection) {
-        Set<HNode> result = new HashSet<HNode>();
-        
-        if (intersection) {
-            if (activeSetList.size() > 0) {
-                    result.addAll(activeSetList.get(0).elements);
-                    for(HAnnotation s: activeSetList) {
-                        result.retainAll(s.elements);
-                    }
-            }
-        } else {
-            for(HAnnotation s: activeSetList) {
-                result.addAll(s.elements);
-            }
-        }
-        
-        return result;
+        //change.signal();
     }
 }

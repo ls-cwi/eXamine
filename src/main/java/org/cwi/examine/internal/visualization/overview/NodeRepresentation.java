@@ -2,6 +2,7 @@ package org.cwi.examine.internal.visualization.overview;
 
 import java.awt.Color;
 
+import com.sun.javafx.collections.ObservableSetWrapper;
 import org.cwi.examine.internal.graphics.PVector;
 import org.cwi.examine.internal.graphics.draw.Parameters;
 import org.cwi.examine.internal.graphics.draw.Representation;
@@ -130,18 +131,18 @@ public class NodeRepresentation extends Representation<HNode> {
         // Highlight protein, its adjacent interactions, and its member terms.
         Set<HNode> hP = new HashSet<>();
         hP.add(element);
-        visualization.model.highlightedProteins.set(hP);
+        visualization.model.highlightedProteins.set(new ObservableSetWrapper<>(hP));
         
         // Highlight interactions.
         Set<DefaultEdge> hI = new HashSet<>();
         Set<DefaultEdge> edges = visualization.model.activeNetwork.get().graph.edgesOf(element);
         hI.addAll(edges);
-        visualization.model.highlightedInteractions.set(hI);
+        visualization.model.highlightedInteractions.set(new ObservableSetWrapper<>(hI));
         
         // Highlight member terms.
         Set<HAnnotation> hT = new HashSet<>();
         hT.addAll(element.annotations);
-        visualization.model.highlightedSets.set(hT);
+        visualization.model.highlightedSets.set(new ObservableSetWrapper<>(hT));
     }
 
     @Override

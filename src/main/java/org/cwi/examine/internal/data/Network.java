@@ -53,5 +53,4 @@ public class Network {
 
         return new Network(undirectedSubGraph, superNetwork.categories);
     }
-    
 }

@@ -28,7 +28,6 @@ import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.cwi.examine.internal.graphics.draw.Parameters;
 import org.cwi.examine.internal.graphics.draw.Snippet;
-import org.cwi.examine.internal.signal.gui.SidePane;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
@@ -37,7 +36,6 @@ import static org.cwi.examine.internal.graphics.StaticGraphics.*;
 // Graphics application.
 public abstract class Application extends JFrame {
     private final JPanel rootPanel;     // Main content panel.
-    private SidePane sidePane;          // Side pane (for GUI).
     protected Snippet rootSnippet;      // Root snippet.
     private DrawManager drawManager;    // Snippet manager.
     
@@ -48,9 +46,6 @@ public abstract class Application extends JFrame {
         setSize(1000, 600);
         setExtendedState(Frame.NORMAL);
         setVisible(true);
-        
-        // Side pane.
-        sidePane = new SidePane();
         
         // Graphics setup.
         setup();
@@ -109,16 +104,8 @@ public abstract class Application extends JFrame {
                 // Font.
                 textFont(Parameters.font);
                 
-                // Make room for side pane.
-                pushTransform();
-                translate(sidePane.paneWidth(), 0);
-                
                 // Draw (sub classed).
                 Application.this.draw();
-                popTransform();
-                
-                // Draw side pane on top of everything.
-                snippet(sidePane);
             }
             
         };
@@ -178,11 +165,6 @@ public abstract class Application extends JFrame {
             Parameters.labelFont = new Font("Arial", Font.PLAIN, 14);
             Parameters.noteFont = new Font("Arial", Font.PLAIN, 8);
         }
-    }
-    
-    // Get side pane.
-    public SidePane sidePane() {
-        return sidePane;
     }
     
     public final void rootDraw() {
@@ -294,16 +276,6 @@ public abstract class Application extends JFrame {
         }
 
         public void keyTyped(KeyEvent e) {
-            // Expand options pane by pressing Ctrl + o.
-            if(e.getKeyChar() == 'o') {
-                System.out.println("Press o");
-                if(sidePane.root().active) {
-                    sidePane.activate(sidePane.root());
-                } else {
-                    sidePane.deactivate(sidePane.root());
-                }
-            }
-
             // Send event to hovered item.
             if(drawManager.hovered != null) {
                 drawManager.hovered.keyTyped(e);

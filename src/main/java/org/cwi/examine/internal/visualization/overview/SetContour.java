@@ -1,5 +1,6 @@
 package org.cwi.examine.internal.visualization.overview;
 
+import com.sun.javafx.collections.ObservableSetWrapper;
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.cwi.examine.internal.graphics.PVector;
@@ -101,17 +102,17 @@ public class SetContour extends SetRepresentation {
     @Override
     public void beginHovered() {
         // Highlight proteins term intersection.
-        Set<HNode> hP = new HashSet<HNode>();
+        Set<HNode> hP = new HashSet<>();
         hP.addAll(element.elements);
-        visualization.model.highlightedProteins.set(hP);
+        visualization.model.highlightedProteins.set(new ObservableSetWrapper<>(hP));
         
         // Highlight annotation annotations that contain all elements of this set.
-        Set<HAnnotation> hT = new HashSet<HAnnotation>();
+        Set<HAnnotation> hT = new HashSet<>();
         hT.addAll(element.elements.get(0).annotations);
         for(int i = 1; i < element.elements.size(); i++) {
             hT.retainAll(element.elements.get(i).annotations);
         }
-        visualization.model.highlightedSets.set(hT);
+        visualization.model.highlightedSets.set(new ObservableSetWrapper<>(hT));
     }
 
     @Override

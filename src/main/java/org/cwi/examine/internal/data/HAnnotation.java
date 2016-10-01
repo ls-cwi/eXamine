@@ -11,26 +11,18 @@ import java.util.Set;
  */
 public class HAnnotation extends HElement {
 
-    public final double score;                              // Optional score (lower is better -> p-value).
-    public final List<HNode> elements = new ArrayList<>();  // Wrapped set.
+    public final List<HNode> elements = new ArrayList<>();
     public final Set<HNode> set = new HashSet<>();
-    
-    /**
-     * Base constructor.
-     */
-    public HAnnotation(final String identifier, final String name, final double score, final String url) {
-        super(identifier, name, url);
-        this.score = score; // Double.isNaN(score) || score > 0.9 ? 0.9 : score; // Default score to 1.
+
+    public HAnnotation(final String identifier, final String name, final String url, final double score) {
+        super(identifier, name, url, score);
     }
 
     protected void addMember(HNode node) {
         elements.add(node);
         set.add(node);
     }
-    
-    /**
-     * Textual representation
-     */
+
     @Override
     public String toString() {
         return name;

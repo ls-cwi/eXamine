@@ -6,7 +6,6 @@ import org.cwi.examine.internal.graphics.Application;
 import org.cwi.examine.internal.graphics.draw.Layout;
 import org.cwi.examine.internal.graphics.draw.Representation;
 import org.cwi.examine.internal.model.Model;
-import org.cwi.examine.internal.signal.Observer;
 
 import org.cwi.examine.internal.data.HCategory;
 import org.cwi.examine.internal.data.HAnnotation;
@@ -44,17 +43,12 @@ public class Visualization extends Application {
 
         // Protein set listing, update on selection change.
         setLists = new ArrayList<>();
-        Observer proteinSetListObserver = () -> setLists.clear();
-        //model.orderedCategories.change.subscribe(proteinSetListObserver);
-        model.activeNetwork.change.subscribe(proteinSetListObserver);
+        //Observer proteinSetListObserver = () -> setLists.clear();
+        model.activeNetwork.addListener((observable, old, activeNetwork) -> setLists.clear());
+        //model.activeNetwork.change.subscribe(proteinSetListObserver);
 
         // Overview at bottom, dominant.
         overview = new Overview(this);
-
-        // Always reset navigation state.
-        model.highlightedSets.clear();
-        model.highlightedProteins.clear();
-        model.selection.clear();
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
@@ -92,12 +86,12 @@ public class Visualization extends Application {
             PVector shiftPos = PVector.v();
 
             // Left side option snippets (includes set lists).
-            List<Representation> sideSnippets = new ArrayList<Representation>();
+            List<Representation> sideSnippets = new ArrayList<>();
             
-            List<SetList> openSl = new ArrayList<SetList>();
-            List<SetList> closedSl = new ArrayList<SetList>();
+            List<SetList> openSl = new ArrayList<>();
+            List<SetList> closedSl = new ArrayList<>();
             for(SetList sl: setLists) {
-                (model.openedCategories.get().contains(sl.element) ? openSl : closedSl)
+                (model.openedCategories.contains(sl.element) ? openSl : closedSl)
                 .add(sl);
             }
             sideSnippets.addAll(openSl);

@@ -1,67 +1,53 @@
 package org.cwi.examine.internal.model;
 
+import com.sun.javafx.collections.ObservableListWrapper;
+import com.sun.javafx.collections.ObservableSetWrapper;
+import javafx.beans.property.*;
 import org.cwi.examine.internal.data.*;
-import org.cwi.examine.internal.signal.Observer;
-import org.cwi.examine.internal.signal.Variable;
-import org.cwi.examine.internal.signal.VolatileSet;
 import org.jgrapht.graph.DefaultEdge;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 // Model module. Manages enriched dataSet that includes
 // information provided via user interaction.
 public final class Model {
-    private final DataSet dataSet;
 
-    public final Selection selection;                               // Selected (visualized) annotations.
-    public final VolatileSet<HCategory> openedCategories;           // Opened set categories.
-    public final Variable<List<HCategory>> orderedCategories;
-    public final VolatileSet<HNode> highlightedProteins;            // Highlighted proteins.
-    public final VolatileSet<DefaultEdge> highlightedInteractions;  // Highlighted interactions.
-    public final VolatileSet<HAnnotation> highlightedSets;          // Highlighted protein annotations.
-    public final Variable<Network> activeNetwork;                   // Active network.
+    public final Selection selection;
+    public final SetProperty<HCategory> openedCategories;
+    public final ListProperty<HCategory> orderedCategories;
+    public final SetProperty<HNode> highlightedProteins;
+    public final SetProperty<DefaultEdge> highlightedInteractions;
+    public final SetProperty<HAnnotation> highlightedSets;
+    public final ObjectProperty<Network> activeNetwork;
 
     public Model(final DataSet dataSet) {
-        this.dataSet = dataSet;
-
         this.selection = new Selection(this);
-        this.openedCategories = new VolatileSet<>();
-        this.orderedCategories = new Variable<>(Collections.<HCategory>emptyList());
-        this.highlightedProteins = new VolatileSet<>();
-        this.highlightedInteractions = new VolatileSet<>();
-        this.highlightedSets = new VolatileSet<>();
-        this.activeNetwork = new Variable<>(new Network());
+        this.openedCategories = new SimpleSetProperty<>(new ObservableSetWrapper<>(new HashSet<>()));
+        this.orderedCategories = new SimpleListProperty<>(new ObservableListWrapper<>(new ArrayList<>()));
+        this.highlightedProteins = new SimpleSetProperty<>(new ObservableSetWrapper<>(new HashSet<>()));
+        this.highlightedInteractions = new SimpleSetProperty<>(new ObservableSetWrapper<>(new HashSet<>()));
+        this.highlightedSets = new SimpleSetProperty<>(new ObservableSetWrapper<>(new HashSet<>()));
+        this.activeNetwork = new SimpleObjectProperty<>(new Network());
 
         // Update active network that is to be visualized.
-        Observer activeNetworkObserver = () -> {
-            Network superNetwork = dataSet.superNetwork.get();
-            activeNetwork.set(superNetwork);
-//            Set<HNode> moduleNodes = superNetwork.graph.vertexSet().stream()
-//                    .filter(node -> node.score != 0.)
-//                    .collect(Collectors.toSet());
-//            Network module = new Network(Network.induce(moduleNodes, dataSet.superNetwork.get()));
-//            activeNetwork.set(module);
-        };
-
-        //Parameters.visualStaticProteinBasis.change.subscribe(activeNetworkObserver);
-        selection.change.subscribe(activeNetworkObserver);
-        dataSet.superNetwork.change.subscribe(activeNetworkObserver);
+        dataSet.superNetwork.addListener((obs, old, categories) ->
+                activeNetwork.set(dataSet.superNetwork.get()));
 
         // Update ordered category list.
-        Observer categoryObserver = () -> {
+        Runnable categoryObserver = () -> {
             List<HCategory> openedCat = new ArrayList<>();
             List<HCategory> closedCat = new ArrayList<>();
             for(HCategory c: dataSet.superNetwork.get().categories) {
-                (openedCategories.get().contains(c) ? openedCat : closedCat).add(c);
+                (openedCategories.contains(c) ? openedCat : closedCat).add(c);
             }
 
             openedCat.addAll(closedCat);
-            orderedCategories.set(openedCat);
+            orderedCategories.set(new ObservableListWrapper<>(openedCat));
         };
 
-        openedCategories.change.subscribe(categoryObserver);
-        dataSet.superNetwork.change.subscribe(categoryObserver);
+        openedCategories.addListener((obs, old, categories) -> categoryObserver.run());
+        dataSet.superNetwork.addListener((obs, old, categories) -> categoryObserver.run());
     }
 }

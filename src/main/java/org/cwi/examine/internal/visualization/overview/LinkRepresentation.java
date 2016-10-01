@@ -1,5 +1,6 @@
 package org.cwi.examine.internal.visualization.overview;
 
+import com.sun.javafx.collections.ObservableSetWrapper;
 import org.cwi.examine.internal.data.HNode;
 import org.cwi.examine.internal.graphics.PVector;
 import org.cwi.examine.internal.graphics.StaticGraphics;
@@ -69,18 +70,18 @@ public class LinkRepresentation extends Representation<LinkRepresentation.Link> 
         Set<HNode> hP = new HashSet<HNode>();
         hP.add(element.node1);
         hP.add(element.node2);
-        visualization.model.highlightedProteins.set(hP);
+        visualization.model.highlightedProteins.set(new ObservableSetWrapper<>(hP));
         
         // Highlight interactions.
         Set<DefaultEdge> hI = new HashSet<DefaultEdge>();
         hI.add(edge);
-        visualization.model.highlightedInteractions.set(hI);
+        visualization.model.highlightedInteractions.set(new ObservableSetWrapper<>(hI));
         
         // Intersect annotation annotations.
         Set<HAnnotation> hT = new HashSet<HAnnotation>();
         hT.addAll(element.node1.annotations);
         hT.retainAll(element.node2.annotations);
-        visualization.model.highlightedSets.set(hT);
+        visualization.model.highlightedSets.set(new ObservableSetWrapper<>(hT));
     }
 
     @Override

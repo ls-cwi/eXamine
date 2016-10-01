@@ -9,7 +9,6 @@ import java.awt.Font;
 
 import org.cwi.examine.internal.graphics.draw.PickingGraphics2D;
 import org.cwi.examine.internal.graphics.draw.Snippet;
-import org.cwi.examine.internal.signal.gui.SidePane;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
@@ -158,11 +157,6 @@ public class StaticGraphics {
     // Get hovered snippet.
     public static Snippet hovered() {
         return dm.hovered;
-    }
-    
-    // Get side pane.
-    public static SidePane sidePane() {
-        return application.sidePane();
     }
     
     // Set draw plane/volume bounds.
@@ -453,7 +447,7 @@ public class StaticGraphics {
 
     // Sketch area width.
     public static double sketchWidth() {
-        return applicationWidth() - sidePane().paneWidth();
+        return applicationWidth();
     }
 
     // Sketch area height.

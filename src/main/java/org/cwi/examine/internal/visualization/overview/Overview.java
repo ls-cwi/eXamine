@@ -1,5 +1,6 @@
 package org.cwi.examine.internal.visualization.overview;
 
+import javafx.collections.ListChangeListener;
 import org.cwi.examine.internal.visualization.Visualization;
 import org.cwi.examine.internal.graphics.draw.PositionedSnippet;
 import com.vividsolutions.jts.geom.Geometry;
@@ -19,7 +20,6 @@ import java.util.logging.Logger;
 import org.cwi.examine.internal.graphics.PVector;
 import org.cwi.examine.internal.layout.Layout;
 import org.cwi.examine.internal.layout.Layout.RichEdge;
-import org.cwi.examine.internal.signal.Observer;
 import org.jgrapht.graph.DefaultEdge;
 
 import static org.cwi.examine.internal.graphics.StaticGraphics.*;
@@ -168,18 +168,21 @@ public class Overview extends PositionedSnippet {
         // Constructor.
         public LayoutUpdater() {
             // Update model for network change.
-            Observer modelObs = () -> {
+            Runnable modelObs = () -> {
                 synchronized(LayoutUpdater.this) {
                     // Fetch context network (single input network, for now).
                     // Now bypassed to super network for Cytoscape integration.
                     contextNetwork = visualization.model.activeNetwork.get();
                     layoutDirty = true;
-                    //layout = null;
                 }
             };
-            visualization.model.activeNetwork.change.subscribe(modelObs);
-            visualization.model.selection.change.subscribe(modelObs);
-            modelObs.signal();
+            visualization.model.activeNetwork.addListener((obs, old, activeNetwork) -> modelObs.run());
+            visualization.model.selection.activeSetList.addListener(new ListChangeListener<HAnnotation>() {
+                @Override
+                public void onChanged(Change<? extends HAnnotation> c) {
+                    modelObs.run();
+                }
+            });
         }
 
         @Override
@@ -199,29 +202,31 @@ public class Overview extends PositionedSnippet {
         private boolean converged = true;
         private void update() {
             synchronized(LayoutUpdater.this) {
-                if (layoutDirty || layout == null) {
-                    layoutDirty = false;
-                    layout = new Layout(contextNetwork, visualization.model.selection, layout);
-                    updateNodeRepresentations();
-                    updateInteractionRepresentations();
-                    updateSetRepresentations();
-                    span = layout.dimensions;
+                if(contextNetwork != null && !contextNetwork.graph.vertexSet().isEmpty()) {
+                    if (layoutDirty || layout == null) {
+                        layoutDirty = false;
+                        layout = new Layout(contextNetwork, visualization.model.selection, layout);
+                        updateNodeRepresentations();
+                        updateInteractionRepresentations();
+                        updateSetRepresentations();
+                        span = layout.dimensions;
 
-                    converged = false;
-                }
+                        converged = false;
+                    }
 
-                if (!converged && layout.nodes.length > 0) {
-                    converged = layout.updatePositions();
+                    if (!converged) {
+                        converged = layout.updatePositions();
 
-                    // Update node positions.
-                    updateNodePositions();
-                    updateInteractionRepresentations();
+                        // Update node positions.
+                        updateNodePositions();
+                        updateInteractionRepresentations();
 
-                    // Update set contours.
-                    updateSetRepresentations();
+                        // Update set contours.
+                        updateSetRepresentations();
 
-                    // Update centering shift.
-                    span = layout.dimensions;
+                        // Update centering shift.
+                        span = layout.dimensions;
+                    }
                 }
             }
         }

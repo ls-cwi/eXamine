@@ -5,10 +5,11 @@ import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import org.cwi.examine.internal.data.domain.Annotation;
 import org.cwi.examine.internal.data.domain.Link;
 import org.cwi.examine.internal.data.domain.Node;
-import org.cwi.examine.internal.signal.Variable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,10 +26,10 @@ import org.jgrapht.graph.Pseudograph;
  */
 public class DataSet {
     
-    public final Variable<Network> superNetwork;
+    public final ObjectProperty<Network> superNetwork;
 
     public DataSet() {
-        this.superNetwork = new Variable<>(new Network());
+        this.superNetwork = new SimpleObjectProperty<>(new Network());
     }
 
     public <T extends HElement> Map<String, T> mapIdToElement(List<T> elements) {
@@ -60,7 +61,7 @@ public class DataSet {
 
         // Annotations.
         final List<HAnnotation> sets = annotations.stream().map(a ->
-                new HAnnotation(a.getIdentifier(), a.getName(), a.getScore(), a.getUrl())).collect(Collectors.toList());
+                new HAnnotation(a.getIdentifier(), a.getName(), a.getUrl(), a.getScore())).collect(Collectors.toList());
         final Map<String, HAnnotation> idToAnnotation = mapIdToElement(sets);
 
         // Annotation <-> Node.
@@ -69,13 +70,16 @@ public class DataSet {
             final List<String> nodeAnnotationStrings = Arrays.asList(
                     node.getComponents(), node.getFunctions(), node.getPathways(), node.getProcesses());
             nodeAnnotationStrings.forEach(annotationIds -> {
-                for(final String annotationId: annotationIds.split("\\|")) {
-                    final HAnnotation annotation = idToAnnotation.get(annotationId);
-                    if(annotation == null) {
-                        System.out.println("Unknown annotation identifier: " + annotationId);
-                    } else {
-                        annotation.addMember(hNode);
-                        hNode.addAnnotation(annotation);
+                for(String annotationId: annotationIds.split("\\|")) {
+                    annotationId = annotationId.trim();
+                    if(!annotationId.isEmpty()) {
+                        final HAnnotation annotation = idToAnnotation.get(annotationId);
+                        if (annotation == null) {
+                            System.out.println("Unknown annotation identifier: " + annotationId);
+                        } else {
+                            annotation.addMember(hNode);
+                            hNode.addAnnotation(annotation);
+                        }
                     }
                 }
             });

@@ -2,8 +2,8 @@ package org.cwi.examine.internal.visualization;
 
 import java.awt.Color;
 
+import javafx.collections.ListChangeListener;
 import org.cwi.examine.internal.model.Selection;
-import org.cwi.examine.internal.signal.Observer;
 
 import org.cwi.examine.internal.data.HAnnotation;
 
@@ -15,11 +15,11 @@ import java.util.Map;
 import java.util.Set;
 
 // Selected set to color map.
-public class SetColors implements Observer {
+public class SetColors implements ListChangeListener<HAnnotation> {
     private final Selection selection;
     private final Map<HAnnotation, Color> predefinedColorMap;  // Predefined protein set to color mapping.
     private final Map<HAnnotation, Color> colorMap;            // Dynamic protein set to color mapping.
-    private final ArrayList<Color> availableColors;     // Available set colors.
+    private final ArrayList<Color> availableColors;            // Available set colors.
     
     // Source color pool.
     public static final Color[] palette = new Color[] {
@@ -48,19 +48,17 @@ public class SetColors implements Observer {
         predefinedColorMap = new HashMap<>();
         
         // Listen to model and parameter changes.
-        selection.change.subscribe(this);
-        
-        signal();
+        //selection.change.subscribe(this);
+        selection.activeSetList.addListener(this);
     }
-    
-    @Override
-    public void signal() {
-        Set<HAnnotation> newActiveSets = new HashSet<HAnnotation>();
+
+    public void onChanged(ListChangeListener.Change<? extends HAnnotation> change) {
+        Set<HAnnotation> newActiveSets = new HashSet<>();
         newActiveSets.addAll(selection.activeSetList);
         newActiveSets.removeAll(colorMap.keySet());
         newActiveSets.removeAll(predefinedColorMap.keySet());
         
-        Set<HAnnotation> newDormantSets = new HashSet<HAnnotation>();
+        Set<HAnnotation> newDormantSets = new HashSet<>();
         newDormantSets.addAll(colorMap.keySet());
         newDormantSets.removeAll(selection.activeSetList);
         newDormantSets.removeAll(predefinedColorMap.keySet());

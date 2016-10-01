@@ -70,19 +70,15 @@ public class Layout {
         this.selection = selection;
         
         // Order annotations by size.
-        this.sets = new ArrayList<HAnnotation>();
+        this.sets = new ArrayList<>();
         this.sets.addAll(selection.activeSetList);
-        Collections.sort(this.sets, new Comparator<HAnnotation>() {
-            public int compare(HAnnotation s1, HAnnotation s2) {
-                return s1.elements.size() - s2.elements.size();
-            }
-        });
+        Collections.sort(this.sets, (s1, s2) -> s1.elements.size() - s2.elements.size());
         
         // Invert set membership for vertices.
         nodes = network.graph.vertexSet().toArray(new HNode[] {});
-        nodeMemberships = new HashMap<HNode, List<HAnnotation>>();
+        nodeMemberships = new HashMap<>();
         for(HNode n: nodes) {
-            nodeMemberships.put(n, new ArrayList<HAnnotation>());
+            nodeMemberships.put(n, new ArrayList<>());
         }
         for(HAnnotation s: sets) {
             for(HNode n: s.elements) {

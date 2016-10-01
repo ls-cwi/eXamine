@@ -13,8 +13,8 @@ public class Application {
 
     public static void main(String[] args) throws FileNotFoundException {
         final DataSet dataSet = new DataSet();
-        dataSet.load(); // Load from filesystem.
         final Model model = new Model(dataSet);
         final Visualization visualization = new Visualization(model);
+        dataSet.load(); // Load from filesystem.
     }
 }

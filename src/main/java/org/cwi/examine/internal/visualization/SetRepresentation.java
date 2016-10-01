@@ -1,5 +1,6 @@
 package org.cwi.examine.internal.visualization;
 
+import com.sun.javafx.collections.ObservableSetWrapper;
 import org.cwi.examine.internal.graphics.draw.Representation;
 import org.cwi.examine.internal.data.HNode;
 import org.cwi.examine.internal.data.HAnnotation;
@@ -36,11 +37,11 @@ public abstract class SetRepresentation extends Representation<HAnnotation> {
     public void beginHovered() {
         Set<HAnnotation> hT = new HashSet<>();
         hT.add(element);
-        visualization.model.highlightedSets.set(hT);
+        visualization.model.highlightedSets.set(new ObservableSetWrapper<>(hT));
         
         Set<HNode> hP = new HashSet<>();
         hP.addAll(element.elements);
-        visualization.model.highlightedProteins.set(hP);
+        visualization.model.highlightedProteins.set(new ObservableSetWrapper<>(hP));
     }
 
     @Override
