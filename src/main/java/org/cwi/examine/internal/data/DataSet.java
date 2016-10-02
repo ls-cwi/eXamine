@@ -35,7 +35,7 @@ public class DataSet {
     /**
      * Load dataSet set from files.
      */
-    private Network beansToNetwork() throws FileNotFoundException {
+    private Network loadNetwork() throws FileNotFoundException {
 
         // Nodes.
         final Map<String, HNode> idToNode = new HashMap<>();
@@ -69,17 +69,15 @@ public class DataSet {
             throws FileNotFoundException {
 
         final Map<String, String> nodeColumns = new HashMap<>();
-        nodeColumns.put("ID", "identifier");
+        nodeColumns.put("Identifier", "identifier");
         nodeColumns.put("Symbol", "name");
         nodeColumns.put("URL", "url");
-        nodeColumns.put("Module", "module");
         nodeColumns.put("Score", "logFC");
 
         final List<Node> nodeBeans = csvToBean(file, Node.class, nodeColumns);
         //nodes.forEach(System.out::println);
 
         final List<HNode> graphNodes = nodeBeans.stream()
-                .filter(node -> !node.getModule().isEmpty())
                 .map(node -> new HNode(node.getIdentifier(), node.getName(), node.getUrl(), node.getScore()))
                 .collect(Collectors.toList());
 
@@ -92,11 +90,11 @@ public class DataSet {
         throws FileNotFoundException {
 
         final Map<String, String> annotationColumns = new HashMap<>();
-        annotationColumns.put("ID", "identifier");
+        annotationColumns.put("Identifier", "identifier");
         annotationColumns.put("Symbol", "name");
         annotationColumns.put("URL", "url");
-        annotationColumns.put("score", "score");
-        annotationColumns.put("category", "category");
+        annotationColumns.put("Score", "score");
+        annotationColumns.put("Category", "category");
 
         final List<Annotation> annotations = csvToBean(file, Annotation.class, annotationColumns);
         //annotations.forEach(System.out::println);
@@ -157,25 +155,8 @@ public class DataSet {
         });
     }
 
-    /**
-     * Load data set from files.
-     */
-    private Network networkFromLegacyFormat() throws FileNotFoundException {
-        return beansToNetwork();
-    }
-
     public void load() throws IOException {
-        superNetwork.set(networkFromLegacyFormat());
-
-//        CSVWriter writer = new CSVWriter(new FileWriter(new File("data/memberships.tsv")),
-//                '\t', CSVWriter.NO_QUOTE_CHARACTER);
-//        superNetwork.get().annotations.forEach(annotation -> {
-//            List<String> tags = new ArrayList<>();
-//            tags.add(annotation.identifier);
-//            tags.addAll(annotation.elements.stream().map(el -> el.identifier).collect(Collectors.toSet()));
-//            writer.writeNext(tags.toArray(new String[]{}));
-//        });
-//        writer.flush();
+        superNetwork.set(loadNetwork());
     }
 
     private <T extends HElement> void mapIdToElement(final List<T> elements, Map<String, T> idToElement) {

@@ -1,4 +1,4 @@
-ID	Category	Score	Symbol	URL
+Identifier	Category	Score	Symbol	URL
 GO:0000823	Function	0.00444	inositol-1,4,5-trisphosphate 6-kinase activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0000823
 GO:0000824	Function	0.00444	inositol tetrakisphosphate 3-kinase activity	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0000824
 GO:0000910	Process	1.1e-05	cytokinesis	http://amigo.geneontology.org/cgi-bin/amigo/term_details?term=GO:0000910

@@ -32,8 +32,15 @@ public final class Model {
         this.activeNetwork = new SimpleObjectProperty<>(new Network());
 
         // Update active network that is to be visualized.
-        dataSet.superNetwork.addListener((obs, old, categories) ->
-                activeNetwork.set(dataSet.superNetwork.get()));
+        // For now, it is the union of all known modules.
+        dataSet.superNetwork.addListener((obs, old, categories) -> {
+            final Network superNetwork = dataSet.superNetwork.get();
+            final Network moduleNetwork = Network.induce(superNetwork.modules, superNetwork);
+            activeNetwork.set(moduleNetwork);
+
+            System.out.println(superNetwork.graph.vertexSet().size());
+            System.out.println(moduleNetwork.graph.vertexSet().size());
+        });
 
         // Update ordered category list.
         Runnable categoryObserver = () -> {
