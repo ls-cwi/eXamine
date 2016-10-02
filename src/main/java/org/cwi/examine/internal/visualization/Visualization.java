@@ -43,9 +43,7 @@ public class Visualization extends Application {
 
         // Protein set listing, update on selection change.
         setLists = new ArrayList<>();
-        //Observer proteinSetListObserver = () -> setLists.clear();
         model.activeNetwork.addListener((observable, old, activeNetwork) -> setLists.clear());
-        //model.activeNetwork.change.subscribe(proteinSetListObserver);
 
         // Overview at bottom, dominant.
         overview = new Overview(this);
@@ -64,7 +62,7 @@ public class Visualization extends Application {
                 for(HCategory d: model.activeNetwork.get().categories) {
                     List<SetLabel> labels = new ArrayList<>();
 
-                    for(HAnnotation t: d.annotations.subList(0, Math.min(d.MAXIMUM_SIZE, d.annotations.size()))) {
+                    for(HAnnotation t: d.annotations) {
                         String text = t.toString();
                         labels.add(new SetLabel(this, t, text));
                     }

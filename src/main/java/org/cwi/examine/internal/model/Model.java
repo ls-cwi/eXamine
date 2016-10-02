@@ -23,7 +23,7 @@ public final class Model {
     public final ObjectProperty<Network> activeNetwork;
 
     public Model(final DataSet dataSet) {
-        this.selection = new Selection(this);
+        this.selection = new Selection();
         this.openedCategories = new SimpleSetProperty<>(new ObservableSetWrapper<>(new HashSet<>()));
         this.orderedCategories = new SimpleListProperty<>(new ObservableListWrapper<>(new ArrayList<>()));
         this.highlightedProteins = new SimpleSetProperty<>(new ObservableSetWrapper<>(new HashSet<>()));

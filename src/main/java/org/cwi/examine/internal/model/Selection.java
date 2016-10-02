@@ -17,9 +17,6 @@ import java.util.HashMap;
  */
 public final class Selection {
     
-    // Change signal.
-    //public final Subject change;
-    
     // Included sets and the weight that has been assigned to them.
     public final ObservableMap<HAnnotation, Double> activeSetMap;
     
@@ -29,23 +26,10 @@ public final class Selection {
     // Selected set or protein.
     public HElement selected;
     
-    public Selection(final Model model) {
-        //this.change = new Subject();
+    public Selection() {
         this.activeSetMap = new ObservableMapWrapper<>(new HashMap<>());
         this.activeSetList = new ObservableListWrapper<>(new ArrayList<>());
         this.selected = null;
-    }
-    
-    /**
-     * Clear all selection information.
-     */
-    public void clear() {
-        this.activeSetMap.clear();
-        this.activeSetList.clear();
-        this.activeSetList.clear();
-        this.selected = null;
-        
-        //this.change.signal();
     }
     
     /**
@@ -58,8 +42,6 @@ public final class Selection {
         if(added) {
             activeSetMap.put(proteinSet, weight);
             activeSetList.add(proteinSet);
-            
-            //change.signal();
         }
         
         return added;
@@ -71,8 +53,6 @@ public final class Selection {
     public void remove(HAnnotation proteinSet) {
         activeSetMap.remove(proteinSet);
         activeSetList.remove(proteinSet);
-        
-        //change.signal();
     }
     
     /**
@@ -90,8 +70,6 @@ public final class Selection {
             } else {
                 add(elSet, 1);
             }
-        } else {
-            //change.signal();
         }
     }
     
@@ -102,7 +80,5 @@ public final class Selection {
         double currentWeight = activeSetMap.get(proteinSet);
         double newWeight = Math.max(1f, currentWeight + weightChange);
         activeSetMap.put(proteinSet, newWeight);
-        
-        //change.signal();
     }
 }

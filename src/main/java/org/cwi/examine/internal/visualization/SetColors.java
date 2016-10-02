@@ -29,9 +29,7 @@ public class SetColors implements ListChangeListener<HAnnotation> {
             new Color(251, 128, 114),
             new Color(128, 177, 211),
             new Color(253, 180, 98),
-            //rgb(179, 222, 105),
             new Color(252, 205, 229),
-            //new Color(217, 217, 217),
             new Color(188, 128, 189),
             new Color(204, 235, 197),
             new Color(255, 237, 111)
@@ -48,7 +46,6 @@ public class SetColors implements ListChangeListener<HAnnotation> {
         predefinedColorMap = new HashMap<>();
         
         // Listen to model and parameter changes.
-        //selection.change.subscribe(this);
         selection.activeSetList.addListener(this);
     }
 

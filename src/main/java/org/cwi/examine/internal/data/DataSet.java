@@ -1,30 +1,30 @@
 package org.cwi.examine.internal.data;
 
 import com.opencsv.CSVReader;
-import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import org.cwi.examine.internal.data.domain.Annotation;
-import org.cwi.examine.internal.data.domain.Link;
 import org.cwi.examine.internal.data.domain.Node;
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.Pseudograph;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.Pseudograph;
 
 /**
  * Data set / module.
  */
 public class DataSet {
+
+    private static final String DATA_PATH = "data/";
     
     public final ObjectProperty<Network> superNetwork;
 
@@ -32,117 +32,160 @@ public class DataSet {
         this.superNetwork = new SimpleObjectProperty<>(new Network());
     }
 
-    public <T extends HElement> Map<String, T> mapIdToElement(List<T> elements) {
-        Map<String, T> map = new HashMap<>();
-        elements.forEach(e -> map.put(e.identifier, e));
-        return map;
-    }
-
     /**
      * Load dataSet set from files.
      */
-    public Network beansToNetwork(final List<Node> nodes, final List<Link> links, final List<Annotation> annotations) {
-        final List<HNode> graphNodes = nodes.stream()
-                .filter(node -> !node.getModule().isEmpty())
-                .map(node -> new HNode(node.getIdentifier(), node.getName(), node.getUrl(), node.getScore()))
-                .collect(Collectors.toList());
-        final Map<String, HNode> idToGraphNode = mapIdToElement(graphNodes);
+    private Network beansToNetwork() throws FileNotFoundException {
 
         // Nodes.
+        final Map<String, HNode> idToNode = new HashMap<>();
+        for(final File file: resolveFiles(".nodes")) {
+            loadNodes(file, idToNode);
+        }
         final UndirectedGraph<HNode, DefaultEdge> superGraph = new Pseudograph<>(DefaultEdge.class);
-        graphNodes.forEach(superGraph::addVertex);
+        idToNode.values().forEach(node -> superGraph.addVertex(node));
 
-        // Node <-> Node.
-        links.forEach(link -> {
-            if(idToGraphNode.containsKey(link.getSource()) && idToGraphNode.containsKey(link.getTarget())) {
-                superGraph.addEdge(idToGraphNode.get(link.getSource()), idToGraphNode.get(link.getTarget()));
-            }
-        });
-
-        // Annotations.
-        final List<HAnnotation> sets = annotations.stream().map(a ->
-                new HAnnotation(a.getIdentifier(), a.getName(), a.getUrl(), a.getScore())).collect(Collectors.toList());
-        final Map<String, HAnnotation> idToAnnotation = mapIdToElement(sets);
-
-        // Annotation <-> Node.
-        nodes.forEach(node -> {
-            final HNode hNode = idToGraphNode.get(node.getIdentifier());
-            final List<String> nodeAnnotationStrings = Arrays.asList(
-                    node.getComponents(), node.getFunctions(), node.getPathways(), node.getProcesses());
-            nodeAnnotationStrings.forEach(annotationIds -> {
-                for(String annotationId: annotationIds.split("\\|")) {
-                    annotationId = annotationId.trim();
-                    if(!annotationId.isEmpty()) {
-                        final HAnnotation annotation = idToAnnotation.get(annotationId);
-                        if (annotation == null) {
-                            System.out.println("Unknown annotation identifier: " + annotationId);
-                        } else {
-                            annotation.addMember(hNode);
-                            hNode.addAnnotation(annotation);
-                        }
-                    }
-                }
-            });
-        });
-
-        // Category <-> annotations.
+        // Annotations and categories.
+        final Map<String, HAnnotation> idToAnnotation = new HashMap<>();
         final Map<String, List<HAnnotation>> categoryToAnnotations = new HashMap<>();
-        categoryToAnnotations.put("Process", new ArrayList<>());
-        categoryToAnnotations.put("Function", new ArrayList<>());
-        categoryToAnnotations.put("Component", new ArrayList<>());
-        categoryToAnnotations.put("Pathway", new ArrayList<>());
-
-        annotations.forEach(annotation -> {
-            final HAnnotation hAnnotation = idToAnnotation.get(annotation.getIdentifier());
-            final String category = annotation.getCategory();
-            categoryToAnnotations.get(category).add(hAnnotation);
-        });
+        for(final File file: resolveFiles(".annotations")) {
+            loadAnnotations(file, idToAnnotation, categoryToAnnotations);
+        }
 
         // Categories.
         final List<HCategory> categories = new ArrayList<>();
-        categoryToAnnotations.forEach((id, hAnnotations) -> categories.add(new HCategory(id, hAnnotations)));
+        categoryToAnnotations.forEach((id, hAnnotations) ->
+                categories.add(new HCategory(id, hAnnotations)));
+
+        // Links, for both node <-> node and node <-> annotation.
+        for(final File file: resolveFiles(".links")) {
+            loadLinks(file, idToNode, idToAnnotation, superGraph);
+        }
 
         return new Network(superGraph, categories);
     }
 
-    /**
-     * Load data set from files.
-     */
-    public void load() throws FileNotFoundException {
-        final File nodeFile = resolveFile("nodes.tsv");
+    private void loadNodes(final File file, final Map<String, HNode> idToNode)
+            throws FileNotFoundException {
+
         final Map<String, String> nodeColumns = new HashMap<>();
         nodeColumns.put("ID", "identifier");
         nodeColumns.put("Symbol", "name");
         nodeColumns.put("URL", "url");
         nodeColumns.put("Module", "module");
         nodeColumns.put("Score", "logFC");
-        nodeColumns.put("Process", "processes");
-        nodeColumns.put("Function", "functions");
-        nodeColumns.put("Component", "components");
-        nodeColumns.put("Pathway", "pathways");
-        final List<Node> nodes = csvToBean(nodeFile, Node.class, nodeColumns);
+
+        final List<Node> nodeBeans = csvToBean(file, Node.class, nodeColumns);
         //nodes.forEach(System.out::println);
 
-        final File linkFile = resolveFile("links.tsv");
-        final List<Link> links = csvToBean(linkFile, Link.class, "source", "target");
-        //edges.forEach(System.out::println);
+        final List<HNode> graphNodes = nodeBeans.stream()
+                .filter(node -> !node.getModule().isEmpty())
+                .map(node -> new HNode(node.getIdentifier(), node.getName(), node.getUrl(), node.getScore()))
+                .collect(Collectors.toList());
 
-        final File annotationFile = resolveFile("annotations.tsv");
+        mapIdToElement(graphNodes, idToNode);
+    }
+
+    private void loadAnnotations(final File file,
+                                 final Map<String, HAnnotation> idToAnnotation,
+                                 final Map<String, List<HAnnotation>> categoryToAnnotations)
+        throws FileNotFoundException {
+
         final Map<String, String> annotationColumns = new HashMap<>();
         annotationColumns.put("ID", "identifier");
         annotationColumns.put("Symbol", "name");
         annotationColumns.put("URL", "url");
         annotationColumns.put("score", "score");
         annotationColumns.put("category", "category");
-        final List<Annotation> annotations = csvToBean(annotationFile, Annotation.class, annotationColumns);
+
+        final List<Annotation> annotations = csvToBean(file, Annotation.class, annotationColumns);
         //annotations.forEach(System.out::println);
 
-        // Update model.
-        superNetwork.set(beansToNetwork(nodes, links, annotations));
+        // Category <-> annotations.
+        annotations.forEach(annotation -> {
+            final HAnnotation hAnnotation = new HAnnotation(
+                    annotation.getIdentifier(),
+                    annotation.getName(),
+                    annotation.getUrl(),
+                    annotation.getScore());
+            final String category = annotation.getCategory();
+
+            idToAnnotation.put(annotation.getIdentifier(), hAnnotation);
+            categoryToAnnotations
+                    .computeIfAbsent(category, k -> new ArrayList<>())
+                    .add(hAnnotation);
+        });
     }
 
-    private File resolveFile(final String name) {
-        return new File("data/" + name);
+    private void loadLinks(final File linkFile,
+                           final Map<String, HNode> idToNode,
+                           final Map<String, HAnnotation> idToAnnotation,
+                           final UndirectedGraph<HNode, DefaultEdge> graph)
+            throws FileNotFoundException {
+
+        final CSVReader csvReader = new CSVReader(new FileReader(linkFile), '\t');
+        csvReader.forEach(ids -> {
+            final String sourceId = ids[0]; // First column is link source.
+            final HNode sourceNode = idToNode.get(sourceId);
+            final HAnnotation sourceAnnotation = idToAnnotation.get(sourceId);
+
+            // Remaining columns are link targets; one link per target.
+            for(int i = 1; i < ids.length; i++) {
+                final String targetId = ids[i];
+                final HNode targetNode = idToNode.get(targetId);
+                final HAnnotation targetAnnotation = idToAnnotation.get(targetId);
+
+                // Node -> node.
+                if(sourceNode != null && targetNode != null) {
+                    graph.addEdge(sourceNode, targetNode);
+                }
+                // Node -> annotation.
+                else if(sourceNode != null && targetAnnotation != null) {
+                    sourceNode.addAnnotation(targetAnnotation);
+                    targetAnnotation.addMember(sourceNode);
+                }
+                // Annotation -> node.
+                else if(sourceAnnotation != null && targetNode != null) {
+                    sourceAnnotation.addMember(targetNode);
+                    targetNode.addAnnotation(sourceAnnotation);
+                }
+                // Invalid link: annotation -> annotation, or unknown identifiers.
+                else {
+                    System.err.println("Invalid link: " + sourceId + " -> " + targetId);
+                }
+            }
+        });
+    }
+
+    /**
+     * Load data set from files.
+     */
+    private Network networkFromLegacyFormat() throws FileNotFoundException {
+        return beansToNetwork();
+    }
+
+    public void load() throws IOException {
+        superNetwork.set(networkFromLegacyFormat());
+
+//        CSVWriter writer = new CSVWriter(new FileWriter(new File("data/memberships.tsv")),
+//                '\t', CSVWriter.NO_QUOTE_CHARACTER);
+//        superNetwork.get().annotations.forEach(annotation -> {
+//            List<String> tags = new ArrayList<>();
+//            tags.add(annotation.identifier);
+//            tags.addAll(annotation.elements.stream().map(el -> el.identifier).collect(Collectors.toSet()));
+//            writer.writeNext(tags.toArray(new String[]{}));
+//        });
+//        writer.flush();
+    }
+
+    private <T extends HElement> void mapIdToElement(final List<T> elements, Map<String, T> idToElement) {
+        elements.forEach(e -> idToElement.put(e.identifier, e));
+    }
+
+    private List<File> resolveFiles(final String postFix) {
+        final File dataRoot = new File(DATA_PATH);
+        final File[] files = dataRoot.listFiles(file -> file.getName().endsWith(postFix));
+        return Arrays.asList(files);
     }
 
     private <T> List<T> csvToBean(final File csvFile, final HeaderColumnNameMappingStrategy<T> strategy)
@@ -152,14 +195,6 @@ public class DataSet {
         CSVReader csvReader = new CSVReader(new FileReader(csvFile), '\t');
 
         return csvToBean.parse(strategy, csvReader);
-    }
-
-    private <T> List<T> csvToBean(final File csvFile, Class<T> classToMap, final String... beanNames)
-            throws FileNotFoundException {
-        ColumnPositionMappingStrategy<T> strategy = new ColumnPositionMappingStrategy<>();
-        strategy.setType(classToMap);
-        strategy.setColumnMapping(beanNames);
-        return csvToBean(csvFile, strategy);
     }
 
     private <T> List<T> csvToBean(final File csvFile, Class<T> classToMap, final Map<String, String> columnToBeanNames)
