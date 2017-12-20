@@ -1,4 +1,4 @@
-package org.cytoscape.examine.internal.layout;
+package org.cwi.examine.internal.layout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,20 +8,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.cytoscape.examine.internal.data.HNode;
-import org.cytoscape.examine.internal.data.HSet;
-import org.cytoscape.examine.internal.data.Network;
-import org.cytoscape.examine.internal.graphics.PVector;
-import org.cytoscape.examine.internal.graphics.StaticGraphics;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import org.cytoscape.examine.internal.layout.dwyer.cola.Descent;
-import org.cytoscape.examine.internal.layout.dwyer.cola.Descent.Projection;
-import org.cytoscape.examine.internal.layout.dwyer.vpsc.Constraint;
-import org.cytoscape.examine.internal.layout.dwyer.vpsc.Variable;
-import org.cytoscape.examine.internal.layout.dwyer.vpsc.Solver;
-import org.cytoscape.examine.internal.model.Selection;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
+
+import org.cwi.examine.internal.data.Network;
+import org.cwi.examine.internal.graphics.PVector;
+import org.cwi.examine.internal.layout.dwyer.cola.Descent;
+import org.cwi.examine.internal.layout.dwyer.vpsc.Constraint;
+
+
+import org.cwi.examine.internal.molepan.dataread.DataRead;
+
+//import org.cwi.examine.internal.layout.mp.MolecularPartitioner;
+
+
+import org.cwi.examine.internal.visualization.Parameters;
+import org.cwi.examine.internal.data.HNode;
+import org.cwi.examine.internal.data.HAnnotation;
+import org.cwi.examine.internal.graphics.StaticGraphics;
+import org.cwi.examine.internal.layout.dwyer.vpsc.Variable;
+import org.cwi.examine.internal.layout.dwyer.vpsc.Solver;
+import org.cwi.examine.internal.model.Selection;
 import org.jgrapht.Graph;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.FloydWarshallShortestPaths;
@@ -31,18 +36,20 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
+import static org.cwi.examine.internal.graphics.StaticGraphics.*;
+
 public class Layout {
     static final double EDGE_SPACE              = 50;
     static final int    INITIAL_ITERATIONS      = 100000;
-    static final int    PHASE_ITERATIONS        = 100;
+    static final int    PHASE_ITERATIONS        = 10000;
     static final double SET_EDGE_CONTRACTION    = 0.5;
     
     // Network and set topology.
     public Network network;
     public Selection selection;
-    public List<HSet> sets;
+    public List<HAnnotation> sets;
     public final HNode[] nodes;
-    public final Map<HNode, List<HSet>> nodeMemberships;
+    public final Map<HNode, List<HAnnotation>> nodeMemberships;
     
     // Spanning set graphs.
     private WeightedGraph<HNode, DefaultEdge> minDistGraph;
@@ -58,10 +65,13 @@ public class Layout {
     private double[] radii;
     private double[][] mD;
     private double[][] P;
+    
+      private double[][] Temp;
+    
     private double[][] D;
     private double[][] G;
     private Descent descent;
-    
+   
     // Derived metrics.
     public PVector dimensions;
     
@@ -69,28 +79,31 @@ public class Layout {
         this.network = network;
         this.selection = selection;
         
-        // Order sets by size.
-        this.sets = new ArrayList<HSet>();
+        // Order annotations by size.
+        this.sets = new ArrayList<>();
         this.sets.addAll(selection.activeSetList);
-        Collections.sort(this.sets, new Comparator<HSet>() {
-            public int compare(HSet s1, HSet s2) {
-                return s1.elements.size() - s2.elements.size();
-            }
-        });
+        Collections.sort(this.sets, (s1, s2) -> s1.elements.size() - s2.elements.size());
         
         // Invert set membership for vertices.
         nodes = network.graph.vertexSet().toArray(new HNode[] {});
-        nodeMemberships = new HashMap<HNode, List<HSet>>();
+        nodeMemberships = new HashMap<>();
         for(HNode n: nodes) {
-            nodeMemberships.put(n, new ArrayList<HSet>());
+            nodeMemberships.put(n, new ArrayList<>());
         }
-        for(HSet s: sets) {
+        for(HAnnotation s: sets) {
             for(HNode n: s.elements) {
                 nodeMemberships.get(n).add(s);
             }
         }
         
+        
+      
         this.dimensions = PVector.v();
+        
+     
+        //MolecularPartitioner mp = new MolecularPartitioner(network);
+      
+        
         
         updatePositions(oldLayout);
     }
@@ -104,7 +117,7 @@ public class Layout {
         int vN = nodes.length;
             
         if(index == null) {
-            index = new HashMap<HNode, Integer>();
+            index = new HashMap<>();
             for(int i = 0; i < vN; i++) index.put(nodes[i], i);
             
             // Vertex line radii (width / 2) and base dilations (based on bounds height).
@@ -122,8 +135,8 @@ public class Layout {
                 for(int j = i + 1; j < vN; j++) {
                     double dil2 = baseDilations[j];
                     mD[i][j] = mD[j][i] =
-                        dil1 + dil2 + 2 * NODE_SPACE +
-                        RIBBON_EXTENT * membershipDiscrepancy(nodes[i], nodes[j]);
+                        dil1 + dil2 + 2 * Parameters.NODE_SPACE +
+                        Parameters.RIBBON_EXTENT * membershipDiscrepancy(nodes[i], nodes[j]);
                 }
             }
             
@@ -143,7 +156,9 @@ public class Layout {
             for(int i = 0; i < nodes.length; i++) {
                 PVector pos = oldLayout == null ? PVector.v() : oldLayout.position(richNodes[i]);
                 P[0][i] = pos.x;
-                P[1][i] = pos.y;
+                P[1][i] =  pos.y;
+                
+
             }
             
             // Gradient descent.
@@ -178,21 +193,101 @@ public class Layout {
         double minY = Double.MAX_VALUE;
         double maxX = Double.MIN_VALUE;
         double maxY = Double.MIN_VALUE;
+    /*    
         for(int i = 0; i < vN; i++) {
             minX = Math.min(minX, P[0][i]);
             minY = Math.min(minY, P[1][i]);
             maxX = Math.max(maxX, P[0][i]);
             maxY = Math.max(maxY, P[1][i]);
         }
-        this.dimensions = PVector.v(maxX - minX, maxY - minY);
+        this.dimensions = PVector.v(maxX - minX, maxY - minY); */
         
-        for(int i = 0; i < vN; i++) {
-            P[0][i] -= minX;
-            P[1][i] -= minY;
-        }
+          
+        
+        	  for(int i = 0; i < vN; i++) {
+    
+            P[1][i] = DataRead.coordinates[1][(DataRead.PosAtom [i % DataRead.atomNo]-1) ]*40; 
+            
+            
+      		P[0][i] =  DataRead.coordinates[0][(DataRead.PosAtom [i % DataRead.atomNo]-1) ]*40; 
+ 					//System.out.println("test " + DataRead.PosAtom [i-1 % (DataRead.atomNo)]);
+       			 }
+       
+         //System.out.println(vN);
+      
+
+    double fac = 40;
+
+/*
+P[0][9] =-2.83*fac; P[1][9] = 0.95*fac;  //1
+P[0][10] =-2.83*fac; P[1][10] = -0.55*fac; //2
+P[0][11] =-1.53*fac; P[1][11] = -1.29*fac; //3
+P[0][12] =-0.24*fac; P[1][12] = -0.55*fac; //4
+
+
+P[0][13] =-0.24*fac; P[1][13] = 0.95*fac; //5
+P[0][14] =1.06*fac; P[1][14] = 1.71*fac;
+
+
+
+P[0][15] =2.36*fac; P[1][15] = 0.95*fac;
+
+P[0][16] =2.36*fac; P[1][16] = -0.55*fac;
+P[0][17] =1.06*fac; P[1][17] = -1.29*fac;
+
+
+P[0][18] =2.36*fac; P[1][18] = -2.04*fac;
+
+
+P[0][0] =3.110208131003807*fac; P[1][0] = 2.048917918952455*fac;
+
+
+P[0][1] =3.110208131003807*fac; P[1][1] = -3.3389179189524545*fac;
+
+P[0][2] =4.610208111749353*fac; P[1][2] = -3.338677578853741*fac;
+
+P[0][3] =5.360416242753159*fac; P[1][3] = -4.637595497806196*fac;
+
+P[0][4] =6.860416223498705*fac; P[1][4] = -4.637355157707486*fac;
+
+P[0][5] =7.610624354502509*fac; P[1][5] = -5.936273076659942*fac;
+
+
+P[0][6] =4.610624393011419*fac; P[1][6] = -5.936273076659942*fac;
+
+P[0][7] =4.610624393011419*fac; P[1][7] = -7.437586839572579*fac;
+P[0][8] =3.3112256603763273*fac; P[1][8] = -6.68779498983084*fac;
+        
+
+
+
+
+1 (-2.83, 0.95)
+2 (-2.83, -0.55)
+3 (-1.53, -1.29)
+4 (-0.24, -0.55)
+5 (-0.24, 0.95)
+6 (1.06, 1.71)
+7 (2.36, 0.95)
+8 (2.36, -0.55)
+9 (1.06, -1.29)
+10 (2.36, -2.04
+
+11 (3.110208131003807, -3.3389179189524545)
+12 (4.610208111749353, -3.338677578853741)
+13 (5.360416242753159, -4.637595497806196)
+14 (6.860416223498705, -4.637355157707486)
+15 (7.610624354502509, -5.936273076659942)
+16 (4.610624393011419, -5.936753756857364)
+17 (4.610383919427495, -7.437586839572579)
+18 (3.3112256603763273, -6.68779498983084)        
+        
+) */
+        
+      
         
         return converged;
-    }
+    } 
     
     // Position of the given node, (0,0) iff null.
     public PVector position(HNode node) {
@@ -249,7 +344,7 @@ public class Layout {
         
         // Spanning graph per set.
         spanGraphs = new ArrayList<Graph<HNode, DefaultEdge>>();
-        for(HSet set: sets) {
+        for(HAnnotation set: sets) {
             SimpleWeightedGraph<HNode, DefaultEdge> weightedSubGraph =
                     new SimpleWeightedGraph<HNode, DefaultEdge>(DefaultWeightedEdge.class);
             for(HNode v: set.elements) {
@@ -314,7 +409,7 @@ public class Layout {
         }
         // Add all set span edges.
         for(int i = 0; i < sets.size(); i++) {
-            HSet s = sets.get(i);
+            HAnnotation s = sets.get(i);
             Graph<HNode, DefaultEdge> sG = spanGraphs.get(i);
             
             for(DefaultEdge e: sG.edgeSet()) {
@@ -382,26 +477,26 @@ public class Layout {
     public static PVector labelDimensions(HNode node, boolean padding) {
         double height = textHeight();
         
-        StaticGraphics.textFont(labelFont);
+        StaticGraphics.textFont(org.cwi.examine.internal.graphics.draw.Parameters.labelFont);
         return PVector.v(textWidth(node.toString()) /*+ NODE_OUTLINE*/ + (padding ? height : 0),
-                 height + NODE_OUTLINE);
+                 height + Parameters.NODE_OUTLINE);
     }
     
     public static PVector labelSpacedDimensions(HNode node) {
         return PVector.add(labelDimensions(node, true),
-                           PVector.v(NODE_OUTLINE + NODE_SPACE, NODE_OUTLINE + NODE_SPACE));
+                           PVector.v(Parameters.NODE_OUTLINE + Parameters.NODE_SPACE, Parameters.NODE_OUTLINE + Parameters.NODE_SPACE));
     }
     
     // Set membership discrepancy between two nodes.
     private int membershipDiscrepancy(HNode n1, HNode n2) {
         int discr = 0;
         
-        List<HSet> sets1 = nodeMemberships.get(n1);
-        List<HSet> sets2 = nodeMemberships.get(n2);
-        for(HSet s: sets1)
+        List<HAnnotation> sets1 = nodeMemberships.get(n1);
+        List<HAnnotation> sets2 = nodeMemberships.get(n2);
+        for(HAnnotation s: sets1)
             if(!s.set.contains(n2))
                 discr++;
-        for(HSet s: sets2)
+        for(HAnnotation s: sets2)
             if(!s.set.contains(n1))
                 discr++;
         
@@ -425,15 +520,15 @@ public class Layout {
             }
         }
 
-        public Projection[] projectFunctions() {
-            return new Projection[] {
-                new Projection() {
+        public Descent.Projection[] projectFunctions() {
+            return new Descent.Projection[] {
+                new Descent.Projection() {
                     @Override
                     public void apply(double[] x0, double[] y0, double[] r) {
                         xProject(x0, y0, r);
                     }
                 },
-                new Projection() {
+                new Descent.Projection() {
                     @Override
                     public void apply(double[] x0, double[] y0, double[] r) {
                         yProject(x0, y0, r);
@@ -524,11 +619,11 @@ public class Layout {
     
     public static class RichNode {
         public HNode element;
-        public List<HSet> memberships;
+        public List<HAnnotation> memberships;
 
         public RichNode(HNode element) {
             this.element = element;
-            this.memberships = new ArrayList<HSet>();
+            this.memberships = new ArrayList<HAnnotation>();
         }
 
         @Override
@@ -545,11 +640,11 @@ public class Layout {
     
     public static class RichEdge extends DefaultWeightedEdge {
         public boolean core;            // Whether edge is part of original graph.
-        public List<HSet> memberships;  // Set memberships.
+        public List<HAnnotation> memberships;  // Set memberships.
         public RichNode subNode;        // Optional dummy node that divides edge in extended graph.
         
         public RichEdge() {
-            memberships = new ArrayList<HSet>();
+            memberships = new ArrayList<HAnnotation>();
         }
     }
 }
