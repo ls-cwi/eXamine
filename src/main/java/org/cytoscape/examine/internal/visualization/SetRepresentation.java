@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.mouseEvent;
-
 // ProteinSet representation.
 public abstract class SetRepresentation extends Representation<HSet> {
 
@@ -62,7 +60,7 @@ public abstract class SetRepresentation extends Representation<HSet> {
     // Toggle selection state on mouse click.
     public void mouseClicked(MouseEvent e) {
         // Open website on ctrl click for relevant sets.
-        if(mouseEvent().isControlDown()) {
+        if(e.isControlDown()) {
             // URL to open.
             String url = element.url;
             

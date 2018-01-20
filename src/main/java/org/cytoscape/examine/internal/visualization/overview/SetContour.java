@@ -5,7 +5,7 @@ import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.graphics.Colors;
 import org.cytoscape.examine.internal.graphics.PVector;
-import org.cytoscape.examine.internal.graphics.StaticGraphics;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.model.Model;
 import org.cytoscape.examine.internal.visualization.SetColors;
 import org.cytoscape.examine.internal.visualization.SetRepresentation;
@@ -15,16 +15,9 @@ import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.fill;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.popStyle;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.pushStyle;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.stroke;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.strokeWeight;
-
 // Contour representation of a set.
 public class SetContour extends SetRepresentation {
+
     // Outline color weight and color.
     public static final double OUTLINE_WEIGHT = 1.75f;
     public static final Color OUTLINE_COLOR = Colors.grey(0.33f);
@@ -65,28 +58,28 @@ public class SetContour extends SetRepresentation {
 
     // Draw body.
     @Override
-    public void draw() {
+    public void draw(AnimatedGraphics g) {
         boolean highlight = highlight();
         
-        picking();
+        g.picking();
         
-        color(bandColor(), BODY_OPACITY);
-        fill(bodyShape);
+        g.color(bandColor(), BODY_OPACITY);
+        g.fill(bodyShape);
         
         // Solid outline in back.
-        color(highlight ? OUTLINE_HIGHLIGHT_COLOR : OUTLINE_COLOR);
-        strokeWeight(highlight ? OUTLINE_HIGHLIGHT_WEIGHT : OUTLINE_WEIGHT);
-        StaticGraphics.draw(outlineShape);
+        g.color(highlight ? OUTLINE_HIGHLIGHT_COLOR : OUTLINE_COLOR);
+        g.strokeWeight(highlight ? OUTLINE_HIGHLIGHT_WEIGHT : OUTLINE_WEIGHT);
+        g.draw(outlineShape);
     }
     
     // Draw outline.
-    public void drawOutline() {
+    public void drawOutline(AnimatedGraphics g) {
         boolean highlight = highlight();
         
-        color(highlight ? OUTLINE_HIGHLIGHT_COLOR : OUTLINE_COLOR);
+        g.color(highlight ? OUTLINE_HIGHLIGHT_COLOR : OUTLINE_COLOR);
         
         // Dithered outline in front (hack to Graphics2D).
-        pushStyle();
+        g.pushStyle();
         BasicStroke pen = new BasicStroke(
                 (float) (highlight ? OUTLINE_HIGHLIGHT_WEIGHT : OUTLINE_WEIGHT) - .25f,
                 BasicStroke.CAP_ROUND,
@@ -94,15 +87,15 @@ public class SetContour extends SetRepresentation {
                 4f,
                 new float[]{3f, 3f},
                 0f);
-        stroke(pen);
+        g.stroke(pen);
         
-        StaticGraphics.draw(outlineShape);
+        g.draw(outlineShape);
         
-        popStyle();
+        g.popStyle();
     }
 
     @Override
-    public PVector dimensions() {
+    public PVector dimensions(AnimatedGraphics g) {
         return PVector.v();
     }
     

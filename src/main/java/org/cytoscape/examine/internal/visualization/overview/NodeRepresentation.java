@@ -3,7 +3,7 @@ package org.cytoscape.examine.internal.visualization.overview;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.graphics.PVector;
-import org.cytoscape.examine.internal.graphics.StaticGraphics;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.graphics.draw.Representation;
 import org.cytoscape.examine.internal.layout.Layout;
 import org.cytoscape.examine.internal.model.Model;
@@ -25,16 +25,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.fill;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.mouseEvent;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.strokeWeight;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.text;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.translate;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.containmentColor;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.textContainedColor;
-import static org.cytoscape.examine.internal.visualization.Parameters.NODE_OUTLINE;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.CONTAINMENT_COLOR;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.TEXT_CONTAINED_COLOR;
+import static org.cytoscape.examine.internal.visualization.Constants.NODE_OUTLINE;
 
 // Node representation.
 public class NodeRepresentation extends Representation<HNode> {
@@ -48,36 +41,36 @@ public class NodeRepresentation extends Representation<HNode> {
     }
 
     @Override
-    public PVector dimensions() {
+    public PVector dimensions(AnimatedGraphics g) {
         return PVector.v();
     }
 
     @Override
-    public void draw() {
-        color(Color.BLACK);
-        translate(topLeft);
+    public void draw(AnimatedGraphics g) {
+        g.color(Color.BLACK);
+        g.translate(topLeft);
         
         // Get label bounds, but also sets label font.
-        PVector bounds = Layout.labelDimensions(element, true);
+        PVector bounds = Layout.labelDimensions(g, element, true);
         Shape shape = shape(bounds);
-        translate(-0.5 * bounds.x, -0.5 * bounds.y);
+        g.translate(-0.5 * bounds.x, -0.5 * bounds.y);
         
         // Background rectangle.
-        color(highlight() ? containmentColor :
+        g.color(highlight() ? CONTAINMENT_COLOR :
                             (Color) styleValue(BasicVisualLexicon.NODE_FILL_COLOR));
-        fill(shape);
+        g.fill(shape);
         //fillRect(0, 0, bounds.x, bounds.y, bounds.y);
         
         // Foreground outline with color coding.
-        color((Color) styleValue(BasicVisualLexicon.NODE_BORDER_PAINT));
-        strokeWeight(styleValue(BasicVisualLexicon.NODE_BORDER_WIDTH));
-        StaticGraphics.draw(shape);
+        g.color((Color) styleValue(BasicVisualLexicon.NODE_BORDER_PAINT));
+        g.strokeWeight(styleValue(BasicVisualLexicon.NODE_BORDER_WIDTH));
+        g.draw(shape);
         //drawRect(0, 0, bounds.x, bounds.y, bounds.y);
         
-        picking();
-        color(highlight() ? textContainedColor :
+        g.picking();
+        g.color(highlight() ? TEXT_CONTAINED_COLOR :
                             (Color) styleValue(BasicVisualLexicon.NODE_LABEL_COLOR));
-        text(element.toString(), 0.5 * (bounds.y + NODE_OUTLINE) - 3,
+        g.text(element.toString(), 0.5 * (bounds.y + NODE_OUTLINE) - 3,
                                  bounds.y - NODE_OUTLINE - 3);
     }
     
@@ -169,7 +162,7 @@ public class NodeRepresentation extends Representation<HNode> {
     @Override
     public void mouseClicked(MouseEvent e) {
         // Open website(s) on ctrl click.
-        if(mouseEvent().isControlDown()) {
+        if(e.isControlDown()) {
             if(element.url != null && element.url.trim().length() > 0) {
                 try {
                     Desktop.getDesktop().browse(URI.create(element.url));

@@ -6,13 +6,17 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.operation.union.CascadedPolygonUnion;
-import java.awt.Shape;
+import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.Shapes;
+
+import java.awt.*;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.List;
-import org.cytoscape.examine.internal.graphics.PVector;
-import static org.cytoscape.examine.internal.graphics.PVector.*;
-import org.cytoscape.examine.internal.graphics.StaticGraphics;
+
+import static org.cytoscape.examine.internal.graphics.PVector.angle;
+import static org.cytoscape.examine.internal.graphics.PVector.sub;
+import static org.cytoscape.examine.internal.graphics.PVector.v;
 
 // Visualization utility functions.
 public class Util {
@@ -95,7 +99,7 @@ public class Util {
                 PVector mid = vs[midC];
                 PVector end = vs[nextBreak];
 
-                path.append(StaticGraphics.getArc(begin, mid, end), true);
+                path.append(Shapes.getArc(begin, mid, end), true);
             }
                 
             path.closePath();

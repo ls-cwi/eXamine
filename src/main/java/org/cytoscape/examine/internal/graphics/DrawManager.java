@@ -1,29 +1,30 @@
 package org.cytoscape.examine.internal.graphics;
 
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
+import org.cytoscape.examine.internal.graphics.draw.PickingGraphics2D;
 import org.cytoscape.examine.internal.graphics.draw.Snippet;
+
+import java.awt.*;
 import java.awt.geom.AffineTransform;
-import static java.lang.Math.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import org.cytoscape.examine.internal.graphics.draw.PickingGraphics2D;
+
+import static java.lang.Math.min;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.MOVE_TRANSITION_DURATION;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.PRESENCE_TRANSITION_DURATION;
 
 // Draw and animation manager.
 public class DrawManager {
-    
-    // Parent application.
-    private Application parent;
     
     // Time point of last global draw.
     private long oT;
     
     // Time difference since last global draw.
     private double dT;
+
+    private double mD = 0.5f * MOVE_TRANSITION_DURATION;
     
     // Mapping of snippets to managed values.
     private HashMap<Snippet, SnippetValues> snippets;
@@ -34,7 +35,7 @@ public class DrawManager {
     // Picking graphics buffer.
     private PickingGraphics2D pickingGraphics;
     
-    // XProcessing graphics to delegate to for drawn snippet.
+    // Graphics to delegate to for drawn snippet.
     protected Graphics2D pg;
     
     // Whether coordinate and color values are being
@@ -48,35 +49,29 @@ public class DrawManager {
     protected SnippetValues snippetValues;
     
     // Hovered snippet.
-    public Snippet hovered;
+    protected Snippet hovered;
     
     // Post screen phase flag.
     private boolean postScreen;
     
     // Style and transform stacks.
-    protected ArrayList<Style> styleStack;
-    protected ArrayList<AffineTransform> transformStack;
+    private ArrayList<Style> styleStack;
+    private ArrayList<AffineTransform> transformStack;
     
     /**
      * Base constructor.
      */
-    public DrawManager(Application parent) {
-        this.parent = parent;
+    DrawManager() {
         this.snippets = new HashMap<Snippet, SnippetValues>(10000);
         this.styleStack = new ArrayList<Style>();
         this.transformStack = new ArrayList<AffineTransform>();
-        
-        // Get Draw context focus.
-        StaticGraphics.dm = this;
-        StaticGraphics.application = parent;
     }
     
     /**
      * Install new picking buffer.
      */
-    public void updatePickingBuffer() {
-        pickingGraphics = new PickingGraphics2D(
-                defaultGraphics, this.parent.getWidth(), this.parent.getHeight());
+    public void updatePickingBuffer(int width, int height) {
+        pickingGraphics = new PickingGraphics2D(defaultGraphics, width, height);
     }
     
     /**
@@ -122,8 +117,8 @@ public class DrawManager {
     /**
      * Fix: recurrent call.
      */
-    public void postScreen() {
-        // Entering post screenphase.
+    public void postScreen(AnimatedGraphics animatedGraphics) {
+        // Entering post screen phase.
         postScreen = true;
         
         // Fade away and/or remove redundant snippets.
@@ -134,7 +129,7 @@ public class DrawManager {
             
             // Fade in.
             if(sv.drawn) {
-                sv.presence = min(1f, sv.presence + dT / presenceDuration);
+                sv.presence = min(1f, sv.presence + dT / PRESENCE_TRANSITION_DURATION);
             }
             // Fade out and remove.
             else {
@@ -144,29 +139,29 @@ public class DrawManager {
                 }
                 // Fade out.
                 else {
-                    sv.presence -= dT / presenceDuration;
+                    sv.presence -= dT / PRESENCE_TRANSITION_DURATION;
                 }
             }
         }
         
         // Draw non-drawn snippets.
-        StaticGraphics.pushTransform();
-        StaticGraphics.pushStyle();
+        pushTransform();
+        pushStyle();
         for(Entry<Snippet, SnippetValues> r: snippets.entrySet()) {
             Snippet s = r.getKey();
             SnippetValues sv = r.getValue();
             
             if(!sv.drawn) {
                 // Apply last known transformation and style.
-                StaticGraphics.dm.pg.setTransform(sv.transform);
-                StaticGraphics.style(sv.style);
+                pg.setTransform(sv.transform);
+                setStyle(sv.style);
 
                 // Draw snippet, push to back.
-                snippet(s);
+                snippet(s, animatedGraphics);
             }
         }
-        StaticGraphics.popStyle();
-        StaticGraphics.popTransform();
+        popStyle();
+        popTransform();
     }
     
     public void prePicking() {
@@ -189,13 +184,11 @@ public class DrawManager {
         // Initialize picking buffer.
         pickingGraphics.preDraw();
     }
-    
-    public void postPicking() {
-        //pg.endDraw();
-        
+
+    public Snippet updateHoveredSnippet(int mouseX, int mouseY) {
         // Determine object under mouse.
-        int pickId = pickingGraphics.closestSnippetId(parent.mouseX, parent.mouseY);
-        
+        int pickId = pickingGraphics.closestSnippetId(mouseX, mouseY);
+
         // Remove redundant snippets and determine hovered snippet.
         Snippet oldHovered = hovered;
         hovered = null;
@@ -206,28 +199,65 @@ public class DrawManager {
                 hovered = r.getKey();
             }
         }
-        
+
         // Call hover transition methods on snippet.
         if(hovered != oldHovered) {
             if(oldHovered != null) {
                 oldHovered.endHovered();
             }
-            
+
             if(hovered != null) {
                 hovered.beginHovered();
             }
         }
-        
-        // Adapt cursor to hover.
-        StaticGraphics.cursor(hovered == null ?
-                Cursor.getDefaultCursor() :
-                Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        return hovered;
+    }
+
+    public void pushTransform() {
+        transformStack.add(pg.getTransform());
+    }
+
+    public void popTransform() {
+        pg.setTransform(transformStack.remove(transformStack.size() - 1));
+    }
+
+    public void pushStyle() {
+        styleStack.add(getStyle());
+    }
+
+    public void popStyle() {
+        Style style = styleStack.remove(styleStack.size() - 1);
+        setStyle(style);
+    }
+
+    public void setStyle(Style style) {
+        pg.setPaint(style.paint);
+        pg.setStroke(style.stroke);
+    }
+
+    public Style getStyle() {
+        return new Style(pg.getPaint(), pg.getStroke());
+    }
+
+    // Any drawn geometry will be picked.
+    public void picking() {
+        if(pg instanceof PickingGraphics2D) {
+            ((PickingGraphics2D) pg).picking();
+        }
+    }
+
+    // No drawn geometry will be picked.
+    public void noPicking() {
+        if(pg instanceof PickingGraphics2D) {
+            ((PickingGraphics2D) pg).noPicking();
+        }
     }
     
     /**
      * Draw a snippet.
      */
-    public void snippet(Snippet s) {        
+    public void snippet(Snippet s, AnimatedGraphics animatedGraphics) {
         // Store current state (for nested snippets).
         boolean oldTransitioning = transitioning;
         SnippetValues oldSnippetValues = snippetValues;
@@ -265,17 +295,17 @@ public class DrawManager {
             ti = 0;
 
             // Push transformation matrix and style (isolate snippet).
-            StaticGraphics.pushTransform();
-            StaticGraphics.pushStyle();
+            pushTransform();
+            pushStyle();
 
             // For screen draw, prevent duplicate draw for fading out snippets.
             if(pg == defaultGraphics) {
                 // Store last know transformation matrix and style.
-                snippetValues.transform.setTransform(StaticGraphics.dm.pg.getTransform());
-                snippetValues.style = StaticGraphics.getStyle();
+                snippetValues.transform.setTransform(pg.getTransform());
+                snippetValues.style = getStyle();
 
                 // Draw.
-                s.draw();
+                s.draw(animatedGraphics);
             }
             // For picking draw.
             else {
@@ -283,22 +313,20 @@ public class DrawManager {
                 pickingGraphics.snippetId = snippetValues.id;
 
                 // Draw.
-                s.draw();
+                s.draw(animatedGraphics);
             }
 
             // Pop transformation matrix and style.
-            StaticGraphics.popStyle();
-            StaticGraphics.popTransform();
+            popStyle();
+            popTransform();
         }
         
         // Restore old state (for nested snippets).
         ti = oldTi;
         snippetValues = oldSnippetValues;
         transitioning = oldTransitioning;
-        StaticGraphics.noPicking();
+        noPicking();
     }
-    
-    protected double mD = 0.5f * moveDuration;
     
     // Additional information that is maintained for a snippet during its lifespan.
     public class SnippetValues {
@@ -316,7 +344,7 @@ public class DrawManager {
         protected int id;
         
         // Extent of presence in the scene, includes delay.
-        protected double presence = -moveDuration / presenceDuration;
+        protected double presence = -MOVE_TRANSITION_DURATION / PRESENCE_TRANSITION_DURATION;
         
         // Intermediate state of doubles that are transitioned over.
         private Intermediate[] intermediates = new Intermediate[20];

@@ -1,5 +1,6 @@
 package org.cytoscape.examine.internal.graphics.draw;
 
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.graphics.PVector;
 
 /**
@@ -34,13 +35,13 @@ public abstract class PositionedSnippet extends Snippet {
     /**
      * Dimensions (panned space).
      */
-    public abstract PVector dimensions();
+    public abstract PVector dimensions(AnimatedGraphics graphics);
     
     /**
      * Top right position. Derived from top left and dimensions.
      */
-    public PVector topRight() {
-        return PVector.v(topLeft.x + dimensions().x, topLeft.y);
+    public PVector topRight(AnimatedGraphics graphics) {
+        return PVector.v(topLeft.x + dimensions(graphics).x, topLeft.y);
     }
     
 }

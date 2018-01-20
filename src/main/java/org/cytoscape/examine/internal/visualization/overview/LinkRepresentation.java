@@ -2,6 +2,7 @@ package org.cytoscape.examine.internal.visualization.overview;
 
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.examine.internal.graphics.draw.Representation;
 import org.cytoscape.examine.internal.model.Model;
@@ -11,13 +12,9 @@ import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.circleArc;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.strokeWeight;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.backgroundColor;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.textColor;
-import static org.cytoscape.examine.internal.visualization.Parameters.LINK_WIDTH;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.BACKGROUND_COLOR;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.TEXT_COLOR;
+import static org.cytoscape.examine.internal.visualization.Constants.LINK_WIDTH;
 
 // Link representation.
 public class LinkRepresentation extends Representation<LinkRepresentation.Link> {
@@ -40,31 +37,31 @@ public class LinkRepresentation extends Representation<LinkRepresentation.Link> 
     }
 
     @Override
-    public PVector dimensions() {
+    public PVector dimensions(AnimatedGraphics g) {
         return PVector.v();
     }
 
     @Override
-    public void draw() {
+    public void draw(AnimatedGraphics g) {
         boolean highlight = model.highlightedInteractions.get().contains(edge);
         
-        picking();
+        g.picking();
 
         // Halo.
         double haloWeight = highlight ? LINK_WIDTH + 4f : LINK_WIDTH + 2f;
-        color(backgroundColor);
-        strokeWeight(haloWeight);
-        drawLink();
+        g.color(BACKGROUND_COLOR);
+        g.strokeWeight(haloWeight);
+        drawLink(g);
         
         // Actual edge.
         double edgeWeight = highlight ? LINK_WIDTH + 2f : LINK_WIDTH;
-        color(highlight ? Color.BLACK: textColor);
-        strokeWeight(edgeWeight);
-        drawLink();
+        g.color(highlight ? Color.BLACK: TEXT_COLOR);
+        g.strokeWeight(edgeWeight);
+        drawLink(g);
     }
     
-    private void drawLink() {
-        circleArc(cs[0], cs[1], cs[2]);
+    private void drawLink(AnimatedGraphics g) {
+        g.circleArc(cs[0], cs[1], cs[2]);
         //drawLineString(ls);
         //drawLine(cs[0], cs[1]);
         //drawLine(cs[1], cs[2]);

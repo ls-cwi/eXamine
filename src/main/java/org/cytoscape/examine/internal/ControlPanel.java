@@ -11,7 +11,6 @@ import org.cytoscape.examine.internal.model.Model;
 import org.cytoscape.examine.internal.visualization.Visualization;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
-import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyTable;
@@ -46,10 +45,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("serial")
@@ -103,343 +100,6 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	// Network settings, maintained for several networks as to accommodate
 	// storing and retrieval of settings upon network selection change
 	private Map<Long, NetworkSettings> networkSettings;
-
-	private Visualization activeVisualization;
-
-	/**
-	 * Ensures current network settings match UI, called upon UI changes.
-	 * 
-	 * @author melkebir
-	 * 
-	 */
-	private class ItemChangeListener implements ItemListener {
-		@Override
-		public void itemStateChanged(ItemEvent event) {
-			// update network settings to match ui
-			int idxNodeLabel = cmbNodeLabel.getSelectedIndex();
-			int idxNodeURL = cmbNodeURL.getSelectedIndex();
-			int idxGroupScore = cmbGroupScore.getSelectedIndex();
-			int idxGroupSelection = cmbGroupSelection.getSelectedIndex();
-
-			NetworkSettings ns = networkSettings.get(currentNetworkSUID);
-			if (ns != null) {
-				ns.setSelectedLabelColumn(idxNodeLabel);
-				ns.setSelectedURLColumn(idxNodeURL);
-				ns.setSelectedScoreColumn(idxGroupScore);
-				ns.setGroupSelection(Selection.values()[idxGroupSelection]);
-				ns.setShowScore(showScoreCheckBox.isSelected());
-	
-				ArrayList<Integer> selectedGroups = new ArrayList<Integer>();
-				ArrayList<Integer> groupSizes = new ArrayList<Integer>();
-				for (int idxGroup = 0; idxGroup < checkBoxes.length; idxGroup++) {
-					if (checkBoxes[idxGroup].isSelected()) {
-						selectedGroups.add(idxGroup);
-						spinners[idxGroup].setEnabled(true);
-					} else {
-						spinners[idxGroup].setEnabled(false);
-					}
-					
-					Integer size = (Integer) spinners[idxGroup].getModel().getValue();
-					groupSizes.add(size);
-				}
-				ns.setSelectedGroupColumns(selectedGroups);
-				ns.setAllGroupColumnSizes(groupSizes);
-	
-				updateButtons();
-			}
-		}
-	}
-
-	/**
-	 * Stores network settings, including selected columns and column names.
-	 * 
-	 * @author melkebir
-	 * 
-	 */
-	private class NetworkSettings {
-		private Long networkSUID;
-		private List<String> columnNames;
-		private Set<String> columnNamesSet = new HashSet<String>();
-		private List<Integer> allGroupColumns = new ArrayList<Integer>();
-		private List<Integer> allGroupColumnSizes = new ArrayList<Integer>();
-		private List<Integer> allStringColumns = new ArrayList<Integer>();
-		private List<Integer> allDoubleColumns = new ArrayList<Integer>();
-		private List<Integer> selectedGroupColumns = new ArrayList<Integer>();
-		private int selectedLabelColumn = 0;
-		private int selectedURLColumn = 0;
-		private int selectedScoreColumn = 0;
-		private Constants.Selection groupSelection = Constants.Selection.NONE;
-		private boolean showScore = true;
-
-		public boolean getShowScore() {
-			return showScore;
-		}
-
-		public void setShowScore(boolean showScore) {
-			this.showScore = showScore;
-		}
-
-		public NetworkSettings(CyNetwork network) {
-			this.networkSUID = network.getSUID();
-
-			// columnNames
-			List<CyColumn> columns = new ArrayList<CyColumn>();
-			columns.addAll(network.getDefaultNodeTable().getColumns());
-
-			columnNames = new ArrayList<String>(columns.size());
-
-			int i = 0;
-			for (CyColumn c : columns) {
-				columnNames.add(c.getName());
-				columnNamesSet.add(c.getName());
-
-				if (c.getListElementType() == String.class) {
-					if (c.getName().equals("Pathway")) {
-						selectedGroupColumns.add(allGroupColumns.size());
-					}
-					allGroupColumns.add(i);
-					allGroupColumnSizes.add(Constants.CATEGORY_MAX_SIZE);
-				} else if (c.getType() == String.class) {
-					if (c.getName().equals("URL")) {
-						selectedURLColumn = allStringColumns.size();
-					} else if (c.getName().equals("Symbol")) {
-						selectedLabelColumn = allStringColumns.size();
-					}
-					allStringColumns.add(i);
-				} else if (c.getType() == Double.class) {
-					if (c.getName().equals("Score")) {
-						selectedScoreColumn = allDoubleColumns.size();
-					}
-					allDoubleColumns.add(i);
-				}
-
-				i++;
-			}
-			
-			showScore = allDoubleColumns.size() > 0;
-		}
-		
-		private List<String> getColumnNames(List<Integer> indices) {
-			ArrayList<String> res = new ArrayList<String>();
-			for (Integer i : indices) {
-				res.add(columnNames.get(i));
-			}
-			return res;
-		}
-
-		public boolean existsColumn(String columnName) {
-			return columnNamesSet.contains(columnName);
-		}
-
-		/**
-		 * Adds a column to the current network settings.
-		 * 
-		 * @param network
-		 * @param addedColumnName
-		 */
-		public void addColumnName(CyNetwork network, String addedColumnName) {
-			CyColumn c = network.getDefaultNodeTable().getColumn(addedColumnName);
-			if (c == null)
-				return;
-			
-			if (existsColumn(addedColumnName) && c != null)
-				return;
-
-			columnNamesSet.add(addedColumnName);
-			columnNames.add(addedColumnName);
-			int i = columnNames.size() - 1;
-
-			if (c.getListElementType() == String.class) {
-				allGroupColumns.add(i);
-				allGroupColumnSizes.add(Constants.CATEGORY_MAX_SIZE);
-			} else if (c.getType() == String.class) {
-				allStringColumns.add(i);
-			} else if (c.getType() == Double.class) {
-				allDoubleColumns.add(i);
-			}
-		}
-
-		/**
-		 * Changes name of column with name oldName to newName.
-		 * 
-		 * @param oldName
-		 * @param newName
-		 */
-		public void changeColumnName(String oldName, String newName) {
-			for (int i = 0; i < columnNames.size(); i++) {
-				if (columnNames.get(i).equals(oldName)) {
-					columnNames.set(i, newName);
-				}
-			}
-			
-			columnNamesSet.remove(oldName);
-			columnNamesSet.add(newName);
-		}
-
-		/**
-		 * Deletes column with name deletedColumnName.
-		 * 
-		 * @param deletedColumnName
-		 */
-		public void deleteColumnName(String deletedColumnName) {
-			boolean somethingDeleted = false;
-			
-			int deletedIdx;
-			for (deletedIdx = 0; deletedIdx < columnNames.size(); deletedIdx++) {
-				if (columnNames.get(deletedIdx).equals(deletedColumnName)) {
-					columnNames.remove(deletedIdx);
-					somethingDeleted = true;
-					break;
-				}
-			}
-
-			if (!somethingDeleted) {
-				return;
-			}
-			
-			columnNamesSet.remove(deletedColumnName);
-
-			int idx = 0;
-			for (Integer stringIdx : allStringColumns) {
-				if (stringIdx == deletedIdx) {
-					if (selectedLabelColumn == idx) {
-						selectedLabelColumn = 0;
-					} else if (selectedURLColumn == idx) {
-						selectedURLColumn = 0;
-					}
-					break;
-				}
-				idx++;
-			}
-			allStringColumns.remove(deletedIdx);
-
-			idx = 0;
-			for (Integer doubleIdx : allDoubleColumns) {
-				if (doubleIdx == deletedIdx) {
-					if (selectedScoreColumn == idx) {
-						selectedScoreColumn = 0;
-					}
-					break;
-				}
-				idx++;
-			}
-			allDoubleColumns.remove(deletedIdx);
-
-			idx = 0;
-			for (Integer grpIdx : allGroupColumns) {
-				if (grpIdx == deletedIdx) {
-					if (selectedGroupColumns.contains(idx)) {
-						selectedGroupColumns.remove(idx);
-					}
-					break;
-				}
-				idx++;
-			}
-			allGroupColumns.remove(deletedIdx);
-			allGroupColumnSizes.remove(deletedIdx);
-		}
-
-		public int getSelectedLabelColumn() {
-			return selectedLabelColumn;
-		}
-
-		public void setSelectedLabelColumn(int selectedLabelColumn) {
-			this.selectedLabelColumn = selectedLabelColumn;
-		}
-		
-		public String getSelectedLabelColumnName() {
-			return columnNames.get(allStringColumns.get(selectedLabelColumn));
-		}
-
-		public int getSelectedURLColumn() {
-			return selectedURLColumn;
-		}
-
-		public void setSelectedURLColumn(int selectedURLColumn) {
-			this.selectedURLColumn = selectedURLColumn;
-		}
-		
-		public String getSelectedURLColumnName() {
-			return columnNames.get(allStringColumns.get(selectedURLColumn));
-		}
-
-		public int getSelectedScoreColumn() {
-			return selectedScoreColumn;
-		}
-
-		public void setSelectedScoreColumn(int selectedScoreColumn) {
-			this.selectedScoreColumn = selectedScoreColumn;
-		}
-		
-		public String getSelectedScoreColumnName() {
-      if (allDoubleColumns.size() == 0) {
-        return null;
-      } else {
-			  return columnNames.get(allDoubleColumns.get(selectedScoreColumn));
-      }
-		}
-
-		public List<Integer> getSelectedGroupColumns() {
-			return selectedGroupColumns;
-		}
-		
-		public List<String> getSelectedGroupColumnNames() {
-			ArrayList<Integer> mappedIndices = new ArrayList<Integer>();
-			for (Integer i : selectedGroupColumns) {
-				mappedIndices.add(allGroupColumns.get(i));
-			}
-			return getColumnNames(mappedIndices);
-		}
-
-		public List<Integer> getSelectedGroupColumnSizes() {
-			ArrayList<Integer> res = new ArrayList<Integer>();
-			for (Integer i : selectedGroupColumns) {
-				res.add(allGroupColumnSizes.get(i));
-			}
-			return res;
-		}
-		
-		public void setSelectedGroupColumns(ArrayList<Integer> selectedGroupColumns) {
-			this.selectedGroupColumns = selectedGroupColumns;
-		}
-
-		public List<String> getColumnNames() {
-			return columnNames;
-		}
-
-		public List<Integer> getAllGroupColumns() {
-			return allGroupColumns;
-		}
-		
-		public List<Integer> getAllGroupColumnSizes() {
-			return allGroupColumnSizes;
-		}
-		
-		public void setAllGroupColumnSizes(List<Integer> allGroupColumnSizes) {
-			this.allGroupColumnSizes = allGroupColumnSizes;
-		}
-
-
-		public List<Integer> getAllStringColumns() {
-			return allStringColumns;
-		}
-
-		public List<Integer> getAllDoubleColumns() {
-			return allDoubleColumns;
-		}
-
-		public String getColumnName(int i) {
-			return columnNames.get(i);
-		}
-
-		public Constants.Selection getGroupSelection() {
-			return groupSelection;
-		}
-
-		public void setGroupSelection(Constants.Selection groupSelection) {
-			this.groupSelection = groupSelection;
-		}
-	}
 
 	public ControlPanel(
 			CyNetworkManager networkManager,
@@ -825,22 +485,21 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
      * Open a new visualization window.
      */
     private void openVisualizationWindow(NetworkSettings networkSettings) {
-        DataSet dataSet = new DataSet();
-        dataSet.load(
+        final DataSet dataSet = new DataSet(
                 applicationManager.getCurrentNetwork(),
+				groupManager,
                 networkSettings.getSelectedLabelColumnName(),
                 networkSettings.getSelectedURLColumnName(),
                 networkSettings.getSelectedScoreColumnName(),
                 networkSettings.getSelectedGroupColumnNames(),
-                networkSettings.getSelectedGroupColumnSizes(),
-                groupManager
+                networkSettings.getSelectedGroupColumnSizes()
         );
 
-        Model model = new Model(dataSet, applicationManager, visualMappingManager);
+        final Model model = new Model(dataSet, applicationManager, visualMappingManager);
         model.setSelectionMode(networkSettings.getGroupSelection());
         model.selection.change.signal();
 
-        activeVisualization = new Visualization(dataSet, model, networkSettings.getShowScore());
+        new Visualization(dataSet, model, networkSettings.getShowScore());
     }
 
 	/**
@@ -1120,4 +779,49 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			});
 		}
 	}
+
+	/**
+	 * Ensures current network settings match UI, called upon UI changes.
+	 *
+	 * @author melkebir
+	 *
+	 */
+	private class ItemChangeListener implements ItemListener {
+		@Override
+		public void itemStateChanged(ItemEvent event) {
+			// update network settings to match ui
+			int idxNodeLabel = cmbNodeLabel.getSelectedIndex();
+			int idxNodeURL = cmbNodeURL.getSelectedIndex();
+			int idxGroupScore = cmbGroupScore.getSelectedIndex();
+			int idxGroupSelection = cmbGroupSelection.getSelectedIndex();
+
+			NetworkSettings ns = networkSettings.get(currentNetworkSUID);
+			if (ns != null) {
+				ns.setSelectedLabelColumn(idxNodeLabel);
+				ns.setSelectedURLColumn(idxNodeURL);
+				ns.setSelectedScoreColumn(idxGroupScore);
+				ns.setGroupSelection(Selection.values()[idxGroupSelection]);
+				ns.setShowScore(showScoreCheckBox.isSelected());
+
+				ArrayList<Integer> selectedGroups = new ArrayList<Integer>();
+				ArrayList<Integer> groupSizes = new ArrayList<Integer>();
+				for (int idxGroup = 0; idxGroup < checkBoxes.length; idxGroup++) {
+					if (checkBoxes[idxGroup].isSelected()) {
+						selectedGroups.add(idxGroup);
+						spinners[idxGroup].setEnabled(true);
+					} else {
+						spinners[idxGroup].setEnabled(false);
+					}
+
+					Integer size = (Integer) spinners[idxGroup].getModel().getValue();
+					groupSizes.add(size);
+				}
+				ns.setSelectedGroupColumns(selectedGroups);
+				ns.setAllGroupColumnSizes(groupSizes);
+
+				updateButtons();
+			}
+		}
+	}
+
 }

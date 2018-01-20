@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.examine.internal.graphics.draw.PositionedSnippet;
 import org.cytoscape.examine.internal.layout.Layout;
@@ -21,17 +22,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.fillRect;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.noPicking;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.noTransition;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.scale;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.snippets;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.textFont;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.transition;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.translate;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.labelFont;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
 
 // Network overview.
 public class Overview extends PositionedSnippet {
@@ -64,6 +55,8 @@ public class Overview extends PositionedSnippet {
     private PVector panTranslation;
     private Point2D lastMousePos;
 
+    private AnimatedGraphics lastAnimatedGraphics;
+
     public Overview(Model model, SetColors setColors) {
         this.model = model;
         this.setColors = setColors;
@@ -85,7 +78,9 @@ public class Overview extends PositionedSnippet {
     }
     
     @Override
-    public void draw() {
+    public void draw(AnimatedGraphics g) {
+        lastAnimatedGraphics = g;
+
         // Constrain panning and zooming.
         double minZoom = 0.75 * (span.x > 0 && span.y > 0 ?
                                  Math.min(bounds.x / span.x, bounds.y / span.y) :
@@ -103,46 +98,46 @@ public class Overview extends PositionedSnippet {
             updater.start();
         }
         
-        translate(topLeft);
+        g.translate(topLeft);
         
         // Background rectangle for interaction.
-        color(new Color(1f,1f,1f,0f));
-        picking();
-        fillRect(0, 0, bounds.x, bounds.y);
-        noPicking();
+        g.color(new Color(1f,1f,1f,0f));
+        g.picking();
+        g.fillRect(0, 0, bounds.x, bounds.y);
+        g.noPicking();
 
         // Center overview.
-        noTransition();
-        translate(0.5 * bounds.x, 0.5 * bounds.y);
-        translate(panTranslation.x, panTranslation.y);
-        scale(zoomFactor, zoomFactor);
-        transition();
-        
-        translate(-0.5 * span.x, -0.5 * span.y);
+        g.noTransition();
+        g.translate(0.5 * bounds.x, 0.5 * bounds.y);
+        g.translate(panTranslation.x, panTranslation.y);
+        g.scale(zoomFactor, zoomFactor);
+        g.transition();
+
+        g.translate(-0.5 * span.x, -0.5 * span.y);
 
         // Small font.
-        textFont(labelFont);
+        g.textFont(LABEL_FONT);
 
         // Set bodies first, then outlines on top.
         synchronized (setRepresentations) {
-            snippets(setRepresentations);
+            g.snippets(setRepresentations);
 
-            noTransition();
+            g.noTransition();
             for (SetContour sR : setRepresentations) {
-                sR.drawOutline();
+                sR.drawOutline(g);
             }
-            transition();
+            g.transition();
         }
         synchronized (interactionRepresentations) {
-            snippets(interactionRepresentations);
+            g.snippets(interactionRepresentations);
         }
         synchronized (nodeRepresentations) {
-            snippets(nodeRepresentations);
+            g.snippets(nodeRepresentations);
         }
     }
 
     @Override
-    public PVector dimensions() {
+    public PVector dimensions(AnimatedGraphics g) {
         return bounds;
     }
 
@@ -209,10 +204,14 @@ public class Overview extends PositionedSnippet {
 
         // Update layout.
         private void update() {
+            if(lastAnimatedGraphics == null) {
+                return;
+            }
+
             synchronized(LayoutUpdater.this) {
                 if (layoutDirty || layout == null) {
                     layoutDirty = false;
-                    layout = new Layout(contextNetwork, model.selection, layout);
+                    layout = new Layout(lastAnimatedGraphics, contextNetwork, model.selection, layout);
                     updateNodeRepresentations();
                     updateInteractionRepresentations();
                     updateSetRepresentations();
@@ -220,7 +219,7 @@ public class Overview extends PositionedSnippet {
                 }
 
                 if (layout.nodes.length > 0) {
-                    boolean converged = layout.updatePositions();
+                    boolean converged = layout.updatePositions(lastAnimatedGraphics);
 
                     if(!converged) {
                         // Update node positions.
@@ -290,7 +289,7 @@ public class Overview extends PositionedSnippet {
 
         // Update set representations.
         private void updateSetRepresentations() {
-            setContours = new Contours(layout);
+            setContours = new Contours(lastAnimatedGraphics, layout);
 
             // Create new representations.
             List<SetContour> sR = new ArrayList<SetContour>();

@@ -88,7 +88,7 @@ public class PickingGraphics2D extends Graphics2D {
         //parent.loadPixels();
         
         // Limit radius by window bounds.
-        int radius = min(Parameters.cursorRadius,
+        int radius = min(Constants.CURSOR_DILATION_RADIUS,
                          min(min(parentImage.getWidth() - x, x),
                              min(parentImage.getHeight() - y, y)));
         
