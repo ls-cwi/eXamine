@@ -1,42 +1,58 @@
 package org.cytoscape.examine.internal.visualization;
 
-import java.awt.Color;
-import java.awt.event.KeyEvent;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.Application;
-import org.cytoscape.examine.internal.graphics.draw.Layout;
-import org.cytoscape.examine.internal.graphics.draw.Representation;
-import org.cytoscape.examine.internal.signal.Observer;
-import static org.cytoscape.examine.internal.Modules.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
-
 import org.cytoscape.examine.internal.Constants;
+import org.cytoscape.examine.internal.data.DataSet;
 import org.cytoscape.examine.internal.data.HCategory;
 import org.cytoscape.examine.internal.data.HSet;
+import org.cytoscape.examine.internal.graphics.Application;
+import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.draw.Layout;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
+import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.examine.internal.signal.Observer;
 import org.cytoscape.examine.internal.visualization.overview.Overview;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
-import org.cytoscape.examine.internal.graphics.PVector;
+
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.fillRect;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.sketchHeight;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.snippet;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.snippets;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textFont;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.translate;
+import static org.cytoscape.examine.internal.visualization.Parameters.MARGIN;
+import static org.cytoscape.examine.internal.visualization.Parameters.sceneHeight;
+import static org.cytoscape.examine.internal.visualization.Parameters.sceneWidth;
 
 // Visualization module.
 public class Visualization extends Application {
+
+    private final DataSet dataSet;
+    private final Model model;
+
+    public final boolean showScore;
     public SetColors setColors;             // Protein set coloring.
-    private List<SetList> setLists;  // GO Term lists (per domain).
+    private List<SetList> setLists;         // GO Term lists (per domain).
     private Overview overview;              // Protein SOM overview.
-    
-    @Override
-    public void initialize() {
-        this.setTitle(Constants.APP_NAME);
-        
+
+    public Visualization(DataSet dataSet, Model model, boolean showScore) {
+        this.dataSet = dataSet;
+        this.model = model;
+        this.showScore = showScore;
+
+        setDefaultCloseOperation(Application.DISPOSE_ON_CLOSE);
+        setTitle(Constants.APP_NAME);
+
         // Parameters are now set up => connect model listeners.
         model.initListeners();
-        
-        setColors = new SetColors();
-        
+
+        setColors = new SetColors(model);
+
         // Protein set listing, update on selection change.
         setLists = new ArrayList<SetList>();
         Observer proteinSetListObserver = new Observer() {
@@ -45,36 +61,34 @@ public class Visualization extends Application {
             }
         };
         //model.orderedCategories.change.subscribe(proteinSetListObserver);
-        data.categories.change.subscribe(proteinSetListObserver);
-        
+        dataSet.categories.change.subscribe(proteinSetListObserver);
+
         // Overview at bottom, dominant.
-        overview = new Overview();
-        
+        overview = new Overview(model, setColors);
+
         // Always reset navigation state.
         model.highlightedSets.clear();
         model.highlightedProteins.clear();
         model.selection.clear();
     }
-    
+
     // Processing rootDraw.
     @Override
     public void draw() {
-        // Catch thread exceptions (this is nasty, TODO: pretty fix).
-        try {
             // Construct set lists.
-            if(setLists.isEmpty()) {
-                for(HCategory d: data.categories.get().values()) {
+            if (setLists.isEmpty()) {
+                for (HCategory d : dataSet.categories.get().values()) {
                     List<SetLabel> labels = new ArrayList<SetLabel>();
 
-                    for(HSet t: d.members.subList(0, Math.min(d.maxSize, d.members.size()))) {
+                    for (HSet t : d.members.subList(0, Math.min(d.maxSize, d.members.size()))) {
                         String text = t.toString();
-                        labels.add(new SetLabel(t, text));
+                        labels.add(new SetLabel(dataSet, model, setColors, t, text, showScore));
                     }
 
-                    setLists.add(new SetList(d, labels));
+                    setLists.add(new SetList(model, d, labels));
                 }
             }
-            
+
             // Enforce side margins.
             translate(MARGIN, MARGIN);
 
@@ -89,12 +103,12 @@ public class Visualization extends Application {
 
             // Left side option snippets (includes set lists).
             List<Representation> sideSnippets = new ArrayList<Representation>();
-            
+
             List<SetList> openSl = new ArrayList<SetList>();
             List<SetList> closedSl = new ArrayList<SetList>();
-            for(SetList sl: setLists) {
+            for (SetList sl : setLists) {
                 (model.openedCategories.get().contains(sl.element) ? openSl : closedSl)
-                .add(sl);
+                        .add(sl);
             }
             sideSnippets.addAll(openSl);
             sideSnippets.addAll(closedSl);
@@ -103,43 +117,27 @@ public class Visualization extends Application {
             PVector termBounds = Layout.bounds(sideSnippets);
 
             shiftPos.x += termBounds.x + MARGIN;
-        
+
             // Draw protein overview.
             overview.bounds = PVector.v(sceneWidth() - shiftPos.x - 2 * MARGIN, sceneHeight());
             overview.topLeft(shiftPos);
             snippet(overview);
-            
-            // Occlude any overview overspil for side lists.
+
+            // Occlude any overview overspill for side lists.
             color(Color.WHITE);
             fillRect(-MARGIN, -MARGIN, shiftPos.x + MARGIN, sketchHeight());
             snippets(sideSnippets);
 
             try {
-                Thread.sleep(10);
-            } catch(InterruptedException ex) {
+                Thread.sleep(25);
+            } catch (InterruptedException ex) {
                 Logger.getLogger(Visualization.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch(Exception ex) {
-            
-        }
     }
 
-    /*@Override
-    public void mouseClicked(MouseEvent e) {
-        Object hovered = StaticGraphics.hovered();
-        
-        HElement element = hovered == null || !(hovered instanceof HElement) ?
-                                null :
-                                (HElement) hovered;
-        
-        // Clear selection.
-        model.selection.select(element);
-    }*/
-
-    // Terminate overview on disposal.
     @Override
     public void dispose() {
-        overview.stop();
+        overview.stop();    // Request overview animation stop.
         super.dispose();
     }
 }

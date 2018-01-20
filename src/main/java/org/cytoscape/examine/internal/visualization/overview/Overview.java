@@ -1,31 +1,43 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.draw.PositionedSnippet;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
-import java.awt.Color;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
-
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
+import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.draw.PositionedSnippet;
+import org.cytoscape.examine.internal.layout.Layout;
+import org.cytoscape.examine.internal.layout.Layout.RichEdge;
+import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.examine.internal.signal.Observer;
+import org.cytoscape.examine.internal.visualization.SetColors;
+import org.jgrapht.graph.DefaultEdge;
 
-import static org.cytoscape.examine.internal.Modules.*;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.cytoscape.examine.internal.graphics.PVector;
-import org.cytoscape.examine.internal.layout.Layout;
-import org.cytoscape.examine.internal.layout.Layout.RichEdge;
-import org.cytoscape.examine.internal.signal.Observer;
-import org.jgrapht.graph.DefaultEdge;
+
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.fillRect;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.noPicking;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.noTransition;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.scale;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.snippets;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textFont;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.transition;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.translate;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.labelFont;
 
 // Network overview.
 public class Overview extends PositionedSnippet {
+
+    private final Model model;
+    private final SetColors setColors;
 
     // Protein representations.
     private final List<NodeRepresentation> nodeRepresentations;
@@ -52,7 +64,10 @@ public class Overview extends PositionedSnippet {
     private PVector panTranslation;
     private Point2D lastMousePos;
 
-    public Overview() {
+    public Overview(Model model, SetColors setColors) {
+        this.model = model;
+        this.setColors = setColors;
+
         this.bounds = PVector.v();
         this.nodeRepresentations = new ArrayList<NodeRepresentation>();
         this.interactionRepresentations = new ArrayList<LinkRepresentation>();
@@ -171,7 +186,6 @@ public class Overview extends PositionedSnippet {
                         // Now bypassed to super network for Cytoscape integration.
                         contextNetwork = model.activeNetwork.get();
                         layoutDirty = true;
-                        //layout = null;
                     }
                 }
             };
@@ -182,11 +196,11 @@ public class Overview extends PositionedSnippet {
 
         @Override
         public void run() {
-            // Update ad infinitum.
+            // Update while no terminate has been requested.
             while (updateGoAhead) {
                 try {
                     update();
-                    Thread.sleep(10);
+                    Thread.sleep(25);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Overview.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -229,7 +243,7 @@ public class Overview extends PositionedSnippet {
             synchronized (nodeRepresentations) {
                 nodeRepresentations.clear();
                 for(HNode n: layout.nodes)
-                    nodeRepresentations.add(new NodeRepresentation(n));
+                    nodeRepresentations.add(new NodeRepresentation(model, n));
                 updateNodePositions();
             }
         }
@@ -263,7 +277,7 @@ public class Overview extends PositionedSnippet {
                     // Representation.
                     DefaultEdge originalEdge = layout.network.graph.getEdge(sP, tP);
                     LinkRepresentation rep
-                            = new LinkRepresentation(originalEdge, sP, tP, intCs);
+                            = new LinkRepresentation(model, originalEdge, sP, tP, intCs);
                     iR.add(rep);
                 }
 
@@ -283,24 +297,11 @@ public class Overview extends PositionedSnippet {
             for (int i = layout.sets.size() - 1; 0 <= i; i--) {
                 HSet pS = layout.sets.get(i);
 
-                // Stick to same snippet.
-                /*SetContour prevRep = setRepresentations.size() > i
-                        ? setRepresentations.get(i)
-                        : null;
+                Geometry bodyShape = setContours.ribbonShapes.get(i);
+                Geometry outlineShape = setContours.outlineShapes.get(i);
 
-                if (prevRep != null) {
-                    //&& prevRep.outline.compareTo(setContours.outlineShapes.get(i)) == 0) {
-                    sR.add(setRepresentations.get(i));
-                } else {*/
-                    Geometry bodyShape = setContours.ribbonShapes.get(i);
-                    Geometry outlineShape = setContours.outlineShapes.get(i);
-                    
-                    //bodyShape = DouglasPeuckerSimplifier.simplify(bodyShape, 1);
-                    //outlineShape = DouglasPeuckerSimplifier.simplify(outlineShape, 1);
-
-                    SetContour rep = new SetContour(pS, i, bodyShape, outlineShape);
-                    sR.add(rep);
-                //}
+                SetContour rep = new SetContour(model, setColors, pS, i, bodyShape, outlineShape);
+                sR.add(rep);
             }
 
             // Transfer.

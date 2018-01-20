@@ -1,25 +1,27 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.cytoscape.examine.internal.Modules;
-import org.cytoscape.examine.internal.data.HSet;
-import org.cytoscape.examine.internal.visualization.SetRepresentation;
-import org.cytoscape.examine.internal.visualization.Util;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Shape;
-import java.util.HashSet;
-import java.util.Set;
-import static org.cytoscape.examine.internal.Modules.model;
 import org.cytoscape.examine.internal.data.HNode;
-
+import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.graphics.Colors;
 import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.examine.internal.graphics.StaticGraphics;
+import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.examine.internal.visualization.SetColors;
+import org.cytoscape.examine.internal.visualization.SetRepresentation;
+import org.cytoscape.examine.internal.visualization.Util;
+
+import java.awt.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.fill;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.popStyle;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.pushStyle;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.stroke;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.strokeWeight;
 
 // Contour representation of a set.
 public class SetContour extends SetRepresentation {
@@ -33,20 +35,22 @@ public class SetContour extends SetRepresentation {
     public static final double BODY_OPACITY = 1f;
     
     // Set index.
-    public final int index;
-    
-    // Protein set.
+    private final Model model;
+    private final SetColors setColors;
+    public final int setIndex;
     public final HSet set;
     
     // Body and outline shapes of set.
     public final Geometry body, outline;
     public final Shape bodyShape, outlineShape;
     
-    public SetContour(HSet set, int index, Geometry body, Geometry outline) {
-        super(set);
-        
+    public SetContour(Model model, SetColors setColors, HSet set, int index, Geometry body, Geometry outline) {
+        super(model, set);
+
+        this.model = model;
+        this.setColors = setColors;
         this.set = set;
-        this.index = index;
+        this.setIndex = index;
         this.body = body;
         this.bodyShape = Util.geometryToShape(body, 0); //0.0001);
         this.outline = outline;
@@ -55,7 +59,7 @@ public class SetContour extends SetRepresentation {
     
     // Color of the set.
     private Color bandColor() {
-        Color color = Modules.visualization.setColors.color(set);
+        Color color = setColors.color(set);
         return color == null ? Colors.grey(0.5f) : color;
     }
 

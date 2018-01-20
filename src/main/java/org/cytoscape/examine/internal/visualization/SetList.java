@@ -1,27 +1,48 @@
 package org.cytoscape.examine.internal.visualization;
 
-import java.awt.Color;
+import org.cytoscape.examine.internal.data.HCategory;
+import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.draw.Layout;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
+import org.cytoscape.examine.internal.model.Model;
+
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.draw.Layout;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
-import org.cytoscape.examine.internal.graphics.draw.Representation;
 import java.util.List;
-import org.cytoscape.examine.internal.Modules;
-import org.cytoscape.examine.internal.data.HCategory;
-import org.cytoscape.examine.internal.graphics.PVector;
+
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.drawRect;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.fill;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.popTransform;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.pushTransform;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.rotate;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.snippets;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.text;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textFont;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textHeight;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textWidth;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.translate;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.font;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.spacing;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.textColor;
+import static org.cytoscape.examine.internal.visualization.Parameters.LABEL_BAR_HEIGHT;
+import static org.cytoscape.examine.internal.visualization.Parameters.LABEL_MARKER_RADIUS;
+import static org.cytoscape.examine.internal.visualization.Parameters.sceneHeight;
 
 // Visual list of significantly expressed GO terms of a specific domain.
 public class SetList extends Representation<HCategory> {
+
+    private final Model model;
     private final List<SetLabel> labels;
     private int positionScroll;                     // Internal set list scroll.
     
-    public SetList(HCategory element, List<SetLabel> labels) {
+    public SetList(Model model, HCategory element, List<SetLabel> labels) {
         super(element);
-        
+
+        this.model = model;
         this.labels = labels;
         this.positionScroll = 0;
         
@@ -100,7 +121,7 @@ public class SetList extends Representation<HCategory> {
         List<SetLabel> taggedLabels = new ArrayList<SetLabel>();    // Tagged set label representations.
         List<SetLabel> remainderLabels = new ArrayList<SetLabel>(); // Set label representations.
         for(SetLabel lbl: labels) {
-            (Modules.model.selection.activeSetMap.containsKey(lbl.element) ?
+            (model.selection.activeSetMap.containsKey(lbl.element) ?
                     taggedLabels :
                     remainderLabels).add(lbl);
         }
@@ -173,15 +194,15 @@ public class SetList extends Representation<HCategory> {
     }
     
     public boolean isOpened() {
-        return Modules.model.openedCategories.get().contains(element);
+        return model.openedCategories.get().contains(element);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         if(isOpened()) {
-            Modules.model.openedCategories.remove(element);
+            model.openedCategories.remove(element);
         } else {
-            Modules.model.openedCategories.add(element);
+            model.openedCategories.add(element);
         }
     }
 

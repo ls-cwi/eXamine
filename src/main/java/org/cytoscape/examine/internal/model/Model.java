@@ -1,35 +1,40 @@
 package org.cytoscape.examine.internal.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import org.cytoscape.examine.internal.signal.Observer;
-import org.cytoscape.examine.internal.signal.Variable;
-import org.cytoscape.examine.internal.signal.VolatileSet;
-
-import static org.cytoscape.examine.internal.Modules.*;
-import java.util.List;
-import java.util.Set;
-
+import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.examine.internal.Constants;
-import org.cytoscape.examine.internal.ViewerAction;
+import org.cytoscape.examine.internal.data.DataSet;
 import org.cytoscape.examine.internal.data.HCategory;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
 import org.cytoscape.examine.internal.data.SuperNetwork;
+import org.cytoscape.examine.internal.signal.Observer;
+import org.cytoscape.examine.internal.signal.Variable;
+import org.cytoscape.examine.internal.signal.VolatileSet;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
+import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Pseudograph;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 // Model module. Manages enriched data that includes
 // information provided via user interaction.
 public final class Model {
+
+    private final DataSet dataSet;
+    private final CyApplicationManager applicationManager;
+    private final VisualMappingManager visualMappingManager;
+
     public final Selection selection;                               // Selected (visualized) sets.
     public final VolatileSet<HCategory> openedCategories;           // Opened set categories.
     public final Variable<List<HCategory>> orderedCategories;
@@ -39,7 +44,11 @@ public final class Model {
     public final Variable<Network> activeNetwork;                   // Active network.
     private Constants.Selection selectionMode;                      // Selection mode.
 
-    public Model() {
+    public Model(DataSet dataSet, CyApplicationManager applicationManager, VisualMappingManager visualMappingManager) {
+        this.dataSet = dataSet;
+        this.applicationManager = applicationManager;
+        this.visualMappingManager = visualMappingManager;
+
         this.selection = new Selection(this);
         this.openedCategories = new VolatileSet<HCategory>();
         this.orderedCategories =
@@ -58,15 +67,14 @@ public final class Model {
 
             @Override
             public void signal() {              
-                activeNetwork.set(data.superNetwork.get());
+                activeNetwork.set(dataSet.superNetwork.get());
             }
             
         };
-        
-        //Parameters.visualStaticProteinBasis.change.subscribe(activeNetworkObserver);
+
         selection.change.subscribe(activeNetworkObserver);
-        data.superNetwork.change.subscribe(activeNetworkObserver);
-        data.categories.change.subscribe(activeNetworkObserver);
+        dataSet.superNetwork.change.subscribe(activeNetworkObserver);
+        dataSet.categories.change.subscribe(activeNetworkObserver);
         
         // Update ordered category list.
         Observer categoryObserver = new Observer() {
@@ -74,7 +82,7 @@ public final class Model {
             public void signal() {
                 List<HCategory> openedCat = new ArrayList<HCategory>();
                 List<HCategory> closedCat = new ArrayList<HCategory>();
-                for(HCategory c: data.categories.get().values()) {
+                for(HCategory c: dataSet.categories.get().values()) {
                     if(openedCategories.get().contains(c)) {
                         openedCat.add(c);
                     } else {
@@ -90,7 +98,7 @@ public final class Model {
         };
         
         openedCategories.change.subscribe(categoryObserver);
-        data.categories.change.subscribe(categoryObserver);
+        dataSet.categories.change.subscribe(categoryObserver);
         
         // Update Cytoscape selection view.
         selection.change.subscribe(new Observer() {
@@ -100,7 +108,7 @@ public final class Model {
 	                		selection.selectedNodes(selectionMode == Constants.Selection.INTERSECTION);
 	
 	                // Deselect currently selected nodes.
-	                CyNetwork cyNetwork = data.superNetwork.get().cyNetwork;
+	                CyNetwork cyNetwork = dataSet.superNetwork.get().cyNetwork;
 	                List<CyNode> cyNodes = CyTableUtil.getNodesInState(cyNetwork, CyNetwork.SELECTED, true);
 	                for (CyNode node: cyNodes) {
 	                    cyNetwork.getRow(node).set(CyNetwork.SELECTED, false);
@@ -112,7 +120,7 @@ public final class Model {
 	                }
 	                
 	                // Update Cytoscape view for new selection.
-	                ViewerAction.applicationManager.getCurrentNetworkView().updateView();
+	                applicationManager.getCurrentNetworkView().updateView();
                 }
             }
         });
@@ -126,10 +134,10 @@ public final class Model {
             this.selectionMode = selectionMode;
     }
     
-    public static <V> V styleValue(VisualProperty<V> property, CyRow cyRow) {
+    public <V> V styleValue(VisualProperty<V> property, CyRow cyRow) {
         V result;
         
-        VisualStyle style = ViewerAction.visualMappingManager.getCurrentVisualStyle();
+        VisualStyle style = visualMappingManager.getCurrentVisualStyle();
         VisualMappingFunction<?, V> colorFunction = style.getVisualMappingFunction(property);
         if(colorFunction != null) {
             result = colorFunction.getMappedValue(cyRow);
@@ -139,4 +147,9 @@ public final class Model {
         
         return result;
     }
+
+    public DataSet getDataSet() {
+        return dataSet;
+    }
+
 }

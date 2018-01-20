@@ -1,33 +1,42 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import java.awt.Color;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.draw.Representation;
-import java.util.HashSet;
-import java.util.Set;
-import static org.cytoscape.examine.internal.Modules.*;
-
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.graphics.PVector;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
+import org.cytoscape.examine.internal.model.Model;
 import org.jgrapht.graph.DefaultEdge;
+
+import java.awt.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.circleArc;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.strokeWeight;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.backgroundColor;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.textColor;
+import static org.cytoscape.examine.internal.visualization.Parameters.LINK_WIDTH;
 
 // Link representation.
 public class LinkRepresentation extends Representation<LinkRepresentation.Link> {
+
+    private final Model model;
     public final DefaultEdge edge;  // Underlying edge.
     public final PVector[] cs;
-    //public final LineString ls;     // Curve coordinates.
 
-    public LinkRepresentation(DefaultEdge edge,
-                              HNode node1,
-                              HNode node2,
-                              PVector[] cs) {
+    public LinkRepresentation(
+            Model model,
+            DefaultEdge edge,
+            HNode node1,
+            HNode node2,
+            PVector[] cs) {
         super(new Link(node1, node2));
+
+        this.model = model;
         this.edge = edge;
         this.cs = cs;
-        //this.ls = Util.circlePiece(cs[0], cs[1], cs[2], LINK_SEGMENTS);
     }
 
     @Override

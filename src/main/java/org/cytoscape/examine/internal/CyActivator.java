@@ -1,10 +1,10 @@
 package org.cytoscape.examine.internal;
 
-import org.cytoscape.examine.internal.ViewerAction;
+import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
-import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CytoPanelComponent;
-import org.osgi.framework.BundleContext;
+import org.cytoscape.group.CyGroupFactory;
+import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.events.ColumnCreatedListener;
 import org.cytoscape.model.events.ColumnDeletedListener;
@@ -14,13 +14,11 @@ import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.session.events.SessionLoadedListener;
-
-import java.util.Properties;
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.group.CyGroupFactory;
-import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskManager;
+import org.osgi.framework.BundleContext;
+
+import java.util.Properties;
 
 /**
  * Execution body.
@@ -62,26 +60,33 @@ public class CyActivator extends AbstractCyActivator {
         CyGroupFactory groupFactory = getService(bc, CyGroupFactory.class);
         
         TaskManager taskManager = getService(bc, TaskManager.class);
+
+        // The eXamine control panel
+        ControlPanel controlPanel = new ControlPanel(
+                networkManager,
+                visualMappingManager,
+                rootNetworkManager,
+                applicationManager,
+                groupManager,
+                groupFactory,
+                taskManager);
         
         // Action, the group viewer
-        ViewerAction viewerAction =
-                new ViewerAction(applicationManager,
-                                 visualMappingManager,
-                                 groupManager,
-                                 groupFactory);
+//        ViewerAction viewerAction =
+//                new ViewerAction(applicationManager,
+//                                 visualMappingManager,
+//                                 groupManager,
+//                                 groupFactory);
         
         // Action, the group selector
         /*GroupsFromColumnsAction groupsAction =
                 new GroupsFromColumnsAction(applicationManager,
                                             groupManager,
                                             groupFactory);*/
-        
-        // The eXamine control panel
-        ControlPanel controlPanel = new ControlPanel(networkManager, rootNetworkManager, 
-        		applicationManager, groupManager, groupFactory, taskManager);
+
 
         // Register it as a service.
-        registerService(bc, viewerAction, CyAction.class, new Properties());
+        //registerService(bc, viewerAction, CyAction.class, new Properties());
         //registerService(bc, groupsAction, CyAction.class, new Properties());
         registerService(bc, controlPanel, CytoPanelComponent.class, new Properties());
         registerService(bc, controlPanel, SetCurrentNetworkListener.class, new Properties());
@@ -91,15 +96,6 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bc, controlPanel, ColumnCreatedListener.class, new Properties());
         registerService(bc, controlPanel, NetworkDestroyedListener.class, new Properties());
         registerService(bc, controlPanel, SessionLoadedListener.class, new Properties());
-    }
-    
-    /**
-     * Cleanup module resources. (Does this work?)
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        Modules.dispose();
-        super.finalize();
     }
     
 }

@@ -1,33 +1,65 @@
 package org.cytoscape.examine.internal.visualization;
 
-import java.awt.Color;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import org.cytoscape.examine.internal.Modules;
-import org.cytoscape.examine.internal.graphics.Colors;
+import org.cytoscape.examine.internal.data.DataSet;
 import org.cytoscape.examine.internal.data.HSet;
+import org.cytoscape.examine.internal.graphics.Colors;
 import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.examine.internal.graphics.StaticGraphics;
+import org.cytoscape.examine.internal.model.Model;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
-import static org.cytoscape.examine.internal.Modules.*;
+import java.awt.*;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.drawEllipse;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.fillEllipse;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.fillRect;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.snippet;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.text;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textFont;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textHeight;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textWidth;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.translate;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.containmentColor;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.labelFont;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.noteFont;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.textColor;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.textContainedColor;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.textHighlightColor;
+import static org.cytoscape.examine.internal.visualization.Parameters.LABEL_DOUBLE_PADDING;
+import static org.cytoscape.examine.internal.visualization.Parameters.LABEL_MARKER_RADIUS;
+import static org.cytoscape.examine.internal.visualization.Parameters.LABEL_PADDING;
+import static org.cytoscape.examine.internal.visualization.Parameters.LABEL_ROUNDING;
+import static org.cytoscape.examine.internal.visualization.Parameters.SCORE_MIN_RADIUS;
+import static org.cytoscape.examine.internal.visualization.Parameters.SET_LABEL_MAX_LINES;
+import static org.cytoscape.examine.internal.visualization.Parameters.SET_LABEL_MAX_WIDTH;
 
 // GOTerm set label.
 public class SetLabel extends SetRepresentation {
     public boolean opened;
+
+    private final DataSet dataSet;
+    private final Model model;
+    private final SetColors setColors;
     private final String text;
     private final String[] linedText;
     private final SetText setText;
+    private final boolean showScore;
     
     private String shortExponent;
     
     protected SetList parentList;
 
-    public SetLabel(HSet element, String text) {
-        super(element);
-        
+    public SetLabel(DataSet dataSet, Model model, SetColors setColors, HSet element, String text, boolean showScore) {
+        super(model, element);
+
+        this.dataSet = dataSet;
+        this.model = model;
+        this.setColors = setColors;
+        this.showScore = showScore;
+
         this.opened = false;
         
         if(text == null) {
@@ -58,7 +90,7 @@ public class SetLabel extends SetRepresentation {
         this.linedText = lines.toArray(new String[]{});
         
         String txt = text;
-    	if (Modules.showScore) {
+    	if (showScore) {
             DecimalFormat df = new DecimalFormat("0.0E0");
             txt = df.format(element.score) + "  " + txt;
     	}
@@ -103,10 +135,10 @@ public class SetLabel extends SetRepresentation {
         }
         
         double maxRadius = 0.5 * textHeight() - 2;
-        double minScoreExp = exponent(data.minScore.get());
-        double maxScoreExp = exponent(data.maxScore.get());
+        double minScoreExp = exponent(dataSet.minScore.get());
+        double maxScoreExp = exponent(dataSet.maxScore.get());
         double scoreExp = exponent(element.score);
-        double normScore = Modules.showScore ?
+        double normScore = showScore ?
                             ((scoreExp - maxScoreExp) /
                              (minScoreExp - maxScoreExp)) :
                             1;
@@ -142,7 +174,7 @@ public class SetLabel extends SetRepresentation {
     private class SetText extends SetRepresentation {
         
         public SetText(HSet element) {
-            super(element);
+            super(model, element);
         }
 
         @Override
@@ -158,7 +190,7 @@ public class SetLabel extends SetRepresentation {
         
             // Background bubble.
             color(hL ? containmentColor :
-                 selected ? visualization.setColors.color(element) : Colors.grey(1f),
+                 selected ? setColors.color(element) : Colors.grey(1f),
                  selected || hL ? 1f : 0f);
             fillRect(0f, 0f, dim.x, dim.y, LABEL_ROUNDING);
             
@@ -166,7 +198,7 @@ public class SetLabel extends SetRepresentation {
             color(hL ? textContainedColor :
                   selected ? textHighlightColor : textColor); 
             
-            if(Modules.showScore) {
+            if(showScore) {
                 textFont(noteFont);
                 text(shortExponent, 2 * LABEL_MARKER_RADIUS + 3,
                                     0.5 * dim.y - LABEL_MARKER_RADIUS);

@@ -1,43 +1,50 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import java.awt.Color;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
-import org.cytoscape.examine.internal.graphics.draw.Representation;
-
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
-import org.cytoscape.examine.internal.visualization.SetRepresentation;
-
-import static org.cytoscape.examine.internal.Modules.*;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.awt.Desktop;
-import java.awt.Shape;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Path2D;
-import java.awt.geom.RoundRectangle2D;
-import java.io.IOException;
-import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.examine.internal.graphics.StaticGraphics;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
 import org.cytoscape.examine.internal.layout.Layout;
 import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.examine.internal.visualization.SetRepresentation;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.jgrapht.graph.DefaultEdge;
 
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Path2D;
+import java.awt.geom.RoundRectangle2D;
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.color;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.fill;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.mouseEvent;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.picking;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.strokeWeight;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.text;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.translate;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.containmentColor;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.textContainedColor;
+import static org.cytoscape.examine.internal.visualization.Parameters.NODE_OUTLINE;
+
 // Node representation.
 public class NodeRepresentation extends Representation<HNode> {
+
+    private final Model model;
     
-    public NodeRepresentation(HNode element) {
+    public NodeRepresentation(Model model, HNode element) {
         super(element);
+
+        this.model = model;
     }
 
     @Override
@@ -124,7 +131,7 @@ public class NodeRepresentation extends Representation<HNode> {
     }
     
     private <V> V styleValue(VisualProperty<V> property) {
-        return Model.styleValue(property, element.cyRow);
+        return model.styleValue(property, element.cyRow);
     }
 
     @Override

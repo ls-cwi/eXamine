@@ -1,14 +1,17 @@
 package org.cytoscape.examine.internal.graphics;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
+import org.cytoscape.examine.internal.graphics.draw.Snippet;
+import org.cytoscape.examine.internal.signal.gui.SidePane;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+
+import javax.swing.*;
+
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -23,18 +26,17 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.ToolTipManager;
-import org.apache.batik.dom.GenericDOMImplementation;
-import org.apache.batik.svggen.SVGGraphics2D;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.draw.Snippet;
-import org.cytoscape.examine.internal.signal.gui.SidePane;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
+
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.dm;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.hovered;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.popTransform;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.pushTransform;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.snippet;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.textFont;
+import static org.cytoscape.examine.internal.graphics.StaticGraphics.translate;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.font;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.labelFont;
+import static org.cytoscape.examine.internal.graphics.draw.Parameters.noteFont;
 
 // Graphics application.
 public abstract class Application extends JFrame {
@@ -49,7 +51,6 @@ public abstract class Application extends JFrame {
     public Application() {
         // Fair default size, but maximize.
         setSize(1400, 800);
-        setExtendedState(Frame.MAXIMIZED_BOTH);
         setVisible(true);
         
         // Set title to class name by default.
@@ -60,8 +61,7 @@ public abstract class Application extends JFrame {
         
         // Graphics setup.
         setup();
-        
-        //this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
         rootPanel = new JPanel() {
 
             @Override
@@ -83,9 +83,6 @@ public abstract class Application extends JFrame {
                                     RenderingHints.VALUE_DITHER_ENABLE);
                 g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,
                                     RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-
-                // Clear screen.
-                //g2.clearRect(0, 0, getWidth(), getHeight());
 
                 rootDraw();
 
@@ -194,9 +191,6 @@ public abstract class Application extends JFrame {
             labelFont = new Font("Arial", Font.PLAIN, 14);
             noteFont = new Font("Arial", Font.PLAIN, 8);
         }
-        
-        // Initialize implementing class.
-        initialize();
     }
     
     // Get side pane.
@@ -369,9 +363,6 @@ public abstract class Application extends JFrame {
     public void keyPressed() {}
 
     public void keyReleased() {}
-
-    // Draw initialization commands, to be implemented.
-    public abstract void initialize();
     
     // Draw commands, to be implemented.
     public abstract void draw();

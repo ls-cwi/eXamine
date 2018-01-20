@@ -1,54 +1,18 @@
 package org.cytoscape.examine.internal;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
-import javax.swing.JLabel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
-
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.examine.internal.Constants.Selection;
+import org.cytoscape.examine.internal.data.DataSet;
+import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.examine.internal.visualization.Visualization;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.ColumnCreatedEvent;
@@ -66,8 +30,27 @@ import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.events.SessionLoadedEvent;
 import org.cytoscape.session.events.SessionLoadedListener;
+import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("serial")
 public class ControlPanel extends JPanel implements CytoPanelComponent,
@@ -76,6 +59,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		NetworkDestroyedListener, SessionLoadedListener {
 
 	private final CyNetworkManager networkManager;
+	private final VisualMappingManager visualMappingManager;
 	private final CyRootNetworkManager rootNetworkManager;
 	private final CyApplicationManager applicationManager;
 	private final CyGroupManager groupManager;
@@ -119,6 +103,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	// Network settings, maintained for several networks as to accommodate
 	// storing and retrieval of settings upon network selection change
 	private Map<Long, NetworkSettings> networkSettings;
+
+	private Visualization activeVisualization;
 
 	/**
 	 * Ensures current network settings match UI, called upon UI changes.
@@ -455,7 +441,9 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		}
 	}
 
-	public ControlPanel(CyNetworkManager networkManager,
+	public ControlPanel(
+			CyNetworkManager networkManager,
+			VisualMappingManager visualMappingManager,
 			CyRootNetworkManager rootNetworkManager,
 			CyApplicationManager applicationManager,
 			CyGroupManager groupManager,
@@ -463,6 +451,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			TaskManager taskManager) {
 
 		this.networkManager = networkManager;
+		this.visualMappingManager = visualMappingManager;
 		this.rootNetworkManager = rootNetworkManager;
 		this.applicationManager = applicationManager;
 		this.groupManager = groupManager;
@@ -772,24 +761,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
-				
-				// Initialize modules (if they have not been initialized yet).
-				Modules.initialize();
-				Modules.showScore = ns.getShowScore();
-				
-				// Set selection mode
-				Modules.model.setSelectionMode(ns.getGroupSelection());
-                                
-				Modules.data.load(applicationManager.getCurrentNetwork(),
-						ns.getSelectedLabelColumnName(),
-						ns.getSelectedURLColumnName(),
-						ns.getSelectedScoreColumnName(),
-						ns.getSelectedGroupColumnNames(),
-						ns.getSelectedGroupColumnSizes(),
-						groupManager);
-                                
-				// Trigger visualization update.
-				Modules.model.selection.change.signal();
+				openVisualizationWindow(ns);
 			}
 		});
 		btnGenerateAll = new JButton("Generate");
@@ -848,6 +820,28 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		gridBagConstraints.insets = new Insets(10, 0, 10, 0);
 		add(pnlButtons, gridBagConstraints);
 	}
+
+    /**
+     * Open a new visualization window.
+     */
+    private void openVisualizationWindow(NetworkSettings networkSettings) {
+        DataSet dataSet = new DataSet();
+        dataSet.load(
+                applicationManager.getCurrentNetwork(),
+                networkSettings.getSelectedLabelColumnName(),
+                networkSettings.getSelectedURLColumnName(),
+                networkSettings.getSelectedScoreColumnName(),
+                networkSettings.getSelectedGroupColumnNames(),
+                networkSettings.getSelectedGroupColumnSizes(),
+                groupManager
+        );
+
+        Model model = new Model(dataSet, applicationManager, visualMappingManager);
+        model.setSelectionMode(networkSettings.getGroupSelection());
+        model.selection.change.signal();
+
+        activeVisualization = new Visualization(dataSet, model, networkSettings.getShowScore());
+    }
 
 	/**
 	 * Update the network/nodes table.

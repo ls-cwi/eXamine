@@ -1,14 +1,7 @@
 package org.cytoscape.examine.internal.data;
 
-import org.cytoscape.examine.internal.signal.Variable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.cytoscape.examine.internal.Constants;
-import org.cytoscape.examine.internal.Modules;
+import org.cytoscape.examine.internal.signal.Variable;
 import org.cytoscape.group.CyGroup;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyEdge;
@@ -19,6 +12,12 @@ import org.cytoscape.model.CyTable;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.Pseudograph;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Data set / module.
@@ -214,9 +213,6 @@ public class DataSet {
         superNetwork.set(sN);
         nodeMap.set(nM);
         categories.set(cs);
-                                
-        // Clear active sets in model.
-        Modules.model.selection.clear();
     }
     
 }
