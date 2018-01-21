@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -69,7 +67,7 @@ import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.events.SessionLoadedEvent;
 import org.cytoscape.session.events.SessionLoadedListener;
 import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.swing.DialogTaskManager;
 
 //TODO: Move swing components with distinct function to different classes
 
@@ -84,7 +82,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	private final CyApplicationManager applicationManager;
 	private final CyGroupManager groupManager;
 	private final CyGroupFactory groupFactory;
-	private final TaskManager taskManager;
+	private final DialogTaskManager taskManager;
 	
 	// User interface elements
 	//TODO: Parameterize Generics
@@ -117,7 +115,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			CyApplicationManager applicationManager,
 			CyGroupManager groupManager,
 			CyGroupFactory groupFactory,
-			TaskManager taskManager) {
+			DialogTaskManager taskManager) {
 
 		this.networkManager = networkManager;
 		this.rootNetworkManager = rootNetworkManager;
@@ -234,6 +232,12 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		}
 
 		public NetworkSettings(CyNetwork network) {
+			
+			if (network == null) {
+				System.err.println("Attempted to generate NetworkSettings for a non-existing network ...");
+				return;
+			}
+			
 			this.networkSUID = network.getSUID();
 
 			// columnNames
@@ -1068,7 +1072,11 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	@Override
 	public void handleEvent(final ColumnCreatedEvent e) {
 		if (listenersEnabled.get()) {
-			CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(networkManager.getNetwork(currentNetworkSUID));
+			
+			CyNetwork currentNetwork = networkManager.getNetwork(currentNetworkSUID);
+			if (currentNetwork == null) return;
+			
+			CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(currentNetwork);
 
 			if (e.getSource() == rootNetwork.getDefaultNodeTable()) {
 				System.out.println("Column created event: " + e.getColumnName() + ", source: " + e.getSource());
