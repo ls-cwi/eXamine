@@ -1072,7 +1072,9 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	@Override
 	public void handleEvent(final ColumnCreatedEvent e) {
 		if (listenersEnabled.get()) {
-			
+			//We ignore calls when no current network is initialized
+			//Such calls can occur during the loading of sessions as some events are parallel and thus a ColumnCreatedEvent can be fired before the corresponding network has been created and fully registered
+			if (currentNetworkSUID == null) return;
 			CyNetwork currentNetwork = networkManager.getNetwork(currentNetworkSUID);
 			if (currentNetwork == null) return;
 			
