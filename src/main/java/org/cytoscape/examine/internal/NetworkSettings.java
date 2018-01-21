@@ -27,7 +27,7 @@ class NetworkSettings {
     private int selectedURLColumn = 0;
     private int selectedScoreColumn = 0;
     private Constants.Selection groupSelection = Constants.Selection.NONE;
-    private boolean showScore = true;
+    private boolean showScore;
 
     public NetworkSettings(CyNetwork network) {
         this.networkSUID = network.getSUID();

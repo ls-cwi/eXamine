@@ -47,15 +47,24 @@ public class SetList extends Representation<HCategory> {
         
         double space = Constants.SPACING;
         PVector domainBounds = PVector.v(0.75 * g.textHeight() + g.textWidth(element.toString()),
-                                 g.textHeight() + space + LABEL_BAR_HEIGHT + space);
-        
+                                 g.textHeight() + space /*+ LABEL_BAR_HEIGHT + space*/);
+
+        final double termHeight;
         if(isOpened()) {
-            double termHeight = Layout.bounds(g, labels).y;
-            dimensions = PVector.v(Math.max(domainBounds.x, Layout.maxWidth(g, labels)),
-                           domainBounds.y + termHeight);
+            termHeight = Layout.bounds(g, labels).y;
         } else {
-            dimensions = PVector.v(Math.max(domainBounds.x, Layout.maxWidth(g, labels)), domainBounds.y);
+            // Layout tagged set labels.
+            List<SetLabel> taggedLabels = new ArrayList<SetLabel>();    // Tagged set label representations.
+            for(SetLabel lbl: labels) {
+                if (model.selection.activeSetMap.containsKey(lbl.element)) {
+                    taggedLabels.add(lbl);
+                }
+            }
+
+            termHeight = Layout.bounds(g, labels).y;
         }
+
+        dimensions = PVector.v(Math.max(domainBounds.x, Layout.maxWidth(g, labels)), domainBounds.y + termHeight);
         
         return dimensions;
     }
@@ -77,29 +86,31 @@ public class SetList extends Representation<HCategory> {
         
         g.textFont(FONT);
         g.color(isOpened() ? TEXT_COLOR : TEXT_COLOR.brighter().brighter());
-        g.text(element.toString(), 0.75 * g.textHeight(), 0);
+        g.text(element.toString(), g.getDrawManager().isAnimated() ? 0.75 * g.textHeight() : 0, 0);
         
         // Arrows.
-        g.pushTransform();
-        double arrowRad = 0.25 * g.textHeight();
-        double arrowTrunc = 0.25 * 0.85 * g.textHeight();
-        double arrowMargin = 0.33 * arrowTrunc;
-        
-        g.translate(arrowRad, -arrowRad);
-        g.rotate(isOpened() ? 0.5 * Math.PI : 0);
-        
-        Path2D arrows = new Path2D.Double();
-        arrows.moveTo(-arrowRad, 0);
-        arrows.lineTo(-arrowMargin, -arrowTrunc);
-        arrows.lineTo(-arrowMargin, arrowTrunc);
-        arrows.closePath();
-        arrows.moveTo(arrowRad, 0);
-        arrows.lineTo(arrowMargin, arrowTrunc);
-        arrows.lineTo(arrowMargin, -arrowTrunc);
-        arrows.closePath();
-        
-        g.fill(arrows);
-        g.popTransform();
+        if(g.getDrawManager().isAnimated()) {
+            g.pushTransform();
+            double arrowRad = 0.25 * g.textHeight();
+            double arrowTrunc = 0.25 * 0.85 * g.textHeight();
+            double arrowMargin = 0.33 * arrowTrunc;
+
+            g.translate(arrowRad, -arrowRad);
+            g.rotate(isOpened() ? 0.5 * Math.PI : 0);
+
+            Path2D arrows = new Path2D.Double();
+            arrows.moveTo(-arrowRad, 0);
+            arrows.lineTo(-arrowMargin, -arrowTrunc);
+            arrows.lineTo(-arrowMargin, arrowTrunc);
+            arrows.closePath();
+            arrows.moveTo(arrowRad, 0);
+            arrows.lineTo(arrowMargin, arrowTrunc);
+            arrows.lineTo(arrowMargin, -arrowTrunc);
+            arrows.closePath();
+
+            g.fill(arrows);
+            g.popTransform();
+        }
         
         //noPicking();
         
@@ -158,7 +169,7 @@ public class SetList extends Representation<HCategory> {
             
             label.opened =
                 topLeft.y + labelPos.y + 2 * labelDim.y +
-                LABEL_BAR_HEIGHT + SPACING < g.applicationHeight();
+                LABEL_BAR_HEIGHT + SPACING < g.getCanvasHeight();
             
             if(label.opened) {
                 label.topLeft(labelPos);

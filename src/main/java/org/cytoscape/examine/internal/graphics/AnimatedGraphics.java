@@ -5,12 +5,8 @@ import com.vividsolutions.jts.geom.LineString;
 import org.cytoscape.examine.internal.graphics.draw.Snippet;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Collection;
@@ -21,14 +17,28 @@ import java.util.Collection;
  */
 public class AnimatedGraphics {
 
-    private final Application application;
     private final DrawManager drawManager = new DrawManager();
+    private double canvasWidth = Double.POSITIVE_INFINITY;
+    private double canvasHeight = Double.POSITIVE_INFINITY;
 
-    AnimatedGraphics(Application application) {
-        this.application = application;
+    /**
+     * Construct animated graphics for interactive cases.
+     */
+    public AnimatedGraphics() {
+
     }
 
-    DrawManager getDrawManager() {
+    /**
+     * Construct animated graphics to render for export cases.
+     *
+     * @param defaultGraphics The export context to render to.
+     */
+    public AnimatedGraphics(Graphics2D defaultGraphics) {
+        drawManager.defaultGraphics = defaultGraphics;
+        drawManager.setAnimated(false);
+    }
+
+    public DrawManager getDrawManager() {
         return drawManager;
     }
     
@@ -327,51 +337,21 @@ public class AnimatedGraphics {
     public Color getColor() {
         return drawManager.pg.getColor();
     }
-    
-    public MouseEvent mouseEvent() {
-        return application.mouseEvent;
-    }
-    
-    public int mouseX() {
-        return application.mouseX;
-    }
-    
-    public int mouseY() {
-        return application.mouseY;
-    }
-    
-    // Returns the mouse coordinates according to the current coordinate space (2D).
-    public PVector mouseLocal() {
-        PVector mouseLocal = PVector.v();
-        
-        PVector global = PVector.v(mouseX(), mouseY());
-        
-        AffineTransform globalToLocal = drawManager.pg.getTransform();
-        try {
-            globalToLocal.invert();
-            Point2D tP = globalToLocal.transform(new Point2D.Double(global.x, global.y), null);
-            mouseLocal.x = (double) tP.getX();
-            mouseLocal.y = (double) tP.getY();
-        } catch(NoninvertibleTransformException ex) {
-            
-        }
-        
-        return mouseLocal;
-    }
-    
-    // Application width.
-    public double applicationWidth() {
-        return application.getWidth();
-    }
-    
-    // Application height.
-    public double applicationHeight() {
-        return application.getHeight();
+
+    public double getCanvasWidth() {
+        return canvasWidth;
     }
 
-    // Applet dimensions.
-    public PVector applicationDimensions() {
-        return new PVector(applicationWidth(), applicationHeight());
+    void setCanvasWidth(double width) {
+        canvasWidth = width;
+    }
+
+    public double getCanvasHeight() {
+        return canvasHeight;
+    }
+
+    void setCanvasHeight(double height) {
+        canvasHeight = height;
     }
     
 }

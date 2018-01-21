@@ -31,16 +31,16 @@ import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
 import static org.cytoscape.examine.internal.graphics.draw.Constants.NOTE_FONT;
 
 // Graphics application.
-public abstract class Application extends JFrame {
+public abstract class ApplicationFrame extends JFrame {
 
-    private AnimatedGraphics animatedGraphics = new AnimatedGraphics(this);
+    private AnimatedGraphics animatedGraphics = new AnimatedGraphics();
     private final JPanel rootPanel;
 
     protected Snippet rootSnippet;
     protected int mouseX, mouseY;
     protected MouseEvent mouseEvent;
     
-    public Application() {
+    public ApplicationFrame() {
         // Fair default size, but maximize.
         setSize(1400, 800);
         setVisible(true);
@@ -109,7 +109,7 @@ public abstract class Application extends JFrame {
                 animatedGraphics.pushTransform();
                 
                 // Draw (sub-class behavior).
-                Application.this.draw(animatedGraphics);
+                ApplicationFrame.this.draw(animatedGraphics);
                 animatedGraphics.popTransform();
             }
             
@@ -124,12 +124,12 @@ public abstract class Application extends JFrame {
     public final void setup() {
         
         // Adapt picking buffer to canvas size.
-        animatedGraphics.getDrawManager().updatePickingBuffer(getWidth(), getHeight());
+        updateDimensions();
         addComponentListener(new ComponentListener() {
 
             @Override
             public void componentResized(ComponentEvent ce) {
-                animatedGraphics.getDrawManager().updatePickingBuffer(getWidth(), getHeight());
+                updateDimensions();
             }
 
             @Override
@@ -161,7 +161,7 @@ public abstract class Application extends JFrame {
         
         // Load base and label fonts; load open sans and use Arial as fall-back.
         try {
-            InputStream input = Application.class.getResourceAsStream("/font/OpenSans-Regular.ttf");
+            InputStream input = ApplicationFrame.class.getResourceAsStream("/font/OpenSans-Regular.ttf");
             Font inputFont = Font.createFont(Font.TRUETYPE_FONT, input);
             
             FONT = inputFont.deriveFont(24f);
@@ -174,6 +174,12 @@ public abstract class Application extends JFrame {
             LABEL_FONT = new Font("Arial", Font.PLAIN, 14);
             NOTE_FONT = new Font("Arial", Font.PLAIN, 8);
         }
+    }
+
+    private void updateDimensions() {
+        animatedGraphics.setCanvasWidth(getWidth());
+        animatedGraphics.setCanvasHeight(getHeight());
+        animatedGraphics.getDrawManager().updatePickingBuffer(getWidth(), getHeight());
     }
     
     public final void rootDraw() {
@@ -209,7 +215,7 @@ public abstract class Application extends JFrame {
             try {
                 exportSVG();
             } catch (IOException ex) {
-                Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ApplicationFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -323,7 +329,7 @@ public abstract class Application extends JFrame {
             }
 
             // Delegate.
-            Application.this.keyPressed(e);
+            ApplicationFrame.this.keyPressed(e);
         }
 
         public void keyReleased(KeyEvent e) {
@@ -333,7 +339,7 @@ public abstract class Application extends JFrame {
             }
 
             // Delegate.
-            Application.this.keyReleased(e);
+            ApplicationFrame.this.keyReleased(e);
         }
 
         public void keyTyped(KeyEvent e) {
@@ -343,7 +349,7 @@ public abstract class Application extends JFrame {
             }
 
             // Delegate.
-            Application.this.keyTyped(e);
+            ApplicationFrame.this.keyTyped(e);
         }
 
         public void keyPressed() {
@@ -352,7 +358,7 @@ public abstract class Application extends JFrame {
                 animatedGraphics.getDrawManager().hovered.keyPressed();
             }
 
-            Application.this.keyPressed();
+            ApplicationFrame.this.keyPressed();
         }
 
         public void keyReleased() {
@@ -361,7 +367,7 @@ public abstract class Application extends JFrame {
                 animatedGraphics.getDrawManager().hovered.keyReleased();
             }
 
-            Application.this.keyReleased();
+            ApplicationFrame.this.keyReleased();
         }
 
     }

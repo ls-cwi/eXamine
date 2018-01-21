@@ -34,7 +34,6 @@ public class SetLabel extends SetRepresentation {
     private final SetColors setColors;
     private final String text;
     private final SetText setText;
-    private final boolean showScore;
 
     private String[] cachedLinedText;
     private double cachedLineHeight;
@@ -43,13 +42,12 @@ public class SetLabel extends SetRepresentation {
     
     protected SetList parentList;
 
-    public SetLabel(DataSet dataSet, Model model, SetColors setColors, HSet element, String text, boolean showScore) {
+    public SetLabel(DataSet dataSet, Model model, SetColors setColors, HSet element, String text) {
         super(model, element);
 
         this.dataSet = dataSet;
         this.model = model;
         this.setColors = setColors;
-        this.showScore = showScore;
 
         this.opened = false;
         
@@ -58,7 +56,7 @@ public class SetLabel extends SetRepresentation {
         }
         
         String txt = text;
-    	if (showScore) {
+    	if (model.showScore.get()) {
             DecimalFormat df = new DecimalFormat("0.0E0");
             txt = df.format(element.score) + "  " + txt;
     	}
@@ -141,7 +139,7 @@ public class SetLabel extends SetRepresentation {
         double minScoreExp = exponent(dataSet.minScore.get());
         double maxScoreExp = exponent(dataSet.maxScore.get());
         double scoreExp = exponent(element.score);
-        double normScore = showScore ?
+        double normScore = model.showScore.get() ?
                             ((scoreExp - maxScoreExp) /
                              (minScoreExp - maxScoreExp)) :
                             1;
@@ -201,7 +199,7 @@ public class SetLabel extends SetRepresentation {
             g.color(hL ? TEXT_CONTAINED_COLOR :
                   selected ? TEXT_HIGHLIGHT_COLOR : TEXT_COLOR);
             
-            if(showScore) {
+            if(model.showScore.get()) {
                 g.textFont(NOTE_FONT);
                 g.text(shortExponent, 2 * LABEL_MARKER_RADIUS + 3, 0.5 * dim.y - LABEL_MARKER_RADIUS);
             }

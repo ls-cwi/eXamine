@@ -1,27 +1,28 @@
 package org.cytoscape.examine.internal.data;
 
+import org.cytoscape.group.CyGroup;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.cytoscape.group.CyGroup;
 
 /**
  * Category of HSets.
  */
 public class HCategory {
-    
+
     // Wrapped CyGroup.
     private final CyGroup cyGroup;
-    
+
     // Name.
     public final String name;
-    
+
     // Member sets.
     public final List<HSet> members;
-    
+
     // Maximal size.
     public final int maxSize;
-    
+
     /**
      * Base constructor.
      */
@@ -30,22 +31,25 @@ public class HCategory {
         this.name = name;
         this.members = members;
         this.maxSize = maxSize;
-        
+
         // Sort sets by score, then alphabet.
-        Collections.sort(members, new Comparator<HSet> () {
+        Collections.sort(members, new Comparator<HSet>() {
 
             public int compare(HSet lS, HSet rS) {
-                int result;
-                
-                if(lS.score == rS.score) {
+                final int result;
+
+                final double leftScore = Double.isNaN(lS.score) ? Double.POSITIVE_INFINITY : lS.score;
+                final double rightScore = Double.isNaN(rS.score) ? Double.POSITIVE_INFINITY : rS.score;
+
+                if (leftScore == rightScore) {
                     result = lS.name.compareTo(rS.name);
                 } else {
-                    result = Double.isNaN(lS.score) || lS.score > rS.score ? 1 : -1;
+                    result = (int) Math.signum(leftScore - rightScore);
                 }
-                
+
                 return result;
             }
-    
+
         });
     }
 
@@ -75,5 +79,5 @@ public class HCategory {
         }
         return true;
     }
-    
+
 }

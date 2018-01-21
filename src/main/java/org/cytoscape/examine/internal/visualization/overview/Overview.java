@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.SPACING;
 
 // Network overview.
 public class Overview extends PositionedSnippet {
@@ -91,13 +92,23 @@ public class Overview extends PositionedSnippet {
         panTranslation.y = Math.min(0.5 * span.y,
                             Math.max(-0.5 * span.y, panTranslation.y));
         
-        // Separate SOM computation and snippet update thread.
+        // Separate layout computation and snippet update thread.
         if(updater == null) {
-            updater = new Thread(new LayoutUpdater());
-            updater.setPriority(Thread.MIN_PRIORITY);
-            updater.start();
+            // Do continuous update for interactive animation cases.
+            if(g.getDrawManager().isAnimated()) {
+                updater = new Thread(new LayoutUpdater());
+                updater.setPriority(Thread.MIN_PRIORITY);
+                updater.start();
+            } else {
+                // Do single layout for export cases.
+                LayoutUpdater layoutUpdater = new LayoutUpdater();
+                layoutUpdater.update();
+
+                bounds.x = span.x + 2 * SPACING;
+                bounds.y = span.y;
+            }
         }
-        
+
         g.translate(topLeft);
         
         // Background rectangle for interaction.
@@ -203,7 +214,7 @@ public class Overview extends PositionedSnippet {
         }
 
         // Update layout.
-        private void update() {
+        public void update() {
             if(lastAnimatedGraphics == null) {
                 return;
             }

@@ -8,7 +8,8 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.examine.internal.Constants.Selection;
 import org.cytoscape.examine.internal.data.DataSet;
 import org.cytoscape.examine.internal.model.Model;
-import org.cytoscape.examine.internal.visualization.Visualization;
+import org.cytoscape.examine.internal.visualization.InteractiveVisualization;
+import org.cytoscape.examine.internal.visualization.SnapshotVisualization;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
@@ -43,6 +44,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,9 +86,9 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	private JSpinner[] spinners;
 	private JPanel pnlButtons;
 	private JButton btnRemoveAll;
-	private JButton btnGenerateAll;
 	private JButton btnGenerateSelection;
 	private JButton btnExamine;
+	private JButton btnExport;
 	private JCheckBox showScoreCheckBox;
 	
 	// Enable/disable listeners
@@ -424,8 +427,16 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				openVisualizationWindow(ns);
 			}
 		});
-		btnGenerateAll = new JButton("Generate");
-		btnGenerateAll.setFont(btnGenerateAll.getFont().deriveFont(11.f));
+		btnExport = new JButton("Export");
+        btnExport.setFont(btnExport.getFont().deriveFont(11.f));
+        btnExport.setEnabled(false);
+        btnExport.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                NetworkSettings ns = networkSettings.get(currentNetworkSUID);
+                exportVisualization(ns);
+            }
+        });
 		btnGenerateSelection = new JButton("Generate");
 		btnGenerateSelection.setFont(btnGenerateSelection.getFont().deriveFont(11.f));
 		btnRemoveAll = new JButton("Remove");
@@ -443,18 +454,6 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				}
 			}
 		});
-		btnGenerateAll.setEnabled(false);
-		btnGenerateAll.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				CyNetwork network = applicationManager.getCurrentNetwork();
-				CyTable nodeTable = network.getDefaultNodeTable();
-				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
-				List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
-				taskManager.execute(new TaskIterator(
-						new GenerateGroups(applicationManager, groupManager, groupFactory, network, nodeTable, groupColumnNames, true)));
-			}
-		});
 		btnGenerateSelection.setEnabled(false);
 		btnGenerateSelection.addActionListener(new ActionListener() {
 			@Override
@@ -468,9 +467,9 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			}
 		});
 		pnlButtons.add(btnGenerateSelection);
-		//pnlButtons.add(btnGenerateAll);
 		pnlButtons.add(btnExamine);
 		pnlButtons.add(btnRemoveAll);
+		pnlButtons.add(btnExport);
 
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -481,28 +480,62 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		add(pnlButtons, gridBagConstraints);
 	}
 
-    /**
-     * Open a new visualization window.
-     */
-    private void openVisualizationWindow(NetworkSettings networkSettings) {
-        final DataSet dataSet = new DataSet(
+	private DataSet createDataSet(NetworkSettings networkSettings) {
+	    return new DataSet(
                 applicationManager.getCurrentNetwork(),
-				groupManager,
+                groupManager,
                 networkSettings.getSelectedLabelColumnName(),
                 networkSettings.getSelectedURLColumnName(),
                 networkSettings.getSelectedScoreColumnName(),
                 networkSettings.getSelectedGroupColumnNames(),
                 networkSettings.getSelectedGroupColumnSizes()
         );
-
-        final Model model = new Model(dataSet, applicationManager, visualMappingManager);
-        model.setSelectionMode(networkSettings.getGroupSelection());
-        model.selection.change.signal();
-
-        new Visualization(dataSet, model, networkSettings.getShowScore());
     }
 
-	/**
+    private Model createModel(DataSet dataSet, NetworkSettings networkSettings) {
+        return new Model(
+                dataSet,
+                applicationManager,
+                visualMappingManager,
+                groupManager,
+                networkSettings.getShowScore(),
+                networkSettings.getGroupSelection());
+    }
+
+    /**
+     * Open a new visualization window.
+     */
+    private void openVisualizationWindow(NetworkSettings networkSettings) {
+        final DataSet dataSet = createDataSet(networkSettings);
+        final Model model = createModel(dataSet, networkSettings);
+
+        new InteractiveVisualization(dataSet, model);
+    }
+
+    /**
+     * Export the visualization as an image.
+     */
+    private void exportVisualization(NetworkSettings networkSettings) {
+        final DataSet dataSet = createDataSet(networkSettings);
+        final Model model = createModel(dataSet, networkSettings);
+        final SnapshotVisualization visualization = new SnapshotVisualization(dataSet, model);
+
+        // Target file via dialog.
+        final JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setName("Export SVG");
+        fileChooser.setSelectedFile(new File("eXamine-export.svg"));
+        int fileConfirm = fileChooser.showSaveDialog(this);
+
+        if (fileConfirm == JFileChooser.APPROVE_OPTION) {
+            try {
+                visualization.exportSVG(fileChooser.getSelectedFile());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
 	 * Update the network/nodes table.
 	 */
 	private void updateFeedbackTableModel() {
@@ -527,9 +560,10 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		NetworkSettings ns = networkSettings.get(currentNetworkSUID);
 		if (ns != null) {
 			List<Integer> selectedGroups = ns.getSelectedGroupColumns();
-			btnGenerateAll.setEnabled(selectedGroups.size() > 0);
-			btnGenerateSelection.setEnabled(nSelectedNodes > 0 && selectedGroups.size() > 0);
-			btnExamine.setEnabled(nSelectedNodes > 0 && selectedGroups.size() > 0);
+			boolean enabled = nSelectedNodes > 0 && selectedGroups.size() > 0;
+			btnGenerateSelection.setEnabled(enabled);
+			btnExamine.setEnabled(enabled);
+			btnExport.setEnabled(enabled);
 		}
 	}
 	
@@ -539,8 +573,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	private void disableUserInterface() {
 		pnlButtons.setEnabled(false);
 		btnExamine.setEnabled(false);
+		btnExport.setEnabled(false);
 		btnRemoveAll.setEnabled(false);
-		btnGenerateAll.setEnabled(false);
 		btnGenerateSelection.setEnabled(false);
 		cmbNodeLabel.setEnabled(false);
 		cmbNodeURL.setEnabled(false);
@@ -561,8 +595,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		pnlNodes.setEnabled(true);
 		pnlButtons.setEnabled(true);
 		btnExamine.setEnabled(true);
+		btnExport.setEnabled(true);
 		btnRemoveAll.setEnabled(true);
-		btnGenerateAll.setEnabled(true);
 		btnGenerateSelection.setEnabled(true);
 		cmbNodeLabel.setEnabled(true);
 		cmbNodeURL.setEnabled(true);

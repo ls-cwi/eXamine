@@ -37,6 +37,9 @@ public class DrawManager {
     
     // Graphics to delegate to for drawn snippet.
     protected Graphics2D pg;
+
+    // Whether to transition snippets at all.
+    private boolean isAnimated = true;
     
     // Whether coordinate and color values are being
     // transitioned for drawn snippet.
@@ -66,7 +69,15 @@ public class DrawManager {
         this.styleStack = new ArrayList<Style>();
         this.transformStack = new ArrayList<AffineTransform>();
     }
-    
+
+    public void setAnimated(boolean isAnimated) {
+        this.isAnimated = isAnimated;
+    }
+
+    public boolean isAnimated() {
+        return isAnimated;
+    }
+
     /**
      * Install new picking buffer.
      */
@@ -289,7 +300,7 @@ public class DrawManager {
             snippetValues.drawn = true;
 
             // Parameter interpolation enabled by default.
-            transitioning = true;
+            transitioning = isAnimated;
 
             // Reset interpolated value counter.
             ti = 0;
@@ -344,7 +355,7 @@ public class DrawManager {
         protected int id;
         
         // Extent of presence in the scene, includes delay.
-        protected double presence = -MOVE_TRANSITION_DURATION / PRESENCE_TRANSITION_DURATION;
+        protected double presence = isAnimated ? -MOVE_TRANSITION_DURATION / PRESENCE_TRANSITION_DURATION : 1;
         
         // Intermediate state of doubles that are transitioned over.
         private Intermediate[] intermediates = new Intermediate[20];
