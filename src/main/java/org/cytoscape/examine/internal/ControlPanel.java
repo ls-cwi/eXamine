@@ -209,7 +209,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	 * Move to separate class?
 	 */
 	private class NetworkSettings {
-		private Long networkSUID;
+		//private Long networkSUID;
 		private List<String> columnNames;
 		private Set<String> columnNamesSet = new HashSet<String>();
 		private List<Integer> allGroupColumns = new ArrayList<Integer>();
@@ -238,7 +238,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				return;
 			}
 			
-			this.networkSUID = network.getSUID();
+			//networkSUID = network.getSUID();
 
 			// columnNames
 			List<CyColumn> columns = new ArrayList<CyColumn>();
