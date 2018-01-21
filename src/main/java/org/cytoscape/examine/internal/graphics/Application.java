@@ -37,6 +37,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 // Graphics application.
+@SuppressWarnings("serial") //TODO: We can assume we never serialize this right?
 public abstract class Application extends JFrame {
     private final JPanel rootPanel;     // Main content panel.
     private SidePane sidePane;          // Side pane (for GUI).

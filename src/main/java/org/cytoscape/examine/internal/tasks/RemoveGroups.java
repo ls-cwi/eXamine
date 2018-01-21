@@ -1,4 +1,4 @@
-package org.cytoscape.examine.internal;
+package org.cytoscape.examine.internal.tasks;
 
 import java.util.Set;
 

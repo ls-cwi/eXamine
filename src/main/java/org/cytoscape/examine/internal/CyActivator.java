@@ -1,10 +1,13 @@
 package org.cytoscape.examine.internal;
 
 import org.cytoscape.examine.internal.ViewerAction;
+import org.cytoscape.examine.internal.taskfactories.CommandTaskFactory;
+import org.cytoscape.examine.internal.tasks.ExamineCommand;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.osgi.framework.BundleContext;
+
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.events.ColumnCreatedListener;
 import org.cytoscape.model.events.ColumnDeletedListener;
@@ -15,12 +18,17 @@ import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.session.events.SessionLoadedListener;
 
+import static org.cytoscape.work.ServiceProperties.COMMAND;
+import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
+import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
+
 import java.util.Properties;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.TaskFactory;
+import org.cytoscape.work.swing.DialogTaskManager;
 
 /**
  * Execution body.
@@ -61,7 +69,7 @@ public class CyActivator extends AbstractCyActivator {
         // An interface describing a factory used for creating CyGroup objects.
         CyGroupFactory groupFactory = getService(bc, CyGroupFactory.class);
         
-        TaskManager taskManager = getService(bc, TaskManager.class);
+        DialogTaskManager taskManager = getService(bc, DialogTaskManager.class);
         
         // Action, the group viewer
         ViewerAction viewerAction =
@@ -75,6 +83,10 @@ public class CyActivator extends AbstractCyActivator {
                 new GroupsFromColumnsAction(applicationManager,
                                             groupManager,
                                             groupFactory);*/
+        
+        //Store services for later references TODO: Remove redundant fields throughout app
+        CyReferences.getInstance().storeReferences(networkManager, rootNetworkManager, 
+        		applicationManager, groupManager, groupFactory, taskManager);
         
         // The eXamine control panel
         ControlPanel controlPanel = new ControlPanel(networkManager, rootNetworkManager, 
@@ -91,6 +103,15 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bc, controlPanel, ColumnCreatedListener.class, new Properties());
         registerService(bc, controlPanel, NetworkDestroyedListener.class, new Properties());
         registerService(bc, controlPanel, SessionLoadedListener.class, new Properties());
+        
+        //Register commands to allow access via CyRest
+        
+		TaskFactory commandTaskFactory_GENERATE_GROUPS = new CommandTaskFactory(ExamineCommand.GENERATE_GROUPS);
+		Properties props_GENERATE_GROUPS = new Properties();
+		props_GENERATE_GROUPS.setProperty(COMMAND_NAMESPACE, Constants.APP_COMMAND_PREFIX);
+		props_GENERATE_GROUPS.setProperty(COMMAND, ExamineCommand.GENERATE_GROUPS.toString());
+		props_GENERATE_GROUPS.setProperty(COMMAND_DESCRIPTION,"[Placeholder] This command generates groups");
+		registerService(bc, commandTaskFactory_GENERATE_GROUPS, TaskFactory.class, props_GENERATE_GROUPS);
     }
     
     /**

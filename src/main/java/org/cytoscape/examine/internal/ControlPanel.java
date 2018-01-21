@@ -45,6 +45,8 @@ import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.examine.internal.Constants.Selection;
+import org.cytoscape.examine.internal.tasks.GenerateGroups;
+import org.cytoscape.examine.internal.tasks.RemoveGroups;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
@@ -69,6 +71,8 @@ import org.cytoscape.session.events.SessionLoadedListener;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 
+//TODO: Move swing components with distinct function to different classes
+
 @SuppressWarnings("serial")
 public class ControlPanel extends JPanel implements CytoPanelComponent,
 		SetCurrentNetworkListener, RowsSetListener, ColumnCreatedListener,
@@ -83,6 +87,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	private final TaskManager taskManager;
 	
 	// User interface elements
+	//TODO: Parameterize Generics
 	private JPanel pnlNetwork;
 	private JTable tblFeedBack;
 	private JScrollPane pnlScroll;
@@ -106,6 +111,41 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	private JButton btnGenerateSelection;
 	private JButton btnExamine;
 	private JCheckBox showScoreCheckBox;
+	
+	public ControlPanel(CyNetworkManager networkManager,
+			CyRootNetworkManager rootNetworkManager,
+			CyApplicationManager applicationManager,
+			CyGroupManager groupManager,
+			CyGroupFactory groupFactory,
+			TaskManager taskManager) {
+
+		this.networkManager = networkManager;
+		this.rootNetworkManager = rootNetworkManager;
+		this.applicationManager = applicationManager;
+		this.groupManager = groupManager;
+		this.groupFactory = groupFactory;
+		this.taskManager = taskManager;
+		this.networkSettings = new HashMap<Long, NetworkSettings>();
+		this.itemChangeListener = new ItemChangeListener();
+		this.nSelectedNodes = 0;
+		this.currentNetworkSUID = null;
+
+		initUserInterface();
+		
+		CyNetwork network = applicationManager.getCurrentNetwork();
+		if (network != null) {
+			this.currentNetworkSUID = network.getSUID();
+			this.networkSettings.put(currentNetworkSUID, new NetworkSettings(network));
+	
+			updateUserInterface();
+			updateFeedbackTableModel();
+			updateButtons();
+		} else {
+			disableUserInterface();
+		}
+
+		this.setVisible(true);
+	}
 	
 	// Enable/disable listeners
 	public static AtomicBoolean listenersEnabled = new AtomicBoolean(true);	
@@ -168,7 +208,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	 * Stores network settings, including selected columns and column names.
 	 * 
 	 * @author melkebir
-	 * 
+	 * Move to separate class?
 	 */
 	private class NetworkSettings {
 		private Long networkSUID;
@@ -455,40 +495,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		}
 	}
 
-	public ControlPanel(CyNetworkManager networkManager,
-			CyRootNetworkManager rootNetworkManager,
-			CyApplicationManager applicationManager,
-			CyGroupManager groupManager,
-			CyGroupFactory groupFactory,
-			TaskManager taskManager) {
-
-		this.networkManager = networkManager;
-		this.rootNetworkManager = rootNetworkManager;
-		this.applicationManager = applicationManager;
-		this.groupManager = groupManager;
-		this.groupFactory = groupFactory;
-		this.taskManager = taskManager;
-		this.networkSettings = new HashMap<Long, NetworkSettings>();
-		this.itemChangeListener = new ItemChangeListener();
-		this.nSelectedNodes = 0;
-		this.currentNetworkSUID = null;
-
-		initUserInterface();
-		
-		CyNetwork network = applicationManager.getCurrentNetwork();
-		if (network != null) {
-			this.currentNetworkSUID = network.getSUID();
-			this.networkSettings.put(currentNetworkSUID, new NetworkSettings(network));
 	
-			updateUserInterface();
-			updateFeedbackTableModel();
-			updateButtons();
-		} else {
-			disableUserInterface();
-		}
-
-		this.setVisible(true);
-	}
 
 	/**
 	 * Update user interface to match network settings for currently selected network.
@@ -820,7 +827,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
 				List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
 				taskManager.execute(new TaskIterator(
-						new GenerateGroups(applicationManager, groupManager, groupFactory, network, nodeTable, groupColumnNames, true)));
+						new GenerateGroups( network, nodeTable, groupColumnNames, true)));
 			}
 		});
 		btnGenerateSelection.setEnabled(false);
@@ -832,7 +839,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
 				List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
 				taskManager.execute(new TaskIterator(
-						new GenerateGroups(applicationManager, groupManager, groupFactory, network, nodeTable, groupColumnNames, false)));
+						new GenerateGroups( network, nodeTable, groupColumnNames, false)));
 			}
 		});
 		pnlButtons.add(btnGenerateSelection);
@@ -879,6 +886,9 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			btnExamine.setEnabled(nSelectedNodes > 0 && selectedGroups.size() > 0);
 		}
 	}
+	
+
+	//TODO: Merge both following functions into one that takes a boolean argument to remove redundancy
 	
 	/**
 	 * Disable user interface.

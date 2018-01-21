@@ -1,5 +1,6 @@
-package org.cytoscape.examine.internal;
+package org.cytoscape.examine.internal.tasks;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +11,9 @@ import java.util.Set;
 import javax.naming.LimitExceededException;
 
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.examine.internal.Constants;
+import org.cytoscape.examine.internal.ControlPanel;
+import org.cytoscape.examine.internal.CyReferences;
 import org.cytoscape.group.CyGroup;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
@@ -18,8 +22,11 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.Tunable;
+import org.cytoscape.work.TunableValidator;
 
 /**
  * This class contains all the logic to generate groups.
@@ -27,24 +34,48 @@ import org.cytoscape.work.TaskMonitor;
  * @author melkebir
  * 
  */
-public class GenerateGroups implements Task {
-	private final CyApplicationManager applicationManager;
-	private final CyGroupManager groupManager;
-	private final CyGroupFactory groupFactory;
-	private final CyNetwork network;
-	private final CyTable nodeTable;
-	private final List<String> selectedGroupColumnNames;
-	private final boolean all;
+public class GenerateGroups implements ObservableTask, TunableValidator {
+	
+	//Arguments
+	
+	/**
+	 * The CyNetwork on which the groups are to be created
+	 */
+	@Tunable(description="The network from which the groups are to be created")
+	public CyNetwork network = null;
+	//TODO: Maybe change the argument to the table key or table name instead of passing the actual object, should make invocation from command line context easier
+	@Tunable
+	public CyTable nodeTable = null;
+	@Tunable
+	public List<String> selectedGroupColumnNames;
+	@Tunable(description="[PLACEHOLDER] SIMPLY USES ALL NODES / GROUPS ?")
+	public boolean all; //TODO: Clearer name
+	
+	//Internal
+	
 	
 	private Map<String, CyGroup> groupIndex;
+	private CyReferences references = CyReferences.getInstance();
+	
+	/**
+	 * Default constructor
+	 */
+	public GenerateGroups() {
+		
+	};
 
-	public GenerateGroups(CyApplicationManager applicationManager,
-			CyGroupManager groupManager, CyGroupFactory groupFactory,
-			CyNetwork network, CyTable nodeTable,
-			List<String> selectedGroupColumnNames, boolean all) {
-        this.applicationManager = applicationManager;
-        this.groupManager = groupManager;
-        this.groupFactory = groupFactory;
+	/**
+	 * Alternative constructor, used if arguments are known at the time of construction (for instance when called via GUI)
+	 * @param network
+	 * @param nodeTable
+	 * @param selectedGroupColumnNames
+	 * @param all
+	 */
+	public GenerateGroups(
+			CyNetwork network,
+			CyTable nodeTable,
+			List<String> selectedGroupColumnNames,
+			boolean all) {
         this.network = network;
         this.nodeTable = nodeTable;
         this.selectedGroupColumnNames = selectedGroupColumnNames;
@@ -56,7 +87,7 @@ public class GenerateGroups implements Task {
      */
     private void initGroupIndex(CyNetwork network, CyTable nodeTable) {
         groupIndex = new HashMap<String, CyGroup>();
-        Set<CyGroup> groups = groupManager.getGroupSet(network);
+        Set<CyGroup> groups = references.getGroupManager().getGroupSet(network);
         
         for (CyGroup group : groups) {
         	long SUID = group.getGroupNode().getSUID();
@@ -74,7 +105,7 @@ public class GenerateGroups implements Task {
         // Determine whether group already exists.
         CyGroup group = groupIndex.get(groupName);
         if (group == null) {
-            group = groupFactory.createGroup(network, members, new ArrayList<CyEdge>(), false);
+            group = references.getGroupFactory().createGroup(network, members, new ArrayList<CyEdge>(), false);
             nodeTable.getRow(group.getGroupNode().getSUID()).set(CyNetwork.NAME, groupName);
             
             groupIndex.put(groupName, group);
@@ -92,7 +123,7 @@ public class GenerateGroups implements Task {
 
 	@Override
 	public void cancel() {
-		// TODO Auto-generated method stub
+		//TODO: Any states that need to be saved/cleaned?
 	}
 
 	@Override
@@ -126,7 +157,7 @@ public class GenerateGroups implements Task {
 			CyNode node = network.getNode(row.get(CyNetwork.SUID, Long.class));
 			
 			// skip group nodes
-			if (node == null || groupManager.isGroup(node, network)) continue;
+			if (node == null || references.getGroupManager().isGroup(node, network)) continue;
 			// skip nodes that are not selected if !all
 			if (!all && !row.get(CyNetwork.SELECTED, Boolean.class)) continue;
 			
@@ -180,8 +211,29 @@ public class GenerateGroups implements Task {
 		
 		// now finalize groups
 		taskMonitor.setStatusMessage("Finalizing groups.");
-		groupManager.addGroups(new ArrayList<CyGroup>(groupIndex.values()));
+		references.getGroupManager().addGroups(new ArrayList<CyGroup>(groupIndex.values()));
 		
 		ControlPanel.listenersEnabled.set(true);
+	}
+
+	public <R> R getResults(Class<? extends R> type) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public ValidationState getValidationState(Appendable errMsg) {
+		try {
+			//Checks if the arguments are valid and acceptable
+			if (network == null) {
+				errMsg.append("Attempted to generate groups on an empty network!");
+				return ValidationState.INVALID;
+			}
+			//If nothing bad happened, the arguments are acceptable and can be processed
+			return ValidationState.OK;
+		}
+		catch (IOException ex) {
+			ex.printStackTrace(); //TODO: Or is there a logger/ dedicated output stream for those in eXamine?
+		}
+		return ValidationState.INVALID;
 	}
 }

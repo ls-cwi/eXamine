@@ -8,6 +8,11 @@ public class Constants {
     // App symbolic name and menu path.
     public static final String APP_NAME = "eXamine";
     
+    /**
+     * The prefix used for all commands associated with this Cytoscape app
+     */
+    public static final String APP_COMMAND_PREFIX = "examine";
+    
     // Cytoscape data form.
     public static final String CATEGORY_PREFIX = "Category_";
     
