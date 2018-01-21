@@ -3,27 +3,21 @@ package org.cytoscape.examine.internal.tasks;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.LimitExceededException;
 
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.examine.internal.Constants;
 import org.cytoscape.examine.internal.ControlPanel;
 import org.cytoscape.examine.internal.CyReferences;
 import org.cytoscape.group.CyGroup;
-import org.cytoscape.group.CyGroupFactory;
-import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.work.ObservableTask;
-import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
@@ -41,14 +35,18 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	/**
 	 * The CyNetwork on which the groups are to be created
 	 */
-	@Tunable(description="The network from which the groups are to be created")
+	@Tunable(description="The network from which the groups are to be created", context="nogui")
 	public CyNetwork network = null;
+	
 	//TODO: Maybe change the argument to the table key or table name instead of passing the actual object, should make invocation from command line context easier
-	@Tunable
+	//Also isn't the node table ALWAYS the table associated with the network? so is this argument redundant?
+	@Tunable(description="The node table that contains the group information", context="nogui")
 	public CyTable nodeTable = null;
+	
 	@Tunable
 	public List<String> selectedGroupColumnNames;
-	@Tunable(description="[PLACEHOLDER] SIMPLY USES ALL NODES / GROUPS ?")
+	
+	@Tunable(description="[PLACEHOLDER] SIMPLY USES ALL NODES / GROUPS ?",context="nogui")
 	public boolean all; //TODO: Clearer name
 	
 	//Internal
@@ -217,7 +215,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	}
 
 	public <R> R getResults(Class<? extends R> type) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub; Should we return something here? Maybe at least a Boolean as a success indicator
 		return null;
 	}
 
