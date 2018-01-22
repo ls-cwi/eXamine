@@ -42,7 +42,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	 * The columns from which the groups are to be created
 	 */
 	@Tunable
-	public List<String> selectedGroupColumnNames;
+	public List<String> selectedGroupColumnNames = null;
 	
 	@Tunable(description="[PLACEHOLDER] SIMPLY USES ALL NODES / GROUPS ?",context="nogui")
 	public boolean all = false; //TODO: Clearer name, bypasses the group column?
@@ -216,11 +216,13 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		ControlPanel.listenersEnabled.set(true);
 	}
 
+	@Override
 	public <R> R getResults(Class<? extends R> type) {
 		// TODO Auto-generated method stub; Should we return something here? Maybe at least a Boolean as a success indicator
 		return null;
 	}
 
+	@Override
 	public ValidationState getValidationState(Appendable errMsg) {
 		try {
 			//Checks if the arguments are valid and acceptable

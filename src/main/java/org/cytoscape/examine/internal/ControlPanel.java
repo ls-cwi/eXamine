@@ -1090,6 +1090,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 
 				ArrayList<Integer> selectedGroups = new ArrayList<Integer>();
 				ArrayList<Integer> groupSizes = new ArrayList<Integer>();
+				
 				for (int idxGroup = 0; idxGroup < checkBoxes.length; idxGroup++) {
 					if (checkBoxes[idxGroup].isSelected()) {
 						selectedGroups.add(idxGroup);
