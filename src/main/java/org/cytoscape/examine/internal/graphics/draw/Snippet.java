@@ -1,9 +1,10 @@
 package org.cytoscape.examine.internal.graphics.draw;
 
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
+import org.cytoscape.examine.internal.graphics.DrawManager.SnippetValues;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.DrawManager.SnippetValues;
 
 /**
  * Snippet of visual code that includes:
@@ -20,7 +21,7 @@ public abstract class Snippet {
      * commands can be used but should be consistent over
      * multiple calls.
      */
-    public abstract void draw();
+    public abstract void draw(AnimatedGraphics graphics);
     
     public String toolTipText() {
         return null;
@@ -44,10 +45,10 @@ public abstract class Snippet {
     
     /**
      * Whether snippet is being hovered.
-     */
-    public boolean isHovered() {
-        return equals(hovered());
-    }
+//     */
+//    public boolean isHovered() {
+//        return equals(hovered());
+//    }
     
     /**
      * Default processing event, only called

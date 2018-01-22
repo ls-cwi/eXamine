@@ -1,14 +1,16 @@
 package org.cytoscape.examine.internal.graphics;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
+import org.cytoscape.examine.internal.graphics.draw.Snippet;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+
+import javax.swing.*;
+
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -23,46 +25,33 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.ToolTipManager;
-import org.apache.batik.dom.GenericDOMImplementation;
-import org.apache.batik.svggen.SVGGraphics2D;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.draw.Snippet;
-import org.cytoscape.examine.internal.signal.gui.SidePane;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
+
+import static org.cytoscape.examine.internal.graphics.draw.Constants.FONT;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.NOTE_FONT;
 
 // Graphics application.
 @SuppressWarnings("serial") //TODO: We can assume we never serialize this right?
 public abstract class Application extends JFrame {
-    private final JPanel rootPanel;     // Main content panel.
-    private SidePane sidePane;          // Side pane (for GUI).
-    protected Snippet rootSnippet;      // Root snippet.
-    private DrawManager drawManager;    // Snippet manager.
-    
-    protected int mouseX, mouseY;       // Mouse event information.
+
+    private AnimatedGraphics animatedGraphics = new AnimatedGraphics(this);
+    private final JPanel rootPanel;
+
+    protected Snippet rootSnippet;
+    protected int mouseX, mouseY;
     protected MouseEvent mouseEvent;
     
     public Application() {
         // Fair default size, but maximize.
         setSize(1400, 800);
-        setExtendedState(Frame.MAXIMIZED_BOTH);
         setVisible(true);
         
         // Set title to class name by default.
         setTitle(getClass().getSimpleName());
         
-        // Side pane.
-        sidePane = new SidePane();
-        
         // Graphics setup.
         setup();
-        
-        //this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
         rootPanel = new JPanel() {
 
             @Override
@@ -70,7 +59,7 @@ public abstract class Application extends JFrame {
                 super.paint(g); // Clears screen?
         
                 Graphics2D g2 = (Graphics2D) g;
-                dm.defaultGraphics = g2;
+                animatedGraphics.getDrawManager().defaultGraphics = g2;
 
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                     RenderingHints.VALUE_ANTIALIAS_ON);
@@ -85,9 +74,6 @@ public abstract class Application extends JFrame {
                 g2.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,
                                     RenderingHints.VALUE_COLOR_RENDER_QUALITY);
 
-                // Clear screen.
-                //g2.clearRect(0, 0, getWidth(), getHeight());
-
                 rootDraw();
 
                 repaint();
@@ -97,7 +83,7 @@ public abstract class Application extends JFrame {
             public String getToolTipText(MouseEvent event) {
                 String text = null;
                 
-                Snippet hovered = hovered();
+                Snippet hovered = animatedGraphics.hovered();
                 if(hovered != null && hovered.toolTipText() != null) {
                     text = hovered.toolTipText();
                 }
@@ -116,20 +102,16 @@ public abstract class Application extends JFrame {
         rootSnippet = new Snippet() {
 
             @Override
-            public void draw() {
+            public void draw(AnimatedGraphics g) {
                 // Font.
-                textFont(font);
+                animatedGraphics.textFont(FONT);
                 
                 // Make room for side pane.
-                pushTransform();
-                translate(sidePane.paneWidth(), 0);
+                animatedGraphics.pushTransform();
                 
-                // Draw (sub classed).
-                Application.this.draw();
-                popTransform();
-                
-                // Draw side pane on top of everything.
-                snippet(sidePane);
+                // Draw (sub-class behavior).
+                Application.this.draw(animatedGraphics);
+                animatedGraphics.popTransform();
             }
             
         };
@@ -141,16 +123,14 @@ public abstract class Application extends JFrame {
     }
     
     public final void setup() {
-        // Draw manager.
-        drawManager = new DrawManager(this);
         
         // Adapt picking buffer to canvas size.
-        drawManager.updatePickingBuffer();
+        animatedGraphics.getDrawManager().updatePickingBuffer(getWidth(), getHeight());
         addComponentListener(new ComponentListener() {
 
             @Override
             public void componentResized(ComponentEvent ce) {
-                drawManager.updatePickingBuffer();
+                animatedGraphics.getDrawManager().updatePickingBuffer(getWidth(), getHeight());
             }
 
             @Override
@@ -173,8 +153,8 @@ public abstract class Application extends JFrame {
             @Override
             public void mouseWheelMoved(MouseWheelEvent mwe) { 
                 // Send event to hovered item.
-                if(drawManager.hovered != null) {
-                    drawManager.hovered.mouseWheel(mwe.getWheelRotation());
+                if(animatedGraphics.getDrawManager().hovered != null) {
+                    animatedGraphics.getDrawManager().hovered.mouseWheel(mwe.getWheelRotation());
                 }
             }
         
@@ -185,172 +165,44 @@ public abstract class Application extends JFrame {
             InputStream input = Application.class.getResourceAsStream("/font/OpenSans-Regular.ttf");
             Font inputFont = Font.createFont(Font.TRUETYPE_FONT, input);
             
-            font = inputFont.deriveFont(24f);
-            labelFont = inputFont.deriveFont(14f);
-            noteFont = inputFont.deriveFont(8f);
+            FONT = inputFont.deriveFont(24f);
+            LABEL_FONT = inputFont.deriveFont(14f);
+            NOTE_FONT = inputFont.deriveFont(8f);
         } catch(Exception ex) {
             System.out.println("Font load exception: " + ex.getLocalizedMessage());
             
-            font = new Font("Arial", Font.PLAIN, 18);
-            labelFont = new Font("Arial", Font.PLAIN, 14);
-            noteFont = new Font("Arial", Font.PLAIN, 8);
+            FONT = new Font("Arial", Font.PLAIN, 18);
+            LABEL_FONT = new Font("Arial", Font.PLAIN, 14);
+            NOTE_FONT = new Font("Arial", Font.PLAIN, 8);
         }
-        
-        // Initialize implementing class.
-        initialize();
-    }
-    
-    // Get side pane.
-    public SidePane sidePane() {
-        return sidePane;
     }
     
     public final void rootDraw() {
+        DrawManager drawManager = animatedGraphics.getDrawManager();
+
         // Manager global pre rootDraw.
         drawManager.pre();
         
         // Draw to normal graphics.
         drawManager.preScreen();
-        StaticGraphics.snippet(rootSnippet);
-        drawManager.postScreen();
+        animatedGraphics.snippet(rootSnippet);
+        drawManager.postScreen(animatedGraphics);
         
         // Draw to picking graphics.
         drawManager.prePicking();
-        StaticGraphics.snippet(rootSnippet);
-        drawManager.postPicking();
+        animatedGraphics.snippet(rootSnippet);
+        Snippet hovered = drawManager.updateHoveredSnippet(mouseX, mouseY);
+        setCursor(hovered == null ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         // Manager global post rootDraw.
         drawManager.post();
     }
-    
+
     // Input methods.
     private void storeEvent(MouseEvent me) {
         mouseX = me.getX();
         mouseY = me.getY();
         mouseEvent = me;
-    }
-    
-    private class LocalMouseListener implements MouseListener {
-        
-        public void mouseClicked(MouseEvent me) {            
-            storeEvent(me);
-            
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.mouseClicked(me);
-            }
-        }
-
-        public void mousePressed(MouseEvent me) {
-            storeEvent(me);
-            
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.mousePressed(me);
-            }
-        }
-
-        public void mouseReleased(MouseEvent me) {    
-            storeEvent(me);
-            
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.mouseReleased(me);
-            }
-        }
-
-        public void mouseEntered(MouseEvent me) {
-            storeEvent(me);
-        }
-
-        public void mouseExited(MouseEvent me) {    
-            storeEvent(me);
-        }
-
-    }
-    
-    private class LocalMouseMotionListener implements MouseMotionListener {
-
-        public void mouseDragged(MouseEvent me) {
-            storeEvent(me);
-            
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.mouseDragged(me);
-            }
-        }
-
-        public void mouseMoved(MouseEvent me) {
-            storeEvent(me);        
-            
-            // Send event to hovered item.
-            if(drawManager != null && drawManager.hovered != null) {
-                drawManager.hovered.mouseMoved(me);
-            }
-        }
-        
-    }
-    
-    private class LocalKeyListener implements KeyListener {
-
-        public void keyPressed(KeyEvent e) {        
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.keyPressed(e);
-            }
-
-            // Delegate.
-            Application.this.keyPressed(e);
-        }
-
-        public void keyReleased(KeyEvent e) {
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.keyReleased(e);
-            }
-
-            // Delegate.
-            Application.this.keyReleased(e);
-        }
-
-        public void keyTyped(KeyEvent e) {
-            // Expand options pane by pressing Ctrl + o.
-            if(e.getKeyChar() == 'o') {
-                System.out.println("Press o");
-                if(sidePane.root().active) {
-                    sidePane.activate(sidePane.root());
-                } else {
-                    sidePane.deactivate(sidePane.root());
-                }
-            }
-
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.keyTyped(e);
-            }
-
-            // Delegate.
-            Application.this.keyTyped(e);
-        }
-
-        public void keyPressed() {
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.keyPressed();
-            }
-
-            Application.this.keyPressed();
-        }
-
-        public void keyReleased() {
-            // Send event to hovered item.
-            if(drawManager.hovered != null) {
-                drawManager.hovered.keyReleased();
-            }
-
-            Application.this.keyReleased();
-        }
-        
     }
 
     public void keyPressed(KeyEvent e) {
@@ -370,12 +222,9 @@ public abstract class Application extends JFrame {
     public void keyPressed() {}
 
     public void keyReleased() {}
-
-    // Draw initialization commands, to be implemented.
-    public abstract void initialize();
     
     // Draw commands, to be implemented.
-    public abstract void draw();
+    public abstract void draw(AnimatedGraphics graphics);
     
     // Export application paint to SVG file.
     public void exportSVG() throws IOException {
@@ -404,4 +253,118 @@ public abstract class Application extends JFrame {
             svgGenerator.stream(out, useCSS);
         }
     }
+
+    private class LocalMouseListener implements MouseListener {
+
+        public void mouseClicked(MouseEvent me) {
+            storeEvent(me);
+
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.mouseClicked(me);
+            }
+        }
+
+        public void mousePressed(MouseEvent me) {
+            storeEvent(me);
+
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.mousePressed(me);
+            }
+        }
+
+        public void mouseReleased(MouseEvent me) {
+            storeEvent(me);
+
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.mouseReleased(me);
+            }
+        }
+
+        public void mouseEntered(MouseEvent me) {
+            storeEvent(me);
+        }
+
+        public void mouseExited(MouseEvent me) {
+            storeEvent(me);
+        }
+
+    }
+
+    private class LocalMouseMotionListener implements MouseMotionListener {
+
+        public void mouseDragged(MouseEvent me) {
+            storeEvent(me);
+
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.mouseDragged(me);
+            }
+        }
+
+        public void mouseMoved(MouseEvent me) {
+            storeEvent(me);
+
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager() != null && animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.mouseMoved(me);
+            }
+        }
+
+    }
+
+    private class LocalKeyListener implements KeyListener {
+
+        public void keyPressed(KeyEvent e) {
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.keyPressed(e);
+            }
+
+            // Delegate.
+            Application.this.keyPressed(e);
+        }
+
+        public void keyReleased(KeyEvent e) {
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.keyReleased(e);
+            }
+
+            // Delegate.
+            Application.this.keyReleased(e);
+        }
+
+        public void keyTyped(KeyEvent e) {
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.keyTyped(e);
+            }
+
+            // Delegate.
+            Application.this.keyTyped(e);
+        }
+
+        public void keyPressed() {
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.keyPressed();
+            }
+
+            Application.this.keyPressed();
+        }
+
+        public void keyReleased() {
+            // Send event to hovered item.
+            if(animatedGraphics.getDrawManager().hovered != null) {
+                animatedGraphics.getDrawManager().hovered.keyReleased();
+            }
+
+            Application.this.keyReleased();
+        }
+
+    }
+
 }

@@ -1,27 +1,16 @@
 package org.cytoscape.examine.internal.layout;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.graphics.PVector;
-import org.cytoscape.examine.internal.graphics.StaticGraphics;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
 import org.cytoscape.examine.internal.layout.dwyer.cola.Descent;
 import org.cytoscape.examine.internal.layout.dwyer.cola.Descent.Projection;
 import org.cytoscape.examine.internal.layout.dwyer.vpsc.Constraint;
-import org.cytoscape.examine.internal.layout.dwyer.vpsc.Variable;
 import org.cytoscape.examine.internal.layout.dwyer.vpsc.Solver;
+import org.cytoscape.examine.internal.layout.dwyer.vpsc.Variable;
 import org.cytoscape.examine.internal.model.Selection;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
 import org.jgrapht.Graph;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.FloydWarshallShortestPaths;
@@ -30,6 +19,20 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
+import static org.cytoscape.examine.internal.visualization.Constants.NODE_OUTLINE;
+import static org.cytoscape.examine.internal.visualization.Constants.NODE_SPACE;
+import static org.cytoscape.examine.internal.visualization.Constants.RIBBON_EXTENT;
 
 public class Layout {
     static final double EDGE_SPACE              = 50;
@@ -65,7 +68,7 @@ public class Layout {
     // Derived metrics.
     public PVector dimensions;
     
-    public Layout(Network network, Selection selection, Layout oldLayout) {
+    public Layout(AnimatedGraphics g, Network network, Selection selection, Layout oldLayout) {
         this.network = network;
         this.selection = selection;
         
@@ -92,14 +95,14 @@ public class Layout {
         
         this.dimensions = PVector.v();
         
-        updatePositions(oldLayout);
+        updatePositions(g, oldLayout);
     }
     
-    public boolean updatePositions() {
-        return updatePositions(null);
+    public boolean updatePositions(AnimatedGraphics g) {
+        return updatePositions(g,null);
     }
     
-    public final boolean updatePositions(Layout oldLayout) {
+    public final boolean updatePositions(AnimatedGraphics g, Layout oldLayout) {
         boolean converged;
         int vN = nodes.length;
             
@@ -111,8 +114,8 @@ public class Layout {
             baseDilations = new double[vN];
             radii = new double[vN];
             for(int i = 0; i < vN; i++) {
-                baseDilations[i] = 0.5 * labelSpacedDimensions(nodes[i]).y;
-                radii[i] = 0.5 * labelSpacedDimensions(nodes[i]).x;
+                baseDilations[i] = 0.5 * labelSpacedDimensions(g, nodes[i]).y;
+                radii[i] = 0.5 * labelSpacedDimensions(g, nodes[i]).x;
             }
 
             // Vertex to vertex minimum distance (based on set memberships).
@@ -379,16 +382,16 @@ public class Layout {
     }
     
     // Dimensions of drawn node label.
-    public static PVector labelDimensions(HNode node, boolean padding) {
-        double height = textHeight();
+    public static PVector labelDimensions(AnimatedGraphics g, HNode node, boolean padding) {
+        double height = g.textHeight();
         
-        StaticGraphics.textFont(labelFont);
-        return PVector.v(textWidth(node.toString()) /*+ NODE_OUTLINE*/ + (padding ? height : 0),
+        g.textFont(LABEL_FONT);
+        return PVector.v(g.textWidth(node.toString()) /*+ NODE_OUTLINE*/ + (padding ? height : 0),
                  height + NODE_OUTLINE);
     }
     
-    public static PVector labelSpacedDimensions(HNode node) {
-        return PVector.add(labelDimensions(node, true),
+    public static PVector labelSpacedDimensions(AnimatedGraphics g, HNode node) {
+        return PVector.add(labelDimensions(g, node, true),
                            PVector.v(NODE_OUTLINE + NODE_SPACE, NODE_OUTLINE + NODE_SPACE));
     }
     

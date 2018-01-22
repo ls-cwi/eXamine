@@ -1,27 +1,36 @@
 package org.cytoscape.examine.internal.visualization;
 
-import java.awt.Color;
+import org.cytoscape.examine.internal.data.HCategory;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
+import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.draw.Constants;
+import org.cytoscape.examine.internal.graphics.draw.Layout;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
+import org.cytoscape.examine.internal.model.Model;
+
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.draw.Layout;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
-import org.cytoscape.examine.internal.graphics.draw.Representation;
 import java.util.List;
-import org.cytoscape.examine.internal.Modules;
-import org.cytoscape.examine.internal.data.HCategory;
-import org.cytoscape.examine.internal.graphics.PVector;
+
+import static org.cytoscape.examine.internal.graphics.draw.Constants.FONT;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.SPACING;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.TEXT_COLOR;
+import static org.cytoscape.examine.internal.visualization.Constants.LABEL_BAR_HEIGHT;
+import static org.cytoscape.examine.internal.visualization.Constants.LABEL_MARKER_RADIUS;
 
 // Visual list of significantly expressed GO terms of a specific domain.
 public class SetList extends Representation<HCategory> {
+
+    private final Model model;
     private final List<SetLabel> labels;
     private int positionScroll;                     // Internal set list scroll.
     
-    public SetList(HCategory element, List<SetLabel> labels) {
+    public SetList(Model model, HCategory element, List<SetLabel> labels) {
         super(element);
-        
+
+        this.model = model;
         this.labels = labels;
         this.positionScroll = 0;
         
@@ -31,53 +40,53 @@ public class SetList extends Representation<HCategory> {
     }
 
     @Override
-    public PVector dimensions() {
+    public PVector dimensions(AnimatedGraphics g) {
         PVector dimensions;
         
-        textFont(font);
+        g.textFont(FONT);
         
-        double space = org.cytoscape.examine.internal.graphics.draw.Parameters.spacing;
-        PVector domainBounds = PVector.v(0.75 * textHeight() + textWidth(element.toString()),
-                                 textHeight() + space + LABEL_BAR_HEIGHT + space);
+        double space = Constants.SPACING;
+        PVector domainBounds = PVector.v(0.75 * g.textHeight() + g.textWidth(element.toString()),
+                                 g.textHeight() + space + LABEL_BAR_HEIGHT + space);
         
         if(isOpened()) {
-            double termHeight = Layout.bounds(labels).y;
-            dimensions = PVector.v(Math.max(domainBounds.x, Layout.maxWidth(labels)),
+            double termHeight = Layout.bounds(g, labels).y;
+            dimensions = PVector.v(Math.max(domainBounds.x, Layout.maxWidth(g, labels)),
                            domainBounds.y + termHeight);
         } else {
-            dimensions = PVector.v(Math.max(domainBounds.x, Layout.maxWidth(labels)), domainBounds.y);
+            dimensions = PVector.v(Math.max(domainBounds.x, Layout.maxWidth(g, labels)), domainBounds.y);
         }
         
         return dimensions;
     }
 
     @Override
-    public void draw() {
-        PVector dim = dimensions();
+    public void draw(AnimatedGraphics g) {
+        PVector dim = dimensions(g);
         
         // Category label.
-        pushTransform();
-        translate(topLeft);
+        g.pushTransform();
+        g.translate(topLeft);
         
         // Background rectangle to enable scrolling.
-        picking();
-        color(Color.WHITE);
-        drawRect(0, 0, dim.x, dim.y);
+        g.picking();
+        g.color(Color.WHITE);
+        g.drawRect(0, 0, dim.x, dim.y);
         
-        translate(0, textHeight());
+        g.translate(0, g.textHeight());
         
-        textFont(font);
-        color(isOpened() ? textColor: textColor.brighter().brighter());
-        text(element.toString(), 0.75 * textHeight(), 0);
+        g.textFont(FONT);
+        g.color(isOpened() ? TEXT_COLOR : TEXT_COLOR.brighter().brighter());
+        g.text(element.toString(), 0.75 * g.textHeight(), 0);
         
         // Arrows.
-        pushTransform();
-        double arrowRad = 0.25 * textHeight();
-        double arrowTrunc = 0.25 * 0.85 * textHeight();
+        g.pushTransform();
+        double arrowRad = 0.25 * g.textHeight();
+        double arrowTrunc = 0.25 * 0.85 * g.textHeight();
         double arrowMargin = 0.33 * arrowTrunc;
         
-        translate(arrowRad, -arrowRad);
-        rotate(isOpened() ? 0.5 * Math.PI : 0);
+        g.translate(arrowRad, -arrowRad);
+        g.rotate(isOpened() ? 0.5 * Math.PI : 0);
         
         Path2D arrows = new Path2D.Double();
         arrows.moveTo(-arrowRad, 0);
@@ -89,30 +98,29 @@ public class SetList extends Representation<HCategory> {
         arrows.lineTo(arrowMargin, -arrowTrunc);
         arrows.closePath();
         
-        fill(arrows);
-        popTransform();
+        g.fill(arrows);
+        g.popTransform();
         
         //noPicking();
         
-        popTransform();
+        g.popTransform();
         
         // Layout tagged set labels.
         List<SetLabel> taggedLabels = new ArrayList<SetLabel>();    // Tagged set label representations.
         List<SetLabel> remainderLabels = new ArrayList<SetLabel>(); // Set label representations.
         for(SetLabel lbl: labels) {
-            (Modules.model.selection.activeSetMap.containsKey(lbl.element) ?
+            (model.selection.activeSetMap.containsKey(lbl.element) ?
                     taggedLabels :
                     remainderLabels).add(lbl);
         }
         
-        PVector domainBounds = PVector.v(textWidth(element.toString()),
-                                 textHeight() + spacing);
+        PVector domainBounds = PVector.v(g.textWidth(element.toString()), g.textHeight() + SPACING);
         PVector topTaggedPos = PVector.add(topLeft, domainBounds.Y());
         
         PVector labelPos = topTaggedPos;
         for(int i = 0; i < taggedLabels.size(); i++) {
             SetLabel label = taggedLabels.get(i);
-            PVector labelDim = label.dimensions();
+            PVector labelDim = label.dimensions(g);
             
             label.opened = true;
             label.topLeft(labelPos);
@@ -122,9 +130,9 @@ public class SetList extends Representation<HCategory> {
         // Layout remaining set labels.
         int skipCount = isOpened() ? positionScroll : remainderLabels.size();
         PVector topBarPos = PVector.add(labelPos,
-                                        PVector.v(0, taggedLabels.isEmpty() ? 0 : textHeight()));
+                                        PVector.v(0, taggedLabels.isEmpty() ? 0 : g.textHeight()));
         PVector topListPos = PVector.add(topBarPos, PVector.v(0,
-                    skipCount > 0 ? LABEL_BAR_HEIGHT + spacing : 0));
+                    skipCount > 0 ? LABEL_BAR_HEIGHT + SPACING : 0));
         PVector bottomBarPos = null;
         
         double barIncrement = Math.min(
@@ -146,11 +154,11 @@ public class SetList extends Representation<HCategory> {
         labelPos = topListPos;
         for(i = skipCount; i < remainderLabels.size(); i++) {
             SetLabel label = remainderLabels.get(i);
-            PVector labelDim = label.dimensions();
+            PVector labelDim = label.dimensions(g);
             
             label.opened =
                 topLeft.y + labelPos.y + 2 * labelDim.y +
-                LABEL_BAR_HEIGHT + spacing < sceneHeight();
+                LABEL_BAR_HEIGHT + SPACING < g.applicationHeight();
             
             if(label.opened) {
                 label.topLeft(labelPos);
@@ -168,20 +176,20 @@ public class SetList extends Representation<HCategory> {
             labelPos = PVector.add(labelPos, PVector.v(0, labelDim.y + 2));
         }
         
-        snippets(remainderLabels);
-        snippets(taggedLabels);
+        g.snippets(remainderLabels);
+        g.snippets(taggedLabels);
     }
     
     public boolean isOpened() {
-        return Modules.model.openedCategories.get().contains(element);
+        return model.openedCategories.get().contains(element);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         if(isOpened()) {
-            Modules.model.openedCategories.remove(element);
+            model.openedCategories.remove(element);
         } else {
-            Modules.model.openedCategories.add(element);
+            model.openedCategories.add(element);
         }
     }
 

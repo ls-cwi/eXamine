@@ -55,7 +55,7 @@ public final class Selection {
      * (there is a maximum number of selected sets).
      */
     public boolean add(HSet proteinSet, double weight) {
-        boolean added = activeSetList.size() < SetColors.palette.length;
+        boolean added = activeSetList.size() < SetColors.PALETTE.length;
         
         if(added) {
             activeSetMap.put(proteinSet, weight);

@@ -23,6 +23,6 @@ public class Constants {
     public enum Selection { 
     	NONE, 
     	UNION, 
-    	INTERSECTION;
-    };
+    	INTERSECTION
+    }
 }

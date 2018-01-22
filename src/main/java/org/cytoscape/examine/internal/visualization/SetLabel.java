@@ -1,64 +1,64 @@
 package org.cytoscape.examine.internal.visualization;
 
-import java.awt.Color;
+import org.cytoscape.examine.internal.data.DataSet;
+import org.cytoscape.examine.internal.data.HSet;
+import org.cytoscape.examine.internal.graphics.Colors;
+import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
+import org.cytoscape.examine.internal.model.Model;
+
+import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import org.cytoscape.examine.internal.Modules;
-import org.cytoscape.examine.internal.graphics.Colors;
-import org.cytoscape.examine.internal.data.HSet;
-import org.cytoscape.examine.internal.graphics.PVector;
-import org.cytoscape.examine.internal.graphics.StaticGraphics;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
-import static org.cytoscape.examine.internal.Modules.*;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.CONTAINMENT_COLOR;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.NOTE_FONT;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.TEXT_COLOR;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.TEXT_CONTAINED_COLOR;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.TEXT_HIGHLIGHT_COLOR;
+import static org.cytoscape.examine.internal.visualization.Constants.LABEL_DOUBLE_PADDING;
+import static org.cytoscape.examine.internal.visualization.Constants.LABEL_MARKER_RADIUS;
+import static org.cytoscape.examine.internal.visualization.Constants.LABEL_PADDING;
+import static org.cytoscape.examine.internal.visualization.Constants.LABEL_ROUNDING;
+import static org.cytoscape.examine.internal.visualization.Constants.SCORE_MIN_RADIUS;
+import static org.cytoscape.examine.internal.visualization.Constants.SET_LABEL_MAX_LINES;
+import static org.cytoscape.examine.internal.visualization.Constants.SET_LABEL_MAX_WIDTH;
 
 // GOTerm set label.
 public class SetLabel extends SetRepresentation {
     public boolean opened;
+
+    private final DataSet dataSet;
+    private final Model model;
+    private final SetColors setColors;
     private final String text;
-    private final String[] linedText;
     private final SetText setText;
+    private final boolean showScore;
+
+    private String[] cachedLinedText;
+    private double cachedLineHeight;
     
     private String shortExponent;
     
     protected SetList parentList;
 
-    public SetLabel(HSet element, String text) {
-        super(element);
-        
+    public SetLabel(DataSet dataSet, Model model, SetColors setColors, HSet element, String text, boolean showScore) {
+        super(model, element);
+
+        this.dataSet = dataSet;
+        this.model = model;
+        this.setColors = setColors;
+        this.showScore = showScore;
+
         this.opened = false;
         
         if(text == null) {
             text = element.toString();
         }
         
-        StaticGraphics.textFont(labelFont);
-        String[] words = text.split(" ");
-        ArrayList<String> lines = new ArrayList<String>();
-        for(int i = 0; i < words.length; i++) {
-            String w = words[i];
-            
-            if(lines.size() < SET_LABEL_MAX_LINES) {
-                if (textWidth(w) > SET_LABEL_MAX_WIDTH) {
-                    lines.add(w.substring(0, SET_LABEL_MAX_WIDTH / (int) (0.75 * textHeight())) + "...");
-                } else if(lines.isEmpty()) {
-                    lines.add(w);
-                } else {
-                    String extW = lines.get(lines.size() - 1) + " " + w;
-                    if(textWidth(extW) < SET_LABEL_MAX_WIDTH) {
-                        lines.set(lines.size() - 1, extW);
-                    } else {
-                        lines.add(w);
-                    }
-                }
-            }
-        }
-        this.linedText = lines.toArray(new String[]{});
-        
         String txt = text;
-    	if (Modules.showScore) {
+    	if (showScore) {
             DecimalFormat df = new DecimalFormat("0.0E0");
             txt = df.format(element.score) + "  " + txt;
     	}
@@ -70,53 +70,88 @@ public class SetLabel extends SetRepresentation {
         this.setText = new SetText(element);
     }
 
-    @Override
-    public PVector dimensions() {
-        textFont(labelFont);
-        
-        return PVector.v(LABEL_PADDING + 2 * LABEL_MARKER_RADIUS + 2 * LABEL_DOUBLE_PADDING
-                 + SET_LABEL_MAX_WIDTH
-                 + LABEL_PADDING,
-                 linedText.length * textHeight() + LABEL_DOUBLE_PADDING);
+    private String[] getLinedText(AnimatedGraphics g) {
+
+        g.textFont(LABEL_FONT);
+
+        // If cache is invalid => update lined text.
+        if(cachedLineHeight != g.textHeight()) {
+
+            String[] words = text.split(" ");
+            ArrayList<String> lines = new ArrayList<String>();
+            for (int i = 0; i < words.length; i++) {
+                String w = words[i];
+
+                if (lines.size() < SET_LABEL_MAX_LINES) {
+                    if (g.textWidth(w) > SET_LABEL_MAX_WIDTH) {
+                        lines.add(w.substring(0, SET_LABEL_MAX_WIDTH / (int) (0.75 * g.textHeight())) + "...");
+                    } else if (lines.isEmpty()) {
+                        lines.add(w);
+                    } else {
+                        String extW = lines.get(lines.size() - 1) + " " + w;
+                        if (g.textWidth(extW) < SET_LABEL_MAX_WIDTH) {
+                            lines.set(lines.size() - 1, extW);
+                        } else {
+                            lines.add(w);
+                        }
+                    }
+                }
+            }
+
+            cachedLinedText = lines.toArray(new String[]{});
+            cachedLineHeight = g.textHeight();
+        }
+
+        return cachedLinedText;
     }
 
     @Override
-    public void draw() {
-        PVector dim = dimensions();
+    public PVector dimensions(AnimatedGraphics g) {
+        g.textFont(LABEL_FONT);
+
+        return PVector.v(LABEL_PADDING + 2 * LABEL_MARKER_RADIUS + 2 * LABEL_DOUBLE_PADDING
+                 + SET_LABEL_MAX_WIDTH
+                 + LABEL_PADDING,
+                 getLinedText(g).length * g.textHeight() + LABEL_DOUBLE_PADDING);
+    }
+
+    @Override
+    public void draw(AnimatedGraphics g) {
+        PVector dim = dimensions(g);
         boolean hL = highlight();
         
-        textFont(labelFont);
+        g.textFont(LABEL_FONT);
         
-        translate(topLeft);
+        g.translate(topLeft);
         
         if(opened) {
-            snippet(setText);
+            g.snippet(setText);
         }
         
         // Set marker.
         if(!opened && hL) {
-            translate(0, !opened && hL ? 2 * LABEL_MARKER_RADIUS : 0);
+            g.translate(0, !opened && hL ? 2 * LABEL_MARKER_RADIUS : 0);
         } else if(!opened) {
-            translate(0, 0);
+            g.translate(0, 0);
         } else {
-            translate(LABEL_PADDING + LABEL_MARKER_RADIUS, 0.5 * dim.y);
+            g.translate(LABEL_PADDING + LABEL_MARKER_RADIUS, 0.5 * dim.y);
         }
         
-        double maxRadius = 0.5 * textHeight() - 2;
-        double minScoreExp = exponent(data.minScore.get());
-        double maxScoreExp = exponent(data.maxScore.get());
+        double maxRadius = 0.5 * g.textHeight() - 2;
+        double minScoreExp = exponent(dataSet.minScore.get());
+        double maxScoreExp = exponent(dataSet.maxScore.get());
         double scoreExp = exponent(element.score);
-        double normScore = Modules.showScore ?
+        double normScore = showScore ?
                             ((scoreExp - maxScoreExp) /
                              (minScoreExp - maxScoreExp)) :
                             1;
         double radius = SCORE_MIN_RADIUS + (maxRadius - SCORE_MIN_RADIUS) * normScore;
-        color(hL ? containmentColor : Colors.grey(0.7));
-        fillEllipse(0, 0, radius, radius);
+        g.color(hL ? CONTAINMENT_COLOR : Colors.grey(0.7));
+        g.fillEllipse(0, 0, radius, radius);
         
-        color(Color.WHITE);
-        StaticGraphics.strokeWeight(1);
-        drawEllipse(0, 0, radius, radius);
+        g.color(Color.WHITE);
+        g.strokeWeight(1);
+        g.drawEllipse(0, 0, radius, radius);
     }
     
     private double exponent(double value) {
@@ -142,44 +177,43 @@ public class SetLabel extends SetRepresentation {
     private class SetText extends SetRepresentation {
         
         public SetText(HSet element) {
-            super(element);
+            super(model, element);
         }
 
         @Override
-        public PVector dimensions() {
+        public PVector dimensions(AnimatedGraphics g) {
             return PVector.v();
         }
 
         @Override
-        public void draw() {
-            PVector dim = SetLabel.this.dimensions();
+        public void draw(AnimatedGraphics g) {
+            PVector dim = SetLabel.this.dimensions(g);
             boolean hL = highlight();
             boolean selected = selected();
         
             // Background bubble.
-            color(hL ? containmentColor :
-                 selected ? visualization.setColors.color(element) : Colors.grey(1f),
+            g.color(hL ? CONTAINMENT_COLOR :
+                 selected ? setColors.color(element) : Colors.grey(1f),
                  selected || hL ? 1f : 0f);
-            fillRect(0f, 0f, dim.x, dim.y, LABEL_ROUNDING);
+            g.fillRect(0f, 0f, dim.x, dim.y, LABEL_ROUNDING);
             
             // Score label.
-            color(hL ? textContainedColor :
-                  selected ? textHighlightColor : textColor); 
+            g.color(hL ? TEXT_CONTAINED_COLOR :
+                  selected ? TEXT_HIGHLIGHT_COLOR : TEXT_COLOR);
             
-            if(Modules.showScore) {
-                textFont(noteFont);
-                text(shortExponent, 2 * LABEL_MARKER_RADIUS + 3,
-                                    0.5 * dim.y - LABEL_MARKER_RADIUS);
+            if(showScore) {
+                g.textFont(NOTE_FONT);
+                g.text(shortExponent, 2 * LABEL_MARKER_RADIUS + 3, 0.5 * dim.y - LABEL_MARKER_RADIUS);
             }
 
             // Set label.
-            picking();
-            textFont(labelFont);
-            translate(LABEL_PADDING + 2 * LABEL_MARKER_RADIUS + 2 * LABEL_DOUBLE_PADDING,
+            g.picking();
+            g.textFont(LABEL_FONT);
+            g.translate(LABEL_PADDING + 2 * LABEL_MARKER_RADIUS + 2 * LABEL_DOUBLE_PADDING,
                       LABEL_PADDING);
-            for(String line: linedText) {
-                text(line);
-                translate(0, textHeight());
+            for(String line: getLinedText(g)) {
+                g.text(line);
+                g.translate(0, g.textHeight());
             }
         }
 

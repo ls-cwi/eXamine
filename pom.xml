@@ -81,6 +81,14 @@
 					</instructions>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 
@@ -173,5 +181,5 @@
 	 </dependency>
 	</dependencies>
 
-	<description>eXamine is a set-oriented visual analysis approach for annotated modules that displays set membership as contours on top of a node-link layout. eXamine extends upon Self Organizing Maps to simultaneously lay out nodes, links, and set contours.</description>
+	<description>eXamine is a set-oriented visual analysis approach for annotated modules that displays set membership as contours on top of a node-link layout. eXamine utilizes WebCola algorithms to simultaneously lay out nodes, links, and set contours.</description>
 </project>

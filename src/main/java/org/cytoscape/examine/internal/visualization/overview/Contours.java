@@ -3,18 +3,28 @@ package org.cytoscape.examine.internal.visualization.overview;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.operation.union.CascadedPolygonUnion;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.examine.internal.layout.Layout;
 import org.cytoscape.examine.internal.layout.Layout.RichEdge;
 import org.cytoscape.examine.internal.layout.Layout.RichNode;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
 import org.cytoscape.examine.internal.visualization.Util;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.cytoscape.examine.internal.visualization.Constants.BUFFER_SEGMENTS;
+import static org.cytoscape.examine.internal.visualization.Constants.LINK_SEGMENTS;
+import static org.cytoscape.examine.internal.visualization.Constants.LINK_WIDTH;
+import static org.cytoscape.examine.internal.visualization.Constants.NODE_MARGIN;
+import static org.cytoscape.examine.internal.visualization.Constants.NODE_OUTLINE;
+import static org.cytoscape.examine.internal.visualization.Constants.RIBBON_EXTENT;
+import static org.cytoscape.examine.internal.visualization.Constants.RIBBON_SPACE;
+import static org.cytoscape.examine.internal.visualization.Constants.RIBBON_WIDTH;
 import static org.cytoscape.examine.internal.visualization.Util.geometryFactory;
 
 // Generates set contours for a SOM.
@@ -24,18 +34,18 @@ public class Contours {
     // Set body and outline shapes, per set index.
     public final List<Geometry> ribbonShapes, outlineShapes;
     
-    public Contours(Layout layout) {
+    public Contours(AnimatedGraphics graphics, Layout layout) {
         this.layout = layout;
         this.ribbonShapes = new ArrayList<Geometry>();
         this.outlineShapes = new ArrayList<Geometry>();
         
         // Compute contour shapes.
         for(HSet set: layout.sets) {
-            deriveContour(set, layout);
+            deriveContour(graphics, set, layout);
         }
     }
     
-    private void deriveContour(HSet set, Layout layout) {
+    private void deriveContour(AnimatedGraphics g, HSet set, Layout layout) {
         // Radius for smoothening contours.
         double smoothRadius = 4 * RIBBON_EXTENT;
 
@@ -46,7 +56,7 @@ public class Contours {
             double edgeRadius = vertexIndex * RIBBON_EXTENT + smoothRadius;
 
             // Radius of vertex (assuming rounded rectangle).
-            PVector vertexBounds = Layout.labelDimensions(v, false);
+            PVector vertexBounds = Layout.labelDimensions(g, v, false);
             PVector vertexPos = layout.position(v);
             double vertexRadius = 0.5 * vertexBounds.y + NODE_MARGIN;
             double totalRadius = vertexRadius + edgeRadius;
@@ -92,7 +102,7 @@ public class Contours {
         List<Geometry> vertexAntiHulls = new ArrayList<Geometry>();
         for(HNode v: antiVertices) {
             // Radius of vertex (assuming rounded rectangle).
-            PVector bounds = Layout.labelDimensions(v, false);
+            PVector bounds = Layout.labelDimensions(g, v, false);
             PVector pos = layout.position(v);
             double radius = 0.5 * bounds.y + NODE_OUTLINE;
 

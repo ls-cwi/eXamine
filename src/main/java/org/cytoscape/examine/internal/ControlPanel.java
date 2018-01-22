@@ -1,54 +1,20 @@
 package org.cytoscape.examine.internal;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
-import javax.swing.JLabel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
-
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.examine.internal.Constants.Selection;
+import org.cytoscape.examine.internal.data.DataSet;
+import org.cytoscape.examine.internal.model.Model;
 import org.cytoscape.examine.internal.tasks.GenerateGroups;
 import org.cytoscape.examine.internal.tasks.RemoveGroups;
+import org.cytoscape.examine.internal.visualization.Visualization;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.ColumnCreatedEvent;
@@ -66,10 +32,29 @@ import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.events.SessionLoadedEvent;
 import org.cytoscape.session.events.SessionLoadedListener;
+import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.swing.DialogTaskManager;
 
 //TODO: Move swing components with distinct function to different classes
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("serial")
 public class ControlPanel extends JPanel implements CytoPanelComponent,
@@ -77,14 +62,9 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		ColumnDeletedListener, ColumnNameChangedListener,
 		NetworkDestroyedListener, SessionLoadedListener {
 
-	private final CyNetworkManager networkManager;
-	private final CyRootNetworkManager rootNetworkManager;
-	private final CyApplicationManager applicationManager;
-	private final CyGroupManager groupManager;
-	private final CyGroupFactory groupFactory;
-	private final DialogTaskManager taskManager;
 	
 	// User interface elements
+	
 	//TODO: Parameterize Generics
 	private JPanel pnlNetwork;
 	private JTable tblFeedBack;
@@ -110,19 +90,13 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	private JButton btnExamine;
 	private JCheckBox showScoreCheckBox;
 	
-	public ControlPanel(CyNetworkManager networkManager,
-			CyRootNetworkManager rootNetworkManager,
-			CyApplicationManager applicationManager,
-			CyGroupManager groupManager,
-			CyGroupFactory groupFactory,
-			DialogTaskManager taskManager) {
+	//Links
+	
+	CyReferences references = CyReferences.getInstance();
+	
+	public ControlPanel() {
 
-		this.networkManager = networkManager;
-		this.rootNetworkManager = rootNetworkManager;
-		this.applicationManager = applicationManager;
-		this.groupManager = groupManager;
-		this.groupFactory = groupFactory;
-		this.taskManager = taskManager;
+
 		this.networkSettings = new HashMap<Long, NetworkSettings>();
 		this.itemChangeListener = new ItemChangeListener();
 		this.nSelectedNodes = 0;
@@ -130,7 +104,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 
 		initUserInterface();
 		
-		CyNetwork network = applicationManager.getCurrentNetwork();
+		CyNetwork network = references.getApplicationManager().getCurrentNetwork();
+		
 		if (network != null) {
 			this.currentNetworkSUID = network.getSUID();
 			this.networkSettings.put(currentNetworkSUID, new NetworkSettings(network));
@@ -157,50 +132,6 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	// Network settings, maintained for several networks as to accommodate
 	// storing and retrieval of settings upon network selection change
 	private Map<Long, NetworkSettings> networkSettings;
-
-	/**
-	 * Ensures current network settings match UI, called upon UI changes.
-	 * 
-	 * @author melkebir
-	 * 
-	 */
-	private class ItemChangeListener implements ItemListener {
-		@Override
-		public void itemStateChanged(ItemEvent event) {
-			// update network settings to match ui
-			int idxNodeLabel = cmbNodeLabel.getSelectedIndex();
-			int idxNodeURL = cmbNodeURL.getSelectedIndex();
-			int idxGroupScore = cmbGroupScore.getSelectedIndex();
-			int idxGroupSelection = cmbGroupSelection.getSelectedIndex();
-
-			NetworkSettings ns = networkSettings.get(currentNetworkSUID);
-			if (ns != null) {
-				ns.setSelectedLabelColumn(idxNodeLabel);
-				ns.setSelectedURLColumn(idxNodeURL);
-				ns.setSelectedScoreColumn(idxGroupScore);
-				ns.setGroupSelection(Selection.values()[idxGroupSelection]);
-				ns.setShowScore(showScoreCheckBox.isSelected());
-	
-				ArrayList<Integer> selectedGroups = new ArrayList<Integer>();
-				ArrayList<Integer> groupSizes = new ArrayList<Integer>();
-				for (int idxGroup = 0; idxGroup < checkBoxes.length; idxGroup++) {
-					if (checkBoxes[idxGroup].isSelected()) {
-						selectedGroups.add(idxGroup);
-						spinners[idxGroup].setEnabled(true);
-					} else {
-						spinners[idxGroup].setEnabled(false);
-					}
-					
-					Integer size = (Integer) spinners[idxGroup].getModel().getValue();
-					groupSizes.add(size);
-				}
-				ns.setSelectedGroupColumns(selectedGroups);
-				ns.setAllGroupColumnSizes(groupSizes);
-	
-				updateButtons();
-			}
-		}
-	}
 
 	/**
 	 * Stores network settings, including selected columns and column names.
@@ -461,16 +392,9 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			this.selectedGroupColumns = selectedGroupColumns;
 		}
 
-		public List<String> getColumnNames() {
-			return columnNames;
-		}
 
 		public List<Integer> getAllGroupColumns() {
 			return allGroupColumns;
-		}
-		
-		public List<Integer> getAllGroupColumnSizes() {
-			return allGroupColumnSizes;
 		}
 		
 		public void setAllGroupColumnSizes(List<Integer> allGroupColumnSizes) {
@@ -499,7 +423,6 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		}
 	}
 
-	
 
 	/**
 	 * Update user interface to match network settings for currently selected network.
@@ -783,24 +706,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
-				
-				// Initialize modules (if they have not been initialized yet).
-				Modules.initialize();
-				Modules.showScore = ns.getShowScore();
-				
-				// Set selection mode
-				Modules.model.setSelectionMode(ns.getGroupSelection());
-                                
-				Modules.data.load(applicationManager.getCurrentNetwork(),
-						ns.getSelectedLabelColumnName(),
-						ns.getSelectedURLColumnName(),
-						ns.getSelectedScoreColumnName(),
-						ns.getSelectedGroupColumnNames(),
-						ns.getSelectedGroupColumnSizes(),
-						groupManager);
-                                
-				// Trigger visualization update.
-				Modules.model.selection.change.signal();
+				openVisualizationWindow(ns);
 			}
 		});
 		btnGenerateAll = new JButton("Generate");
@@ -817,8 +723,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 						"Group removal", JOptionPane.YES_NO_OPTION);
 
 				if (selectedOption == JOptionPane.YES_OPTION) {
-					CyNetwork network = applicationManager.getCurrentNetwork();
-					taskManager.execute(new TaskIterator(new RemoveGroups(groupManager, network)));
+					CyNetwork network = references.getApplicationManager().getCurrentNetwork();
+					references.getTaskManager().execute(new TaskIterator(new RemoveGroups(references.getGroupManager(), network)));
 				}
 			}
 		});
@@ -826,11 +732,11 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		btnGenerateAll.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				CyNetwork network = applicationManager.getCurrentNetwork();
+				CyNetwork network = references.getApplicationManager().getCurrentNetwork();
 				CyTable nodeTable = network.getDefaultNodeTable();
 				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
 				List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
-				taskManager.execute(new TaskIterator(
+				references.getTaskManager().execute(new TaskIterator(
 						new GenerateGroups( network, nodeTable, groupColumnNames, true)));
 			}
 		});
@@ -838,11 +744,11 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		btnGenerateSelection.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				CyNetwork network = applicationManager.getCurrentNetwork();
+				CyNetwork network = references.getApplicationManager().getCurrentNetwork();
 				CyTable nodeTable = network.getDefaultNodeTable();
 				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
 				List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
-				taskManager.execute(new TaskIterator(
+				references.getTaskManager().execute(new TaskIterator(
 						new GenerateGroups( network, nodeTable, groupColumnNames, false)));
 			}
 		});
@@ -860,13 +766,34 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		add(pnlButtons, gridBagConstraints);
 	}
 
+    /**
+     * Open a new visualization window.
+     */
+    private void openVisualizationWindow(NetworkSettings networkSettings) {
+        final DataSet dataSet = new DataSet(
+                references.getApplicationManager().getCurrentNetwork(),
+				references.getGroupManager(),
+                networkSettings.getSelectedLabelColumnName(),
+                networkSettings.getSelectedURLColumnName(),
+                networkSettings.getSelectedScoreColumnName(),
+                networkSettings.getSelectedGroupColumnNames(),
+                networkSettings.getSelectedGroupColumnSizes()
+        );
+
+        final Model model = new Model(dataSet, references.getApplicationManager(), references.getVisualMappingManager());
+        model.setSelectionMode(networkSettings.getGroupSelection());
+        model.selection.change.signal();
+
+        new Visualization(dataSet, model, networkSettings.getShowScore());
+    }
+
 	/**
 	 * Update the network/nodes table.
 	 */
 	private void updateFeedbackTableModel() {
 		String netName = "";
 		String nodeCount = "";
-		final CyNetwork net = applicationManager.getCurrentNetwork();
+		final CyNetwork net = references.getApplicationManager().getCurrentNetwork();
 
 		if (net != null) {
 			this.nSelectedNodes = net.getDefaultNodeTable().countMatchingRows(CyNetwork.SELECTED, true);
@@ -987,7 +914,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	@Override
 	public void handleEvent(final RowsSetEvent e) {
 		if (listenersEnabled.get()) {	
-			if (applicationManager.getCurrentNetwork() == null) return;
+			if (references.getApplicationManager().getCurrentNetwork() == null) return;
 			
 			boolean isSelection = true;
 			for (RowSetRecord change : e.getPayloadCollection()) {
@@ -1022,7 +949,8 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				@Override
 				public void run() {
 					// get the root network first
-					CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(networkManager.getNetwork(currentNetworkSUID));
+					CyNetwork currentNet = references.getNetworkManager().getNetwork(currentNetworkSUID);
+					CyRootNetwork rootNetwork = references.getRootNetworkManager().getRootNetwork(currentNet);
 	
 					// now for all subnetworks of this root network, update the
 					// column name
@@ -1050,8 +978,10 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				@Override
 				public void run() {
 					// get the root network first
-					CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(networkManager.getNetwork(currentNetworkSUID));
-	
+					// get the root network first
+					CyNetwork currentNet = references.getNetworkManager().getNetwork(currentNetworkSUID);
+					CyRootNetwork rootNetwork = references.getRootNetworkManager().getRootNetwork(currentNet);
+		
 					// now for all subnetworks of this root network, update the
 					// column name
 					for (CyNetwork network : rootNetwork.getSubNetworkList()) {
@@ -1074,11 +1004,16 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		if (listenersEnabled.get()) {
 			//We ignore calls when no current network is initialized
 			//Such calls can occur during the loading of sessions as some events are parallel and thus a ColumnCreatedEvent can be fired before the corresponding network has been created and fully registered
-			if (currentNetworkSUID == null) return;
-			CyNetwork currentNetwork = networkManager.getNetwork(currentNetworkSUID);
-			if (currentNetwork == null) return;
+			if (currentNetworkSUID == null) {
+				System.out.println("Current Network SUID has not been set! Ignoring ColumnCreatedEvent ..."); //TODO: Dedicated log/ error stream?
+				return;
+			}
+			CyNetwork currentNetwork = references.getNetworkManager().getNetwork(currentNetworkSUID);
+			if (currentNetwork == null) {
+				System.out.println("Could not retrieve current network, ignoring ColumnCreatedEvent!");
+			}
 			
-			CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(currentNetwork);
+			CyRootNetwork rootNetwork = references.getRootNetworkManager().getRootNetwork(currentNetwork);
 
 			if (e.getSource() == rootNetwork.getDefaultNodeTable()) {
 				System.out.println("Column created event: " + e.getColumnName() + ", source: " + e.getSource());
@@ -1087,7 +1022,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 					public void run() {
 						// get the root network first
 						if (currentNetworkSUID != null) {
-							CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(networkManager.getNetwork(currentNetworkSUID));
+							CyRootNetwork rootNetwork = references.getRootNetworkManager().getRootNetwork(references.getNetworkManager().getNetwork(currentNetworkSUID));
 			
 							// now for all subnetworks of this root network, update the
 							// column name
@@ -1107,7 +1042,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 
 	private void removeInactiveNetworkSettings() {
 		for (long suid : networkSettings.keySet()) {
-			if (networkManager.getNetwork(suid) == null) {
+			if (references.getNetworkManager().getNetwork(suid) == null) {
 				networkSettings.remove(suid);
 			}
 		}
@@ -1146,4 +1081,49 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			});
 		}
 	}
+
+	/**
+	 * Ensures current network settings match UI, called upon UI changes.
+	 *
+	 * @author melkebir
+	 *
+	 */
+	private class ItemChangeListener implements ItemListener {
+		@Override
+		public void itemStateChanged(ItemEvent event) {
+			// update network settings to match ui
+			int idxNodeLabel = cmbNodeLabel.getSelectedIndex();
+			int idxNodeURL = cmbNodeURL.getSelectedIndex();
+			int idxGroupScore = cmbGroupScore.getSelectedIndex();
+			int idxGroupSelection = cmbGroupSelection.getSelectedIndex();
+
+			NetworkSettings ns = networkSettings.get(currentNetworkSUID);
+			if (ns != null) {
+				ns.setSelectedLabelColumn(idxNodeLabel);
+				ns.setSelectedURLColumn(idxNodeURL);
+				ns.setSelectedScoreColumn(idxGroupScore);
+				ns.setGroupSelection(Selection.values()[idxGroupSelection]);
+				ns.setShowScore(showScoreCheckBox.isSelected());
+
+				ArrayList<Integer> selectedGroups = new ArrayList<Integer>();
+				ArrayList<Integer> groupSizes = new ArrayList<Integer>();
+				for (int idxGroup = 0; idxGroup < checkBoxes.length; idxGroup++) {
+					if (checkBoxes[idxGroup].isSelected()) {
+						selectedGroups.add(idxGroup);
+						spinners[idxGroup].setEnabled(true);
+					} else {
+						spinners[idxGroup].setEnabled(false);
+					}
+
+					Integer size = (Integer) spinners[idxGroup].getModel().getValue();
+					groupSizes.add(size);
+				}
+				ns.setSelectedGroupColumns(selectedGroups);
+				ns.setAllGroupColumnSizes(groupSizes);
+
+				updateButtons();
+			}
+		}
+	}
+
 }

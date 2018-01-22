@@ -51,16 +51,17 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	
 	//Internal
 	
-	
 	private Map<String, CyGroup> groupIndex;
+	
+	
+	//Links
+	
 	private CyReferences references = CyReferences.getInstance();
 	
 	/**
-	 * Default constructor
+	 * Default constructor, can be used for argument passing via Tunables
 	 */
-	public GenerateGroups() {
-		
-	};
+	public GenerateGroups() {};
 
 	/**
 	 * Alternative constructor, used if arguments are known at the time of construction (for instance when called via GUI)
@@ -126,6 +127,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
+		
 		/*taskMonitor.setTitle("Testing...");
 		for (int i = 0; i < 5; i++) {
 			taskMonitor.setStatusMessage("Sleeping #" + i);
@@ -135,11 +137,16 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		}
 		return;*/
 		
-		if (network == null || nodeTable == null) return;
+		if (network == null || nodeTable == null) {
+			throw new Exception(network == null ? "Network is null, this should never be the case!" : "NodeTable is null, this should never be the case!");
+		}
 
+		// Listeners are temporarily disabled to prevent firing of events throughout group generation
 		ControlPanel.listenersEnabled.set(false);
 		
 		taskMonitor.setTitle("Generating groups");
+		
+		//Initializing group index
 		taskMonitor.setStatusMessage("Initializing group index.");
 		initGroupIndex(network, nodeTable);
 		

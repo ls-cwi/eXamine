@@ -1,76 +1,76 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import java.awt.Color;
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
-import static org.cytoscape.examine.internal.visualization.Parameters.*;
-import org.cytoscape.examine.internal.graphics.draw.Representation;
-
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
-import org.cytoscape.examine.internal.visualization.SetRepresentation;
-
-import static org.cytoscape.examine.internal.Modules.*;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.awt.Desktop;
-import java.awt.Shape;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Path2D;
-import java.awt.geom.RoundRectangle2D;
-import java.io.IOException;
-import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cytoscape.examine.internal.graphics.PVector;
-import org.cytoscape.examine.internal.graphics.StaticGraphics;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
 import org.cytoscape.examine.internal.layout.Layout;
 import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.examine.internal.visualization.SetRepresentation;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.view.presentation.property.values.NodeShape;
 import org.jgrapht.graph.DefaultEdge;
 
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Path2D;
+import java.awt.geom.RoundRectangle2D;
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.cytoscape.examine.internal.graphics.draw.Constants.CONTAINMENT_COLOR;
+import static org.cytoscape.examine.internal.graphics.draw.Constants.TEXT_CONTAINED_COLOR;
+import static org.cytoscape.examine.internal.visualization.Constants.NODE_OUTLINE;
+
 // Node representation.
 public class NodeRepresentation extends Representation<HNode> {
+
+    private final Model model;
     
-    public NodeRepresentation(HNode element) {
+    public NodeRepresentation(Model model, HNode element) {
         super(element);
+
+        this.model = model;
     }
 
     @Override
-    public PVector dimensions() {
+    public PVector dimensions(AnimatedGraphics g) {
         return PVector.v();
     }
 
     @Override
-    public void draw() {
-        color(Color.BLACK);
-        translate(topLeft);
+    public void draw(AnimatedGraphics g) {
+        g.color(Color.BLACK);
+        g.translate(topLeft);
         
         // Get label bounds, but also sets label font.
-        PVector bounds = Layout.labelDimensions(element, true);
+        PVector bounds = Layout.labelDimensions(g, element, true);
         Shape shape = shape(bounds);
-        translate(-0.5 * bounds.x, -0.5 * bounds.y);
+        g.translate(-0.5 * bounds.x, -0.5 * bounds.y);
         
         // Background rectangle.
-        color(highlight() ? containmentColor :
+        g.color(highlight() ? CONTAINMENT_COLOR :
                             (Color) styleValue(BasicVisualLexicon.NODE_FILL_COLOR));
-        fill(shape);
+        g.fill(shape);
         //fillRect(0, 0, bounds.x, bounds.y, bounds.y);
         
         // Foreground outline with color coding.
-        color((Color) styleValue(BasicVisualLexicon.NODE_BORDER_PAINT));
-        strokeWeight(styleValue(BasicVisualLexicon.NODE_BORDER_WIDTH));
-        StaticGraphics.draw(shape);
+        g.color((Color) styleValue(BasicVisualLexicon.NODE_BORDER_PAINT));
+        g.strokeWeight(styleValue(BasicVisualLexicon.NODE_BORDER_WIDTH));
+        g.draw(shape);
         //drawRect(0, 0, bounds.x, bounds.y, bounds.y);
         
-        picking();
-        color(highlight() ? textContainedColor :
+        g.picking();
+        g.color(highlight() ? TEXT_CONTAINED_COLOR :
                             (Color) styleValue(BasicVisualLexicon.NODE_LABEL_COLOR));
-        text(element.toString(), 0.5 * (bounds.y + NODE_OUTLINE) - 3,
+        g.text(element.toString(), 0.5 * (bounds.y + NODE_OUTLINE) - 3,
                                  bounds.y - NODE_OUTLINE - 3);
     }
     
@@ -124,7 +124,7 @@ public class NodeRepresentation extends Representation<HNode> {
     }
     
     private <V> V styleValue(VisualProperty<V> property) {
-        return Model.styleValue(property, element.cyRow);
+        return model.styleValue(property, element.cyRow);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class NodeRepresentation extends Representation<HNode> {
     @Override
     public void mouseClicked(MouseEvent e) {
         // Open website(s) on ctrl click.
-        if(mouseEvent().isControlDown()) {
+        if(e.isControlDown()) {
             if(element.url != null && element.url.trim().length() > 0) {
                 try {
                     Desktop.getDesktop().browse(URI.create(element.url));

@@ -1,13 +1,12 @@
 package org.cytoscape.examine.internal;
 
-import org.cytoscape.examine.internal.ViewerAction;
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.events.SetCurrentNetworkListener;
+import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.examine.internal.taskfactories.CommandTaskFactory;
 import org.cytoscape.examine.internal.tasks.ExamineCommand;
-import org.cytoscape.application.events.SetCurrentNetworkListener;
-import org.cytoscape.application.swing.CyAction;
-import org.cytoscape.application.swing.CytoPanelComponent;
-import org.osgi.framework.BundleContext;
-
+import org.cytoscape.group.CyGroupFactory;
+import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.events.ColumnCreatedListener;
 import org.cytoscape.model.events.ColumnDeletedListener;
@@ -17,18 +16,15 @@ import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.session.events.SessionLoadedListener;
-
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.work.TaskFactory;
+import org.cytoscape.work.swing.DialogTaskManager;
+import org.osgi.framework.BundleContext;
 import static org.cytoscape.work.ServiceProperties.COMMAND;
 import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 
 import java.util.Properties;
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.group.CyGroupFactory;
-import org.cytoscape.group.CyGroupManager;
-import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.work.TaskFactory;
-import org.cytoscape.work.swing.DialogTaskManager;
 
 /**
  * Execution body.
@@ -72,28 +68,27 @@ public class CyActivator extends AbstractCyActivator {
         DialogTaskManager taskManager = getService(bc, DialogTaskManager.class);
         
         // Action, the group viewer
-        ViewerAction viewerAction =
-                new ViewerAction(applicationManager,
-                                 visualMappingManager,
-                                 groupManager,
-                                 groupFactory);
+//        ViewerAction viewerAction =
+//                new ViewerAction(applicationManager,
+//                                 visualMappingManager,
+//                                 groupManager,
+//                                 groupFactory);
         
         // Action, the group selector
         /*GroupsFromColumnsAction groupsAction =
                 new GroupsFromColumnsAction(applicationManager,
                                             groupManager,
                                             groupFactory);*/
-        
+
         //Store services for later references TODO: Remove redundant fields throughout app
         CyReferences.getInstance().storeReferences(networkManager, rootNetworkManager, 
-        		applicationManager, groupManager, groupFactory, taskManager);
+        		applicationManager, groupManager, groupFactory, taskManager, visualMappingManager);
         
         // The eXamine control panel
-        ControlPanel controlPanel = new ControlPanel(networkManager, rootNetworkManager, 
-        		applicationManager, groupManager, groupFactory, taskManager);
+        ControlPanel controlPanel = new ControlPanel();
 
         // Register it as a service.
-        registerService(bc, viewerAction, CyAction.class, new Properties());
+        //registerService(bc, viewerAction, CyAction.class, new Properties());
         //registerService(bc, groupsAction, CyAction.class, new Properties());
         registerService(bc, controlPanel, CytoPanelComponent.class, new Properties());
         registerService(bc, controlPanel, SetCurrentNetworkListener.class, new Properties());
@@ -112,15 +107,6 @@ public class CyActivator extends AbstractCyActivator {
 		props_GENERATE_GROUPS.setProperty(COMMAND, ExamineCommand.GENERATE_GROUPS.toString());
 		props_GENERATE_GROUPS.setProperty(COMMAND_DESCRIPTION,"[Placeholder] This command generates groups");
 		registerService(bc, commandTaskFactory_GENERATE_GROUPS, TaskFactory.class, props_GENERATE_GROUPS);
-    }
-    
-    /**
-     * Cleanup module resources. (Does this work?)
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        Modules.dispose();
-        super.finalize();
     }
     
 }

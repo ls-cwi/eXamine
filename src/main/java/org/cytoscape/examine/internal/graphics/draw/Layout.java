@@ -1,8 +1,12 @@
 package org.cytoscape.examine.internal.graphics.draw;
 
-import static java.lang.Math.*;
-import java.util.Iterator;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.graphics.PVector;
+
+import java.util.Iterator;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * Utility class for laying out PositionedSnippets (in two dimensions).
@@ -20,12 +24,14 @@ public class Layout {
      * Place the second given snippet left of the first given snippet,
      * with the given space in between. Aligned to top.
      */
-    public static void placeLeftTop(PositionedSnippet placedSnippet,
-                                    PositionedSnippet toPlaceSnippet,
-                                    double space) {
+    public static void placeLeftTop(
+            AnimatedGraphics graphics,
+            PositionedSnippet placedSnippet,
+            PositionedSnippet toPlaceSnippet,
+            double space) {
         // To left.
         toPlaceSnippet.topLeft.x =
-                placedSnippet.topLeft.x + placedSnippet.dimensions().x + space;
+                placedSnippet.topLeft.x + placedSnippet.dimensions(graphics).x + space;
         
         // Top aligned.
         toPlaceSnippet.topLeft.y = placedSnippet.topLeft.y;
@@ -37,9 +43,10 @@ public class Layout {
      * Returns the bounds of all snippets.
      */
     public static <E extends PositionedSnippet> void placeLeftTop(
-                                                         PVector topLeft,
-                                                         Iterable<E> snippets,
-                                                         double space) {
+            AnimatedGraphics graphics,
+            PVector topLeft,
+            Iterable<E> snippets,
+            double space) {
         // Place first snippet at topLeft.
         Iterator<E> sIt = snippets.iterator();
         if(sIt.hasNext()) {
@@ -49,7 +56,7 @@ public class Layout {
             // Place remainder as a row.
             while(sIt.hasNext()) {
                 PositionedSnippet toPlace = sIt.next();
-                placeLeftTop(s, toPlace, space);
+                placeLeftTop(graphics, s, toPlace, space);
                 s = toPlace;
             }
         }
@@ -59,12 +66,14 @@ public class Layout {
      * Place the second given snippet below the first given snippet,
      * with the given space in between. Aligned to the left.
      */
-    public static void placeBelowLeft(PositionedSnippet placedSnippet,
-                                      PositionedSnippet toPlaceSnippet,
-                                      double space) {
+    public static void placeBelowLeft(
+            AnimatedGraphics graphics,
+            PositionedSnippet placedSnippet,
+            PositionedSnippet toPlaceSnippet,
+            double space) {
         // Below.
         toPlaceSnippet.topLeft.y =
-                placedSnippet.topLeft.y + placedSnippet.dimensions().y + space;
+                placedSnippet.topLeft.y + placedSnippet.dimensions(graphics).y + space;
         
         // Left aligned.
         toPlaceSnippet.topLeft.x = placedSnippet.topLeft.x;
@@ -76,9 +85,10 @@ public class Layout {
      * Returns the bounds of all snippets.
      */
     public static <E extends PositionedSnippet> void placeBelowLeft(
-                                                         PVector topLeft,
-                                                         Iterable<E> snippets,
-                                                         double space) {        
+            AnimatedGraphics graphics,
+            PVector topLeft,
+            Iterable<E> snippets,
+            double space) {
         // Place first snippet at topLeft.
         Iterator<E> sIt = snippets.iterator();
         if(sIt.hasNext()) {
@@ -88,24 +98,25 @@ public class Layout {
             // Place remainder as a column.
             while(sIt.hasNext()) {
                 PositionedSnippet toPlace = sIt.next();
-                placeBelowLeft(s, toPlace, space);
+                placeBelowLeft(graphics, s, toPlace, space);
                 s = toPlace;
             }
         }
     }
     
     public static <E extends PositionedSnippet> void placeBelowLeftToRight(
-                                                         PVector topLeft,
-                                                         Iterable<E> snippets,
-                                                         double space,
-                                                         double verticalBound) {        
+            AnimatedGraphics graphics,
+            PVector topLeft,
+            Iterable<E> snippets,
+            double space,
+            double verticalBound) {
         // Place first snippet at topLeft.
         Iterator<E> sIt = snippets.iterator();
         if(sIt.hasNext()) {
             PositionedSnippet s = sIt.next();
             place(s, topLeft);
             
-            double maxWidth = s.dimensions().x;
+            double maxWidth = s.dimensions(graphics).x;
 
             // Place remainder as a column, switch to next column when
             // vertical space limit has been reached.
@@ -113,17 +124,17 @@ public class Layout {
                 PositionedSnippet toPlace = sIt.next();
                 
                 // Next column.
-                if(s.topLeft.y + s.dimensions().y +
-                   space + toPlace.dimensions().y > verticalBound) {
+                if(s.topLeft.y + s.dimensions(graphics).y +
+                   space + toPlace.dimensions(graphics).y > verticalBound) {
                     place(toPlace, PVector.v(maxWidth + space, topLeft.y));
                 }
                 // Next row.
                 else {
-                    placeBelowLeft(s, toPlace, space);
+                    placeBelowLeft(graphics, s, toPlace, space);
                 }
                 s = toPlace;
                 
-                maxWidth = max(maxWidth, toPlace.topLeft.x + toPlace.dimensions().x);
+                maxWidth = max(maxWidth, toPlace.topLeft.x + toPlace.dimensions(graphics).x);
             }
         }
     }
@@ -131,8 +142,7 @@ public class Layout {
     /**
      * Get the union bounds of the given snippets.
      */
-    public static <E extends PositionedSnippet> PVector bounds(
-                                                    Iterable<E> snippets) {
+    public static <E extends PositionedSnippet> PVector bounds(AnimatedGraphics graphics, Iterable<E> snippets) {
         PVector bounds;
         
         // Snippets are present.
@@ -143,7 +153,7 @@ public class Layout {
             double maxY = -Double.MAX_VALUE;
             
             for(E s: snippets) {
-                PVector sD = s.dimensions();
+                PVector sD = s.dimensions(graphics);
                 minX = min(minX, s.topLeft.x);
                 maxX = max(maxX, s.topLeft.x + sD.x);
                 minY = min(minY, s.topLeft.y);
@@ -165,9 +175,10 @@ public class Layout {
      * the given space if there are any snippets.
      */
     public static <E extends PositionedSnippet> PVector spacedBounds(
-                                                    Iterable<E> snippets,
-                                                    double space) {
-        PVector bounds = bounds(snippets);
+            AnimatedGraphics graphics,
+            Iterable<E> snippets,
+            double space) {
+        PVector bounds = bounds(graphics, snippets);
         
         if(snippets.iterator().hasNext()) {
             bounds = PVector.add(bounds, new PVector(space, space));
@@ -179,11 +190,11 @@ public class Layout {
     /**
      * Maximum width of given snippets.
      */
-    public static <E extends PositionedSnippet> double maxWidth(Iterable<E> snippets) {
+    public static <E extends PositionedSnippet> double maxWidth(AnimatedGraphics graphics, Iterable<E> snippets) {
         double maxWidth = 0;
         
         for(E s: snippets) {
-            maxWidth = max(maxWidth, s.dimensions().x);
+            maxWidth = max(maxWidth, s.dimensions(graphics).x);
         }
         
         return maxWidth;
@@ -192,11 +203,11 @@ public class Layout {
     /**
      * Maximum height of given snippets.
      */
-    public static<E extends PositionedSnippet> double maxHeight(Iterable<E> snippets) {
+    public static<E extends PositionedSnippet> double maxHeight(AnimatedGraphics graphics, Iterable<E> snippets) {
         double maxHeight = 0;
         
         for(E s: snippets) {
-            maxHeight = max(maxHeight, s.dimensions().y);
+            maxHeight = max(maxHeight, s.dimensions(graphics).y);
         }
         
         return maxHeight;

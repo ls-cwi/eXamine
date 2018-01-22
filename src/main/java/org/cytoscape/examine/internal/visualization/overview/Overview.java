@@ -1,31 +1,34 @@
 package org.cytoscape.examine.internal.visualization.overview;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import org.cytoscape.examine.internal.graphics.draw.PositionedSnippet;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
-import java.awt.Color;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
-
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.data.Network;
+import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
+import org.cytoscape.examine.internal.graphics.PVector;
+import org.cytoscape.examine.internal.graphics.draw.PositionedSnippet;
+import org.cytoscape.examine.internal.layout.Layout;
+import org.cytoscape.examine.internal.layout.Layout.RichEdge;
+import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.examine.internal.signal.Observer;
+import org.cytoscape.examine.internal.visualization.SetColors;
+import org.jgrapht.graph.DefaultEdge;
 
-import static org.cytoscape.examine.internal.Modules.*;
-import static org.cytoscape.examine.internal.graphics.draw.Parameters.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.cytoscape.examine.internal.graphics.PVector;
-import org.cytoscape.examine.internal.layout.Layout;
-import org.cytoscape.examine.internal.layout.Layout.RichEdge;
-import org.cytoscape.examine.internal.signal.Observer;
-import org.jgrapht.graph.DefaultEdge;
+
+import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
 
 // Network overview.
 public class Overview extends PositionedSnippet {
+
+    private final Model model;
+    private final SetColors setColors;
 
     // Protein representations.
     private final List<NodeRepresentation> nodeRepresentations;
@@ -52,7 +55,12 @@ public class Overview extends PositionedSnippet {
     private PVector panTranslation;
     private Point2D lastMousePos;
 
-    public Overview() {
+    private AnimatedGraphics lastAnimatedGraphics;
+
+    public Overview(Model model, SetColors setColors) {
+        this.model = model;
+        this.setColors = setColors;
+
         this.bounds = PVector.v();
         this.nodeRepresentations = new ArrayList<NodeRepresentation>();
         this.interactionRepresentations = new ArrayList<LinkRepresentation>();
@@ -70,7 +78,9 @@ public class Overview extends PositionedSnippet {
     }
     
     @Override
-    public void draw() {
+    public void draw(AnimatedGraphics g) {
+        lastAnimatedGraphics = g;
+
         // Constrain panning and zooming.
         double minZoom = 0.75 * (span.x > 0 && span.y > 0 ?
                                  Math.min(bounds.x / span.x, bounds.y / span.y) :
@@ -88,46 +98,46 @@ public class Overview extends PositionedSnippet {
             updater.start();
         }
         
-        translate(topLeft);
+        g.translate(topLeft);
         
         // Background rectangle for interaction.
-        color(new Color(1f,1f,1f,0f));
-        picking();
-        fillRect(0, 0, bounds.x, bounds.y);
-        noPicking();
+        g.color(new Color(1f,1f,1f,0f));
+        g.picking();
+        g.fillRect(0, 0, bounds.x, bounds.y);
+        g.noPicking();
 
         // Center overview.
-        noTransition();
-        translate(0.5 * bounds.x, 0.5 * bounds.y);
-        translate(panTranslation.x, panTranslation.y);
-        scale(zoomFactor, zoomFactor);
-        transition();
-        
-        translate(-0.5 * span.x, -0.5 * span.y);
+        g.noTransition();
+        g.translate(0.5 * bounds.x, 0.5 * bounds.y);
+        g.translate(panTranslation.x, panTranslation.y);
+        g.scale(zoomFactor, zoomFactor);
+        g.transition();
+
+        g.translate(-0.5 * span.x, -0.5 * span.y);
 
         // Small font.
-        textFont(labelFont);
+        g.textFont(LABEL_FONT);
 
         // Set bodies first, then outlines on top.
         synchronized (setRepresentations) {
-            snippets(setRepresentations);
+            g.snippets(setRepresentations);
 
-            noTransition();
+            g.noTransition();
             for (SetContour sR : setRepresentations) {
-                sR.drawOutline();
+                sR.drawOutline(g);
             }
-            transition();
+            g.transition();
         }
         synchronized (interactionRepresentations) {
-            snippets(interactionRepresentations);
+            g.snippets(interactionRepresentations);
         }
         synchronized (nodeRepresentations) {
-            snippets(nodeRepresentations);
+            g.snippets(nodeRepresentations);
         }
     }
 
     @Override
-    public PVector dimensions() {
+    public PVector dimensions(AnimatedGraphics g) {
         return bounds;
     }
 
@@ -171,7 +181,6 @@ public class Overview extends PositionedSnippet {
                         // Now bypassed to super network for Cytoscape integration.
                         contextNetwork = model.activeNetwork.get();
                         layoutDirty = true;
-                        //layout = null;
                     }
                 }
             };
@@ -182,11 +191,11 @@ public class Overview extends PositionedSnippet {
 
         @Override
         public void run() {
-            // Update ad infinitum.
+            // Update while no terminate has been requested.
             while (updateGoAhead) {
                 try {
                     update();
-                    Thread.sleep(10);
+                    Thread.sleep(25);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Overview.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -195,10 +204,14 @@ public class Overview extends PositionedSnippet {
 
         // Update layout.
         private void update() {
+            if(lastAnimatedGraphics == null) {
+                return;
+            }
+
             synchronized(LayoutUpdater.this) {
                 if (layoutDirty || layout == null) {
                     layoutDirty = false;
-                    layout = new Layout(contextNetwork, model.selection, layout);
+                    layout = new Layout(lastAnimatedGraphics, contextNetwork, model.selection, layout);
                     updateNodeRepresentations();
                     updateInteractionRepresentations();
                     updateSetRepresentations();
@@ -206,7 +219,7 @@ public class Overview extends PositionedSnippet {
                 }
 
                 if (layout.nodes.length > 0) {
-                    boolean converged = layout.updatePositions();
+                    boolean converged = layout.updatePositions(lastAnimatedGraphics);
 
                     if(!converged) {
                         // Update node positions.
@@ -229,7 +242,7 @@ public class Overview extends PositionedSnippet {
             synchronized (nodeRepresentations) {
                 nodeRepresentations.clear();
                 for(HNode n: layout.nodes)
-                    nodeRepresentations.add(new NodeRepresentation(n));
+                    nodeRepresentations.add(new NodeRepresentation(model, n));
                 updateNodePositions();
             }
         }
@@ -263,7 +276,7 @@ public class Overview extends PositionedSnippet {
                     // Representation.
                     DefaultEdge originalEdge = layout.network.graph.getEdge(sP, tP);
                     LinkRepresentation rep
-                            = new LinkRepresentation(originalEdge, sP, tP, intCs);
+                            = new LinkRepresentation(model, originalEdge, sP, tP, intCs);
                     iR.add(rep);
                 }
 
@@ -276,31 +289,18 @@ public class Overview extends PositionedSnippet {
 
         // Update set representations.
         private void updateSetRepresentations() {
-            setContours = new Contours(layout);
+            setContours = new Contours(lastAnimatedGraphics, layout);
 
             // Create new representations.
             List<SetContour> sR = new ArrayList<SetContour>();
             for (int i = layout.sets.size() - 1; 0 <= i; i--) {
                 HSet pS = layout.sets.get(i);
 
-                // Stick to same snippet.
-                /*SetContour prevRep = setRepresentations.size() > i
-                        ? setRepresentations.get(i)
-                        : null;
+                Geometry bodyShape = setContours.ribbonShapes.get(i);
+                Geometry outlineShape = setContours.outlineShapes.get(i);
 
-                if (prevRep != null) {
-                    //&& prevRep.outline.compareTo(setContours.outlineShapes.get(i)) == 0) {
-                    sR.add(setRepresentations.get(i));
-                } else {*/
-                    Geometry bodyShape = setContours.ribbonShapes.get(i);
-                    Geometry outlineShape = setContours.outlineShapes.get(i);
-                    
-                    //bodyShape = DouglasPeuckerSimplifier.simplify(bodyShape, 1);
-                    //outlineShape = DouglasPeuckerSimplifier.simplify(outlineShape, 1);
-
-                    SetContour rep = new SetContour(pS, i, bodyShape, outlineShape);
-                    sR.add(rep);
-                //}
+                SetContour rep = new SetContour(model, setColors, pS, i, bodyShape, outlineShape);
+                sR.add(rep);
             }
 
             // Transfer.

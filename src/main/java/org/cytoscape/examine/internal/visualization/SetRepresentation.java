@@ -1,12 +1,11 @@
 package org.cytoscape.examine.internal.visualization;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
-import static org.cytoscape.examine.internal.Modules.*;
-
 import org.cytoscape.examine.internal.data.HNode;
 import org.cytoscape.examine.internal.data.HSet;
+import org.cytoscape.examine.internal.graphics.draw.Representation;
+import org.cytoscape.examine.internal.model.Model;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
@@ -14,15 +13,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.cytoscape.examine.internal.graphics.draw.Representation;
-import org.jgrapht.graph.DefaultEdge;
 
 // ProteinSet representation.
 public abstract class SetRepresentation extends Representation<HSet> {
+
+    private final Model model;
     
     // Base constructor.
-    public SetRepresentation(HSet element) {
-        super(element); 
+    public SetRepresentation(Model model, HSet element) {
+        super(element);
+
+        this.model = model;
     }
     
     public boolean highlight() {
@@ -59,7 +60,7 @@ public abstract class SetRepresentation extends Representation<HSet> {
     // Toggle selection state on mouse click.
     public void mouseClicked(MouseEvent e) {
         // Open website on ctrl click for relevant sets.
-        if(mouseEvent().isControlDown()) {
+        if(e.isControlDown()) {
             // URL to open.
             String url = element.url;
             

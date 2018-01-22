@@ -1,9 +1,8 @@
 package org.cytoscape.examine.internal.visualization;
 
-import static org.cytoscape.examine.internal.graphics.StaticGraphics.*;
+// General visualization constants.
+public class Constants {
 
-// General visualization parameters.
-public class Parameters {
     public static final int     SET_LABEL_MAX_WIDTH     = 200;
     public static final int     SET_LABEL_MAX_LINES     = 3;
     public static final double  LABEL_PADDING           = 4;
@@ -22,9 +21,6 @@ public class Parameters {
     public static final double  NODE_SPACE      = 2;
     public static final double  NODE_MARGIN     = 0.5 * NODE_OUTLINE + NODE_SPACE;
     public static final int     BUFFER_SEGMENTS = 5;
-    public static final int     LINK_SEGMENTS   = 10; //20;
-    
-    // Margin adjusted scene dimensions.
-    public static double sceneHeight() { return sketchHeight() - 2 * MARGIN; }
-    public static double sceneWidth() { return sketchWidth() - 2 * MARGIN; }
+    public static final int     LINK_SEGMENTS   = 10;
+
 }

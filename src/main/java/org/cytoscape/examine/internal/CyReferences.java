@@ -5,6 +5,7 @@ import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
+import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.swing.DialogTaskManager;
 
 /**
@@ -28,6 +29,7 @@ public class CyReferences {
 	private CyGroupFactory groupFactory;
 	private CyGroupManager groupManager;
 	private DialogTaskManager taskManager;
+	private VisualMappingManager visualMappingManager;
 
 	/**
 	 * Hidden constructor
@@ -49,7 +51,8 @@ public class CyReferences {
 			CyApplicationManager applicationManager, 
 			CyGroupManager groupManager, 
 			CyGroupFactory groupFactory, 
-			DialogTaskManager taskManager
+			DialogTaskManager taskManager,
+			VisualMappingManager visualMappingManager
 			) {
 		this.networkManager = networkManager;
 		this.rootNetworkManager = rootNetworkManager;
@@ -57,6 +60,7 @@ public class CyReferences {
 		this.groupManager = groupManager;
 		this.groupFactory = groupFactory;
 		this.taskManager = taskManager;
+		this.visualMappingManager = visualMappingManager;
 	}
 	
 	//SETTER AND GETTER METHODS//
@@ -67,6 +71,7 @@ public class CyReferences {
 	public CyGroupManager getGroupManager() {return groupManager;}
 	public CyGroupFactory getGroupFactory() {return groupFactory;}
 	public DialogTaskManager getTaskManager() {return taskManager;}
+	public VisualMappingManager getVisualMappingManager() {return visualMappingManager;}
 
 	
 }
