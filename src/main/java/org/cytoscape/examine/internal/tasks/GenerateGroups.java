@@ -37,17 +37,15 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	 */
 	@Tunable(description="The network from which the groups are to be created", context="nogui")
 	public CyNetwork network = null;
-	
-	//TODO: Maybe change the argument to the table key or table name instead of passing the actual object, should make invocation from command line context easier
-	//Also isn't the node table ALWAYS the table associated with the network? so is this argument redundant?
-	@Tunable(description="The node table that contains the group information", context="nogui")
-	public CyTable nodeTable = null;
-	
+
+	/**
+	 * The columns from which the groups are to be created
+	 */
 	@Tunable
 	public List<String> selectedGroupColumnNames;
 	
 	@Tunable(description="[PLACEHOLDER] SIMPLY USES ALL NODES / GROUPS ?",context="nogui")
-	public boolean all; //TODO: Clearer name
+	public boolean all = false; //TODO: Clearer name, bypasses the group column?
 	
 	//Internal
 	
@@ -66,17 +64,14 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	/**
 	 * Alternative constructor, used if arguments are known at the time of construction (for instance when called via GUI)
 	 * @param network
-	 * @param nodeTable
 	 * @param selectedGroupColumnNames
 	 * @param all
 	 */
 	public GenerateGroups(
 			CyNetwork network,
-			CyTable nodeTable,
 			List<String> selectedGroupColumnNames,
 			boolean all) {
         this.network = network;
-        this.nodeTable = nodeTable;
         this.selectedGroupColumnNames = selectedGroupColumnNames;
         this.all = all;
 	}
@@ -84,13 +79,13 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
     /**
      * Initialize group index.
      */
-    private void initGroupIndex(CyNetwork network, CyTable nodeTable) {
+    private void initGroupIndex(CyNetwork network) {
         groupIndex = new HashMap<String, CyGroup>();
         Set<CyGroup> groups = references.getGroupManager().getGroupSet(network);
         
         for (CyGroup group : groups) {
         	long SUID = group.getGroupNode().getSUID();
-        	CyRow row = nodeTable.getRow(SUID);
+        	CyRow row = network.getDefaultNodeTable().getRow(SUID);
         	
         	String groupName = row.get(CyNetwork.NAME, String.class);
         	groupIndex.put(groupName, group);
@@ -100,12 +95,12 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
     /**
      * Add/replace group with given name and member nodes.
      */
-    private CyGroup addGroup(CyNetwork network, CyTable nodeTable, String groupName, List<CyNode> members) {
+    private CyGroup addGroup(CyNetwork network, String groupName, List<CyNode> members) {
         // Determine whether group already exists.
         CyGroup group = groupIndex.get(groupName);
         if (group == null) {
             group = references.getGroupFactory().createGroup(network, members, new ArrayList<CyEdge>(), false);
-            nodeTable.getRow(group.getGroupNode().getSUID()).set(CyNetwork.NAME, groupName);
+            network.getDefaultNodeTable().getRow(group.getGroupNode().getSUID()).set(CyNetwork.NAME, groupName);
             
             groupIndex.put(groupName, group);
         } else {
@@ -137,8 +132,8 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		}
 		return;*/
 		
-		if (network == null || nodeTable == null) {
-			throw new Exception(network == null ? "Network is null, this should never be the case!" : "NodeTable is null, this should never be the case!");
+		if (network == null) {
+			throw new Exception("Network is null, this should never be the case!");
 		}
 
 		// Listeners are temporarily disabled to prevent firing of events throughout group generation
@@ -148,7 +143,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		
 		//Initializing group index
 		taskMonitor.setStatusMessage("Initializing group index.");
-		initGroupIndex(network, nodeTable);
+		initGroupIndex(network);
 		
 		Map<String, Map<String, List<CyNode>>> map = new HashMap<String, Map<String,List<CyNode>>>();
 		for (String groupColumnName : selectedGroupColumnNames) {
@@ -157,7 +152,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		
 		taskMonitor.setStatusMessage("Extracting groups from selected columns.");
 		// iterate over all rows, skipping group nodes
-		List<CyRow> rows = nodeTable.getAllRows();
+		List<CyRow> rows = network.getDefaultNodeTable().getAllRows();
 		for (CyRow row : rows) {
 			CyNode node = network.getNode(row.get(CyNetwork.SUID, Long.class));
 			
@@ -201,14 +196,14 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
                 
     			taskMonitor.setStatusMessage("Adding group " + groupName + " " + " with " + group.size() + " entries.");
     			//System.out.println("Adding group " + groupColumnName + ": " + groupName + " with " + group.size() + " entries.");
-                CyGroup subGroup = addGroup(network, nodeTable, groupName, group);
+                CyGroup subGroup = addGroup(network, groupName, group);
                 subGroupNodes.add(subGroup.getGroupNode());
             }
 			
 			// Add column group.
 			taskMonitor.setStatusMessage("Adding column group " + groupColumnName + " with " + subGroupNodes.size() + " entries.");
 			//System.out.println("Adding column group " + groupColumnName + " with " + subGroupNodes.size() + " entries.");
-			addGroup(network, nodeTable, Constants.CATEGORY_PREFIX + groupColumnName, subGroupNodes);
+			addGroup(network, Constants.CATEGORY_PREFIX + groupColumnName, subGroupNodes);
 			
 			i++;
 			taskMonitor.setProgress((double) i / (double) selectedGroupColumnNames.size());
@@ -232,6 +227,18 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 			if (network == null) {
 				errMsg.append("Attempted to generate groups on an empty network!");
 				return ValidationState.INVALID;
+			}
+			//Check the column names for validity
+			if (selectedGroupColumnNames == null) {
+				errMsg.append("You need to provide at least one column name to generate groups!");
+				return ValidationState.INVALID;
+			}
+			CyTable nodeTable = network.getDefaultNodeTable();
+			for (String columnName: selectedGroupColumnNames) {
+				if (nodeTable.getColumn(columnName) == null) {
+					errMsg.append("The column with name: "+columnName+" does not exist!");
+					return ValidationState.INVALID;
+				}
 			}
 			//If nothing bad happened, the arguments are acceptable and can be processed
 			return ValidationState.OK;

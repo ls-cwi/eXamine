@@ -1,6 +1,5 @@
 package org.cytoscape.examine.internal;
 
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
@@ -11,12 +10,8 @@ import org.cytoscape.examine.internal.model.Model;
 import org.cytoscape.examine.internal.tasks.GenerateGroups;
 import org.cytoscape.examine.internal.tasks.RemoveGroups;
 import org.cytoscape.examine.internal.visualization.Visualization;
-import org.cytoscape.group.CyGroupFactory;
-import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.ColumnCreatedEvent;
 import org.cytoscape.model.events.ColumnCreatedListener;
 import org.cytoscape.model.events.ColumnDeletedEvent;
@@ -29,14 +24,9 @@ import org.cytoscape.model.events.RowSetRecord;
 import org.cytoscape.model.events.RowsSetEvent;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
-import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.events.SessionLoadedEvent;
 import org.cytoscape.session.events.SessionLoadedListener;
-import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.swing.DialogTaskManager;
-
-//TODO: Move swing components with distinct function to different classes
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -56,6 +46,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+//TODO: Move swing components with distinct function to different classes
+
+
 @SuppressWarnings("serial")
 public class ControlPanel extends JPanel implements CytoPanelComponent,
 		SetCurrentNetworkListener, RowsSetListener, ColumnCreatedListener,
@@ -70,14 +63,16 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	private JTable tblFeedBack;
 	private JScrollPane pnlScroll;
 	private JPanel pnlNodes;
+	
 	private JLabel lblNode;
-	private JComboBox cmbNodeLabel;
+	private JComboBox<String> cmbNodeLabel;
 	private JLabel lblNodeURL;
-	private JComboBox cmbNodeURL;
+	private JComboBox<String> cmbNodeURL;
+	
 	private JLabel lblGroupScore;
-	private JComboBox cmbGroupScore;
+	private JComboBox<String> cmbGroupScore;
 	private JLabel lblGroupSelection;
-	private JComboBox cmbGroupSelection;
+	private JComboBox<String> cmbGroupSelection;
 	private JPanel pnlGroups;
 	private JPanel pnlGroups1;
 	private JPanel pnlGroups2;
@@ -482,21 +477,20 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		pnlGroups1.repaint();
 		
 		// Fill combo boxes
+		
 		// Remove all itemChangeListeners
 		cmbNodeLabel.removeItemListener(itemChangeListener);
 		cmbNodeURL.removeItemListener(itemChangeListener);
 		cmbGroupScore.removeItemListener(itemChangeListener);
 		cmbGroupSelection.removeItemListener(itemChangeListener);
-		
-		DefaultComboBoxModel mdlCmbNodeLabel = (DefaultComboBoxModel) cmbNodeLabel.getModel();
-		mdlCmbNodeLabel.removeAllElements();
-		DefaultComboBoxModel mdlCmbNodeURL = (DefaultComboBoxModel) cmbNodeURL.getModel();
-		mdlCmbNodeURL.removeAllElements();
+		//Clear combo-boxes
+		cmbNodeLabel.removeAllItems();
+		cmbNodeURL.removeAllItems();
 
 		List<Integer> stringColumns = ns.getAllStringColumns();
 		for (Integer j : stringColumns) {
-			mdlCmbNodeLabel.addElement(ns.getColumnName(j));
-			mdlCmbNodeURL.addElement(ns.getColumnName(j));
+			cmbNodeLabel.addItem(ns.getColumnName(j));
+			cmbNodeURL.addItem(ns.getColumnName(j));
 		}
 
 		if (stringColumns.size() > 0) {
@@ -504,11 +498,10 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			cmbNodeURL.setSelectedIndex(ns.getSelectedURLColumn());
 		}
 
-		DefaultComboBoxModel mdlCmbGroupScore = (DefaultComboBoxModel) cmbGroupScore.getModel();
-		mdlCmbGroupScore.removeAllElements();
+		cmbGroupScore.removeAllItems();
 		List<Integer> doubleColumns = ns.getAllDoubleColumns();
 		for (Integer j : doubleColumns) {
-			mdlCmbGroupScore.addElement(ns.getColumnName(j));
+			cmbGroupScore.addItem(ns.getColumnName(j));
 		}
 		
 		cmbGroupSelection.setSelectedIndex(ns.getGroupSelection().ordinal());
@@ -581,9 +574,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		gridBagConstraints.insets = new Insets(10, 5, 0, 0);
 		pnlNodes.add(lblNode, gridBagConstraints);
 
-		cmbNodeLabel = new JComboBox();
-		DefaultComboBoxModel mdlCmbNodeLabel = new DefaultComboBoxModel();
-		cmbNodeLabel.setModel(mdlCmbNodeLabel);
+		cmbNodeLabel = new JComboBox<String>();
 		cmbNodeLabel.addItemListener(itemChangeListener);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -601,9 +592,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		gridBagConstraints.insets = new Insets(10, 5, 0, 0);
 		pnlNodes.add(lblNodeURL, gridBagConstraints);
 
-		cmbNodeURL = new JComboBox();
-		DefaultComboBoxModel mdlCmbNodeURL = new DefaultComboBoxModel();
-		cmbNodeURL.setModel(mdlCmbNodeURL);
+		cmbNodeURL = new JComboBox<String>();
 		cmbNodeURL.addItemListener(itemChangeListener);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -640,9 +629,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		gridBagConstraints.insets = new Insets(10, 5, 0, 0);
 		pnlGroups2.add(lblGroupScore, gridBagConstraints);
 		
-		cmbGroupScore = new JComboBox();
-		DefaultComboBoxModel mdlCmbGroupScore = new DefaultComboBoxModel();
-		cmbGroupScore.setModel(mdlCmbGroupScore);
+		cmbGroupScore = new JComboBox<String>();
 		cmbGroupScore.addItemListener(itemChangeListener);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -660,12 +647,10 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 		gridBagConstraints.insets = new Insets(10, 5, 0, 0);
 		pnlGroups2.add(lblGroupSelection, gridBagConstraints);
 		
-		cmbGroupSelection = new JComboBox();
-		DefaultComboBoxModel mdlCmbGroupSelection = new DefaultComboBoxModel();
-		mdlCmbGroupSelection.addElement("None");
-		mdlCmbGroupSelection.addElement("Union");
-		mdlCmbGroupSelection.addElement("Intersection");
-		cmbGroupSelection.setModel(mdlCmbGroupSelection);
+		cmbGroupSelection = new JComboBox<String>();
+		cmbGroupSelection.addItem("None");
+		cmbGroupSelection.addItem("Union");
+		cmbGroupSelection.addItem("Intersection");
 		cmbGroupSelection.addItemListener(itemChangeListener);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -733,11 +718,10 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				CyNetwork network = references.getApplicationManager().getCurrentNetwork();
-				CyTable nodeTable = network.getDefaultNodeTable();
 				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
 				List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
 				references.getTaskManager().execute(new TaskIterator(
-						new GenerateGroups( network, nodeTable, groupColumnNames, true)));
+						new GenerateGroups( network, groupColumnNames, true)));
 			}
 		});
 		btnGenerateSelection.setEnabled(false);
@@ -745,11 +729,10 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				CyNetwork network = references.getApplicationManager().getCurrentNetwork();
-				CyTable nodeTable = network.getDefaultNodeTable();
 				NetworkSettings ns = networkSettings.get(currentNetworkSUID);
 				List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
 				references.getTaskManager().execute(new TaskIterator(
-						new GenerateGroups( network, nodeTable, groupColumnNames, false)));
+						new GenerateGroups( network, groupColumnNames, false)));
 			}
 		});
 		pnlButtons.add(btnGenerateSelection);
@@ -1120,7 +1103,6 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 				}
 				ns.setSelectedGroupColumns(selectedGroups);
 				ns.setAllGroupColumnSizes(groupSizes);
-
 				updateButtons();
 			}
 		}
