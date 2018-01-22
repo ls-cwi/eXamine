@@ -1,12 +1,15 @@
 package org.cytoscape.examine.internal.tasks;
 
+import java.io.IOException;
 import java.util.Set;
 
+import org.cytoscape.examine.internal.CyReferences;
 import org.cytoscape.group.CyGroup;
-import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.work.Task;
+import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.Tunable;
+import org.cytoscape.work.TunableValidator;
 
 /**
  * This class contains all the logic to remove groups.
@@ -14,12 +17,14 @@ import org.cytoscape.work.TaskMonitor;
  * @author melkebir
  * 
  */
-public class RemoveGroups implements Task {
-	private final CyGroupManager groupManager;
-	private final CyNetwork network;
+public class RemoveGroups implements ObservableTask,TunableValidator {
 	
-	public RemoveGroups(CyGroupManager groupManager, CyNetwork network) {
-		this.groupManager = groupManager;
+	@Tunable(description="The network for which all groups are to be removed",context="nogui",required=true)
+	public CyNetwork network;
+	
+	private final CyReferences references = CyReferences.getInstance();
+	
+	public RemoveGroups(CyNetwork network) {
 		this.network = network;
 	}
 	
@@ -34,12 +39,34 @@ public class RemoveGroups implements Task {
 		
 		taskMonitor.setStatusMessage("Removing groups.");
 		int i = 0;
-		Set<CyGroup> groupSet = groupManager.getGroupSet(network);
+		Set<CyGroup> groupSet = references.getGroupManager().getGroupSet(network);
 		for (CyGroup group : groupSet) {
-			groupManager.destroyGroup(group);
-			
+			references.getGroupManager().destroyGroup(group);
 			i++;
 			taskMonitor.setProgress((double) i / (double) groupSet.size());
 		}
+	}
+
+	@Override
+	public ValidationState getValidationState(Appendable errMsg) {
+		try {
+			//Checks if the arguments are valid and acceptable
+			if (network == null) {
+				errMsg.append("Attempted to remove groups on an empty network!");
+				return ValidationState.INVALID;
+			}
+			//If nothing bad happened, the arguments are acceptable and can be processed
+			return ValidationState.OK;
+		}
+		catch (IOException ex) {
+			ex.printStackTrace(); //TODO: Or is there a logger/ dedicated output stream for those in eXamine?
+		}
+		return ValidationState.INVALID;
+	}
+
+	@Override
+	public <R> R getResults(Class<? extends R> type) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

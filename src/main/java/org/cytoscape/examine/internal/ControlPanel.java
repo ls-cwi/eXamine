@@ -709,7 +709,7 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 
 				if (selectedOption == JOptionPane.YES_OPTION) {
 					CyNetwork network = references.getApplicationManager().getCurrentNetwork();
-					references.getTaskManager().execute(new TaskIterator(new RemoveGroups(references.getGroupManager(), network)));
+					references.getTaskManager().execute(new TaskIterator(new RemoveGroups(network)));
 				}
 			}
 		});

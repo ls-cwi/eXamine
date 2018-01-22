@@ -15,7 +15,6 @@ import java.util.Set;
  */
 class NetworkSettings {
 
-    private Long networkSUID;
     private List<String> columnNames;
     private Set<String> columnNamesSet = new HashSet<String>();
     private List<Integer> allGroupColumns = new ArrayList<Integer>();
@@ -30,7 +29,6 @@ class NetworkSettings {
     private boolean showScore = true;
 
     public NetworkSettings(CyNetwork network) {
-        this.networkSUID = network.getSUID();
 
         // columnNames
         List<CyColumn> columns = new ArrayList<CyColumn>();

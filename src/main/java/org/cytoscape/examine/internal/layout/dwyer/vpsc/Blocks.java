@@ -2,7 +2,6 @@ package org.cytoscape.examine.internal.layout.dwyer.vpsc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 class Blocks {

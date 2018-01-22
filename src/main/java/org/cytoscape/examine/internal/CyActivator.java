@@ -99,7 +99,7 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bc, controlPanel, NetworkDestroyedListener.class, new Properties());
         registerService(bc, controlPanel, SessionLoadedListener.class, new Properties());
         
-        //Register commands to allow access via CyRest
+        //Register commands to allow access via CyRest TODO: Possible to reduce number of lines by putting shared lines in a function, this might be easier to read though
         
 		TaskFactory commandTaskFactory_GENERATE_GROUPS = new CommandTaskFactory(ExamineCommand.GENERATE_GROUPS);
 		Properties props_GENERATE_GROUPS = new Properties();
@@ -107,6 +107,13 @@ public class CyActivator extends AbstractCyActivator {
 		props_GENERATE_GROUPS.setProperty(COMMAND, ExamineCommand.GENERATE_GROUPS.toString());
 		props_GENERATE_GROUPS.setProperty(COMMAND_DESCRIPTION,"[Placeholder] This command generates groups");
 		registerService(bc, commandTaskFactory_GENERATE_GROUPS, TaskFactory.class, props_GENERATE_GROUPS);
+		
+		TaskFactory commandTaskFactory_REMOVE_GROUPS = new CommandTaskFactory(ExamineCommand.REMOVE_GROUPS);
+		Properties props_REMOVE_GROUPS = new Properties();
+		props_REMOVE_GROUPS.setProperty(COMMAND_NAMESPACE, Constants.APP_COMMAND_PREFIX);
+		props_REMOVE_GROUPS.setProperty(COMMAND, ExamineCommand.REMOVE_GROUPS.toString());
+		props_REMOVE_GROUPS.setProperty(COMMAND_DESCRIPTION,"This command removes all groups associated with a given network");
+		registerService(bc, commandTaskFactory_REMOVE_GROUPS, TaskFactory.class, props_REMOVE_GROUPS);
     }
     
 }
