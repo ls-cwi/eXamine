@@ -11,6 +11,7 @@ import java.util.Set;
 import org.cytoscape.examine.internal.Constants;
 import org.cytoscape.examine.internal.ControlPanel;
 import org.cytoscape.examine.internal.CyReferences;
+import org.cytoscape.examine.internal.Utilities;
 import org.cytoscape.group.CyGroup;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -21,6 +22,7 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
+import org.cytoscape.work.util.ListMultipleSelection;
 
 /**
  * This class contains all the logic to generate groups.
@@ -41,11 +43,12 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	/**
 	 * The columns from which the groups are to be created
 	 */
-	@Tunable
-	public List<String> selectedGroupColumnNames = null;
+	@Tunable(context="nogui", description="The columns from which the groups are to be generated")
+	public ListMultipleSelection<String> selectedGroupColumns = null;
 	
-	@Tunable(description="[PLACEHOLDER] SIMPLY USES ALL NODES / GROUPS ?",context="nogui")
-	public boolean all = false; //TODO: Clearer name, bypasses the group column?
+	@Tunable(description="Use all nodes (not only selected nodes)",context="nogui")
+	public boolean useAllNodes = false;
+	
 	
 	//Internal
 	
@@ -59,7 +62,11 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	/**
 	 * Default constructor, can be used for argument passing via Tunables
 	 */
-	public GenerateGroups() {};
+	public GenerateGroups() {
+		//Populate with default values
+		this.network = references.getApplicationManager().getCurrentNetwork();
+        this.selectedGroupColumns = Utilities.populateColumnList(network);
+	};
 
 	/**
 	 * Alternative constructor, used if arguments are known at the time of construction (for instance when called via GUI)
@@ -72,11 +79,14 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 			List<String> selectedGroupColumnNames,
 			boolean all) {
         this.network = network;
-        this.selectedGroupColumnNames = selectedGroupColumnNames;
-        this.all = all;
+        this.selectedGroupColumns = new ListMultipleSelection<String>(selectedGroupColumnNames);
+        //TODO: I don't like this workaround much
+        this.selectedGroupColumns.setSelectedValues(this.selectedGroupColumns.getPossibleValues());
+        this.useAllNodes = all;
 	}
 	
-    /**
+
+	/**
      * Initialize group index.
      */
     private void initGroupIndex(CyNetwork network) {
@@ -146,7 +156,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		initGroupIndex(network);
 		
 		Map<String, Map<String, List<CyNode>>> map = new HashMap<String, Map<String,List<CyNode>>>();
-		for (String groupColumnName : selectedGroupColumnNames) {
+		for (String groupColumnName : selectedGroupColumns.getSelectedValues()) {
 			map.put(groupColumnName, new HashMap<String, List<CyNode>>());
 		}
 		
@@ -159,10 +169,10 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 			// skip group nodes
 			if (node == null || references.getGroupManager().isGroup(node, network)) continue;
 			// skip nodes that are not selected if !all
-			if (!all && !row.get(CyNetwork.SELECTED, Boolean.class)) continue;
+			if (!useAllNodes && !row.get(CyNetwork.SELECTED, Boolean.class)) continue;
 			
 			// iterate over all columns representing different categories
-			for (String groupColumnName : selectedGroupColumnNames) {
+			for (String groupColumnName : selectedGroupColumns.getSelectedValues()) {
 				
 				Map<String, List<CyNode>> mapGroup = map.get(groupColumnName);
 				//System.out.println(groupColumnName + ": " + node.getSUID());
@@ -186,7 +196,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		
 		// now we create the actual groups
 		int i = 0;
-		for (String groupColumnName : selectedGroupColumnNames) {
+		for (String groupColumnName : selectedGroupColumns.getSelectedValues()) {
 			Map<String, List<CyNode>> mapGroup = map.get(groupColumnName);
 			
 			List<CyNode> subGroupNodes = new ArrayList<CyNode>();
@@ -206,7 +216,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 			addGroup(network, Constants.CATEGORY_PREFIX + groupColumnName, subGroupNodes);
 			
 			i++;
-			taskMonitor.setProgress((double) i / (double) selectedGroupColumnNames.size());
+			taskMonitor.setProgress((double) i / (double) selectedGroupColumns.getSelectedValues().size());
 		}
 		
 		// now finalize groups
@@ -231,12 +241,17 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 				return ValidationState.INVALID;
 			}
 			//Check the column names for validity
-			if (selectedGroupColumnNames == null) {
+			if (selectedGroupColumns == null) {
 				errMsg.append("You need to provide at least one column name to generate groups!");
 				return ValidationState.INVALID;
 			}
+			if (selectedGroupColumns.getSelectedValues().size() <= 0) {
+				errMsg.append("You need to provide at least one column name to generate groups!");
+				return ValidationState.INVALID;
+			}
+			//TODO: Only allow group columns, link to NetworkSettings somehow?
 			CyTable nodeTable = network.getDefaultNodeTable();
-			for (String columnName: selectedGroupColumnNames) {
+			for (String columnName: selectedGroupColumns.getSelectedValues()) {
 				if (nodeTable.getColumn(columnName) == null) {
 					errMsg.append("The column with name: "+columnName+" does not exist!");
 					return ValidationState.INVALID;

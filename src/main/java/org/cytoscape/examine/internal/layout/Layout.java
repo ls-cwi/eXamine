@@ -546,7 +546,8 @@ public class Layout {
         }        
     }
     
-    public static class RichEdge extends DefaultWeightedEdge {
+    @SuppressWarnings("serial")
+	public static class RichEdge extends DefaultWeightedEdge {
         public boolean core;            // Whether edge is part of original graph.
         public List<HSet> memberships;  // Set memberships.
         public RichNode subNode;        // Optional dummy node that divides edge in extended graph.
