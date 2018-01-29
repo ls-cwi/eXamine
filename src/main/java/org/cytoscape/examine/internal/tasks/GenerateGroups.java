@@ -43,7 +43,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	/**
 	 * The columns from which the groups are to be created
 	 */
-	@Tunable(context="nogui", description="The columns from which the groups are to be generated")
+	@Tunable(context="nogui", description="The columns from which the groups are to be generated; provide as comma-separated list for instance selectedGroupColumns=\"a,b,c\";invalid list entries (that are not fitting column names) are ignored")
 	public ListMultipleSelection<String> selectedGroupColumns = null;
 	
 	@Tunable(description="Use all nodes (not only selected nodes)",context="nogui")
@@ -63,7 +63,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	 * Default constructor, can be used for argument passing via Tunables
 	 */
 	public GenerateGroups() {
-		//Populate with default values
+		//Populate with default values, we fetch the current network and get all fitting columns
 		this.network = references.getApplicationManager().getCurrentNetwork();
         this.selectedGroupColumns = Utilities.populateColumnList(network);
 	};
@@ -127,7 +127,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 
 	@Override
 	public void cancel() {
-		//TODO: Any states that need to be saved/cleaned?
+		//TODO: Any states that need to be saved/cleaned?examine generate groups selectedGroupColumns="Component,Funti"
 	}
 
 	@Override
@@ -235,6 +235,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	@Override
 	public ValidationState getValidationState(Appendable errMsg) {
 		try {
+			System.out.println("Running validation checks!");
 			//Checks if the arguments are valid and acceptable
 			if (network == null) {
 				errMsg.append("Attempted to generate groups on an empty network!");
@@ -249,6 +250,15 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 				errMsg.append("You need to provide at least one column name to generate groups!");
 				return ValidationState.INVALID;
 			}
+			//Check if all entries are actually valid columns, nvm ListMultipleSelection seems to handle that already
+//			for (String columnName : selectedGroupColumns.getSelectedValues()) {
+//				System.out.println("Checking provided column entry: "+columnName+" for validity ...");
+//				if (!selectedGroupColumns.getPossibleValues().contains(columnName)){
+//					//We selected a value that is not even part of the possible values
+//					errMsg.append("Provided invalid column name: "+columnName);
+//					return ValidationState.INVALID;
+//				}
+//			}
 			//TODO: Only allow group columns, link to NetworkSettings somehow?
 			CyTable nodeTable = network.getDefaultNodeTable();
 			for (String columnName: selectedGroupColumns.getSelectedValues()) {

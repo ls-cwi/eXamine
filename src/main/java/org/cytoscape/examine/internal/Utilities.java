@@ -3,6 +3,7 @@ package org.cytoscape.examine.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
@@ -20,10 +21,17 @@ public class Utilities {
 		Collection<CyColumn> columns = network.getDefaultNodeTable().getColumns();
 		ArrayList<String> columnNames = new ArrayList<String>();
 		
-		//TODO: Only show group columns as valid options?
 
+		//Is this the correct way for identifying groups columns?
 		for (CyColumn col : columns) {
-			columnNames.add(col.getName());
+			//First we check if the column contains a list
+			if (col.getType() == List.class) {
+				//System.out.println(col.getName());
+				//For an eXamine group column we want a list of Strings
+				if (col.getListElementType() == String.class) {
+					columnNames.add(col.getName());
+				}
+			}
 		}
 		
 		ret.setPossibleValues(columnNames);

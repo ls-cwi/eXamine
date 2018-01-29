@@ -22,6 +22,8 @@ public class CyReferences {
 		if (instance == null) {instance = new CyReferences();}
 		return instance;
 	}
+	
+	//REFERENCES TO CYTOSCAPE SERVICES, SYMBOLIC LINKS
 
 	private CyNetworkManager networkManager;
 	private CyRootNetworkManager rootNetworkManager;
