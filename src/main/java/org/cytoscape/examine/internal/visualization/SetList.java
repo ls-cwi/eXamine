@@ -7,6 +7,7 @@ import org.cytoscape.examine.internal.graphics.draw.Constants;
 import org.cytoscape.examine.internal.graphics.draw.Layout;
 import org.cytoscape.examine.internal.graphics.draw.Representation;
 import org.cytoscape.examine.internal.model.Model;
+import org.cytoscape.examine.internal.signal.Observer;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -25,71 +26,113 @@ public class SetList extends Representation<HCategory> {
 
     private final Model model;
     private final List<SetLabel> labels;
-    private int positionScroll;                     // Internal set list scroll.
-    
+    private int positionScroll;
+
+
+    private final List<SetLabel> taggedLabels = new ArrayList<SetLabel>();
+    private final List<SetLabel> remainderLabels = new ArrayList<SetLabel>();
+
     public SetList(Model model, HCategory element, List<SetLabel> labels) {
         super(element);
 
         this.model = model;
         this.labels = labels;
         this.positionScroll = 0;
-        
-        for(SetLabel l: labels) {
+
+        for (SetLabel l : labels) {
             l.parentList = this;
+        }
+
+        model.selection.change.subscribe(new Observer() {
+            @Override
+            public void signal() {
+                updateTaggedRemainderLabels();
+            }
+        });
+        updateTaggedRemainderLabels();
+    }
+
+    private void updateTaggedRemainderLabels() {
+        taggedLabels.clear();
+        remainderLabels.clear();
+        for (final SetLabel label : labels) {
+            (model.selection.activeSetMap.containsKey(label.element) ? taggedLabels : remainderLabels).add(label);
         }
     }
 
     @Override
     public PVector dimensions(AnimatedGraphics g) {
+        final boolean isAnimated = g.getDrawManager().isAnimated();
+
         PVector dimensions;
-        
+
         g.textFont(FONT);
-        
+
+        // Header space.
         double space = Constants.SPACING;
-        PVector domainBounds = PVector.v(0.75 * g.textHeight() + g.textWidth(element.toString()),
-                                 g.textHeight() + space /*+ LABEL_BAR_HEIGHT + space*/);
+        PVector domainBounds = PVector.v(
+                (isAnimated ? 0.75 * g.textHeight() : 0) + g.textWidth(element.toString()),
+                g.textHeight() + space
+        );
 
-        final double termHeight;
-        if(isOpened()) {
-            termHeight = Layout.bounds(g, labels).y;
+        // Space required by the set tags.
+        layoutTaggedLabel(g, domainBounds.Y());
+        final PVector labelBounds;
+        if (isOpened()) {
+            // Factor in additional space for collapsed set tag markers at top and bottom.
+            final int skipCount = isOpened() ? positionScroll : remainderLabels.size();
+            final PVector tightBounds = Layout.bounds(g, labels);
+            labelBounds = PVector.v(tightBounds.x, tightBounds.y + (skipCount > 0 ? LABEL_BAR_HEIGHT + space : 0));
         } else {
-            // Layout tagged set labels.
-            List<SetLabel> taggedLabels = new ArrayList<SetLabel>();    // Tagged set label representations.
-            for(SetLabel lbl: labels) {
-                if (model.selection.activeSetMap.containsKey(lbl.element)) {
-                    taggedLabels.add(lbl);
-                }
-            }
-
-            termHeight = Layout.bounds(g, labels).y;
+            labelBounds = Layout.bounds(g, taggedLabels);
         }
 
-        dimensions = PVector.v(Math.max(domainBounds.x, Layout.maxWidth(g, labels)), domainBounds.y + termHeight);
-        
+        // Add space at the bottom to separate this list from potential subsequent lists.
+        dimensions = PVector.v(
+                Math.max(domainBounds.x, Layout.maxWidth(g, labels)),
+                domainBounds.y + labelBounds.y + (isAnimated ? LABEL_BAR_HEIGHT + space : 0) + space
+        );
+
         return dimensions;
+    }
+
+    private PVector layoutTaggedLabel(final AnimatedGraphics g, final PVector topLeft) {
+        PVector labelPos = topLeft;
+        for (int i = 0; i < taggedLabels.size(); i++) {
+            SetLabel label = taggedLabels.get(i);
+            PVector labelDim = label.dimensions(g);
+
+            label.opened = true;
+            label.topLeft(labelPos);
+            labelPos = PVector.add(labelPos, PVector.v(0, labelDim.y + 2));
+        }
+
+        return labelPos;
     }
 
     @Override
     public void draw(AnimatedGraphics g) {
+        final boolean isAnimated = g.getDrawManager().isAnimated();
         PVector dim = dimensions(g);
-        
+
         // Category label.
         g.pushTransform();
         g.translate(topLeft);
-        
-        // Background rectangle to enable scrolling.
-        g.picking();
-        g.color(Color.WHITE);
-        g.drawRect(0, 0, dim.x, dim.y);
-        
-        g.translate(0, g.textHeight());
-        
+
         g.textFont(FONT);
+
+        // Transparent background rectangle to enable scrolling.
+        g.picking();
+        g.color(Color.BLACK, 0);
+        g.fillRect(0, 0, dim.x, dim.y);
+
+        g.translate(0, g.textHeight());
+
         g.color(isOpened() ? TEXT_COLOR : TEXT_COLOR.brighter().brighter());
-        g.text(element.toString(), g.getDrawManager().isAnimated() ? 0.75 * g.textHeight() : 0, 0);
-        
+        g.text(element.toString(), isAnimated ? 0.75 * g.textHeight() : 0, 0);
+
         // Arrows.
-        if(g.getDrawManager().isAnimated()) {
+        if (isAnimated) {
             g.pushTransform();
             double arrowRad = 0.25 * g.textHeight();
             double arrowTrunc = 0.25 * 0.85 * g.textHeight();
@@ -111,93 +154,78 @@ public class SetList extends Representation<HCategory> {
             g.fill(arrows);
             g.popTransform();
         }
-        
-        //noPicking();
-        
+
         g.popTransform();
-        
-        // Layout tagged set labels.
-        List<SetLabel> taggedLabels = new ArrayList<SetLabel>();    // Tagged set label representations.
-        List<SetLabel> remainderLabels = new ArrayList<SetLabel>(); // Set label representations.
-        for(SetLabel lbl: labels) {
-            (model.selection.activeSetMap.containsKey(lbl.element) ?
-                    taggedLabels :
-                    remainderLabels).add(lbl);
-        }
-        
+
         PVector domainBounds = PVector.v(g.textWidth(element.toString()), g.textHeight() + SPACING);
         PVector topTaggedPos = PVector.add(topLeft, domainBounds.Y());
-        
-        PVector labelPos = topTaggedPos;
-        for(int i = 0; i < taggedLabels.size(); i++) {
-            SetLabel label = taggedLabels.get(i);
-            PVector labelDim = label.dimensions(g);
-            
-            label.opened = true;
-            label.topLeft(labelPos);
-            labelPos = PVector.add(labelPos, PVector.v(0, labelDim.y + 2));
-        }
-        
-        // Layout remaining set labels.
-        int skipCount = isOpened() ? positionScroll : remainderLabels.size();
-        PVector topBarPos = PVector.add(labelPos,
-                                        PVector.v(0, taggedLabels.isEmpty() ? 0 : g.textHeight()));
-        PVector topListPos = PVector.add(topBarPos, PVector.v(0,
-                    skipCount > 0 ? LABEL_BAR_HEIGHT + SPACING : 0));
-        PVector bottomBarPos = null;
-        
-        double barIncrement = Math.min(
-            2 * LABEL_MARKER_RADIUS + 2,
-            dim.x / (double) remainderLabels.size()
-        );
-        
-        int i;
-        
-        // Place in top bar.
-        for(i = 0; i < skipCount && i < remainderLabels.size(); i++) {
-            SetLabel label = remainderLabels.get(i);
-            label.opened = false;
-            label.topLeft(PVector.v(topBarPos.x + LABEL_MARKER_RADIUS + i * barIncrement,
-                            topBarPos.y + LABEL_MARKER_RADIUS));
-        }
-        
-        // Place in mid section, as full.
-        labelPos = topListPos;
-        for(i = skipCount; i < remainderLabels.size(); i++) {
-            SetLabel label = remainderLabels.get(i);
-            PVector labelDim = label.dimensions(g);
-            
-            label.opened =
-                topLeft.y + labelPos.y + 2 * labelDim.y +
-                LABEL_BAR_HEIGHT + SPACING < g.getCanvasHeight();
-            
-            if(label.opened) {
-                label.topLeft(labelPos);
-            }
-            // Place in bottom bar.
-            else {
-                if(bottomBarPos == null) {
-                    bottomBarPos = labelPos;
-                }
-                
-                label.topLeft(PVector.v(topBarPos.x + LABEL_MARKER_RADIUS + i * barIncrement,
-                                bottomBarPos.y + 2 * LABEL_MARKER_RADIUS));
-            }
-            
-            labelPos = PVector.add(labelPos, PVector.v(0, labelDim.y + 2));
-        }
-        
-        g.snippets(remainderLabels);
+
+        PVector labelPos = layoutTaggedLabel(g, topTaggedPos);
+
         g.snippets(taggedLabels);
+
+        // Layout remaining set labels.
+        if (isAnimated) {
+            int skipCount = isOpened() ? positionScroll : remainderLabels.size();
+            PVector topBarPos = PVector.add(labelPos,
+                    PVector.v(0, taggedLabels.isEmpty() ? 0 : g.textHeight()));
+            PVector topListPos = PVector.add(topBarPos, PVector.v(0,
+                    skipCount > 0 ? LABEL_BAR_HEIGHT + SPACING : 0));
+            PVector bottomBarPos = null;
+
+            final double barIncrement = Math.min(
+                    2 * LABEL_MARKER_RADIUS + 2,
+                    dim.x / (double) remainderLabels.size()
+            );
+
+            int i;
+
+            // Place in top bar.
+            for (i = 0; i < skipCount && i < remainderLabels.size(); i++) {
+                SetLabel label = remainderLabels.get(i);
+                label.opened = false;
+                label.topLeft(PVector.v(topBarPos.x + LABEL_MARKER_RADIUS + i * barIncrement,
+                        topBarPos.y + LABEL_MARKER_RADIUS));
+            }
+
+            // Place in mid section, as full.
+            labelPos = topListPos;
+            for (i = skipCount; i < remainderLabels.size(); i++) {
+                SetLabel label = remainderLabels.get(i);
+                PVector labelDim = label.dimensions(g);
+
+                label.opened =
+                        topLeft.y + labelPos.y + 2 * labelDim.y +
+                                LABEL_BAR_HEIGHT + SPACING < g.getCanvasHeight();
+
+                if (label.opened) {
+                    label.topLeft(labelPos);
+                }
+                // Place in bottom bar.
+                else {
+                    if (bottomBarPos == null) {
+                        bottomBarPos = labelPos;
+                    }
+
+                    label.topLeft(PVector.v(
+                            topBarPos.x + LABEL_MARKER_RADIUS + i * barIncrement,
+                            bottomBarPos.y + 2 * LABEL_MARKER_RADIUS));
+                }
+
+                labelPos = PVector.add(labelPos, PVector.v(0, labelDim.y + 2));
+            }
+
+            g.snippets(remainderLabels);
+        }
     }
-    
+
     public boolean isOpened() {
         return model.openedCategories.get().contains(element);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(isOpened()) {
+        if (isOpened()) {
             model.openedCategories.remove(element);
         } else {
             model.openedCategories.add(element);
@@ -206,9 +234,6 @@ public class SetList extends Representation<HCategory> {
 
     @Override
     public void mouseWheel(int rotation) {
-        positionScroll =
-                Math.max(0,
-                    Math.min(labels.size() - 1,
-                             positionScroll + rotation));
+        positionScroll = Math.max(0, Math.min(labels.size() - 1, positionScroll + rotation));
     }
 }

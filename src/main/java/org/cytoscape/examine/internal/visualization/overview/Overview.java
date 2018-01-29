@@ -23,7 +23,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
-import static org.cytoscape.examine.internal.graphics.draw.Constants.SPACING;
 
 // Network overview.
 public class Overview extends PositionedSnippet {
@@ -104,7 +103,7 @@ public class Overview extends PositionedSnippet {
                 LayoutUpdater layoutUpdater = new LayoutUpdater();
                 layoutUpdater.update();
 
-                bounds.x = span.x + 2 * SPACING;
+                bounds.x = span.x;
                 bounds.y = span.y;
             }
         }

@@ -317,7 +317,7 @@ public class AnimatedGraphics {
     
     private float alphaPresence(double alpha) {
         double presence = drawManager.snippetValues == null ? 1 : drawManager.snippetValues.presence; 
-        return (float) java.lang.Math.max(0, java.lang.Math.min(1, presence));
+        return (float) java.lang.Math.max(0, java.lang.Math.min(1, alpha * presence));
     }
     
     public void color(Color color) {

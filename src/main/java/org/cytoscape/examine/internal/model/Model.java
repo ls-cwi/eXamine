@@ -76,10 +76,7 @@ public final class Model {
         for (final HCategory category : dataSet.categories.get().values()) {
             for (final HSet set : category.members) {
                 if (groupTable.getRow(set.cyGroup.getGroupNode().getSUID()).get(CyNetwork.SELECTED, Boolean.class)) {
-                    System.out.println(set.name + " is selected");
                     selection.add(set, 1);
-                } else {
-                    System.out.println(set.name + " is not selected");
                 }
             }
         }
@@ -147,7 +144,6 @@ public final class Model {
                 }
                 for (final HSet activeSet : selection.activeSetList) {
                     groupTable.getRow(activeSet.cyGroup.getGroupNode().getSUID()).set(CyNetwork.SELECTED, true);
-                    System.out.println("Select " + activeSet);
                 }
             }
         });

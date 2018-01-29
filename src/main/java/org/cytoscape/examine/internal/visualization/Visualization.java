@@ -93,7 +93,12 @@ abstract class Visualization {
         Layout.placeBelowLeftToRight(g, shiftPos, sideSnippets, MARGIN, availableCategoryHeight);
         PVector termBounds = Layout.bounds(g, sideSnippets);
 
-        shiftPos.x += termBounds.x + MARGIN;
+        // Create additional space between side labels and overview when exporting.
+        if(!g.getDrawManager().isAnimated()) {
+            shiftPos = PVector.v(termBounds.x + 4 * MARGIN, 4 * MARGIN);
+        } else {
+            shiftPos = termBounds.X();
+        }
 
         // Draw protein overview.
         overview.bounds = PVector.v(availableWidth - shiftPos.x - 2 * MARGIN, availableHeight);
