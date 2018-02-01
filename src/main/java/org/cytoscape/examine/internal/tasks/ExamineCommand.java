@@ -19,6 +19,16 @@ public enum ExamineCommand {
 		}
 		return "INVALID_COMMAND";
 	}
+
+	public String getDescription() {
+		if (this==GENERATE_GROUPS) {
+			return "Generates eXamine groups from a given set of columns";
+		}
+		else if (this == REMOVE_GROUPS) {
+			return "Removes all eXamine groups from the current session";
+		}
+		return "INVALID_COMMAND";
+	}
 }
 
 

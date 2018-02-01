@@ -100,20 +100,26 @@ public class CyActivator extends AbstractCyActivator {
         registerService(bc, controlPanel, SessionLoadedListener.class, new Properties());
         
         //Register commands to allow access via CyRest TODO: Possible to reduce number of lines by putting shared lines in a function, this might be easier to read though
-        
-		TaskFactory commandTaskFactory_GENERATE_GROUPS = new CommandTaskFactory(ExamineCommand.GENERATE_GROUPS);
-		Properties props_GENERATE_GROUPS = new Properties();
-		props_GENERATE_GROUPS.setProperty(COMMAND_NAMESPACE, Constants.APP_COMMAND_PREFIX);
-		props_GENERATE_GROUPS.setProperty(COMMAND, ExamineCommand.GENERATE_GROUPS.toString());
-		props_GENERATE_GROUPS.setProperty(COMMAND_DESCRIPTION,"[Placeholder] This command generates groups");
-		registerService(bc, commandTaskFactory_GENERATE_GROUPS, TaskFactory.class, props_GENERATE_GROUPS);
-		
-		TaskFactory commandTaskFactory_REMOVE_GROUPS = new CommandTaskFactory(ExamineCommand.REMOVE_GROUPS);
-		Properties props_REMOVE_GROUPS = new Properties();
-		props_REMOVE_GROUPS.setProperty(COMMAND_NAMESPACE, Constants.APP_COMMAND_PREFIX);
-		props_REMOVE_GROUPS.setProperty(COMMAND, ExamineCommand.REMOVE_GROUPS.toString());
-		props_REMOVE_GROUPS.setProperty(COMMAND_DESCRIPTION,"This command removes all groups associated with a given network");
-		registerService(bc, commandTaskFactory_REMOVE_GROUPS, TaskFactory.class, props_REMOVE_GROUPS);
+        registerCommands(bc,
+        		ExamineCommand.GENERATE_GROUPS,
+        		ExamineCommand.REMOVE_GROUPS
+        		);
     }
+
+    /**
+     * Registers the commands with the bundle context and makes them accesible via CyRest
+     * @param bc
+     * @param commands The commands that are to be registered
+     */
+	private void registerCommands(BundleContext bc, ExamineCommand ...commands) {
+		for (ExamineCommand command : commands) {
+			TaskFactory commandTaskFactory = new CommandTaskFactory(command);
+			Properties props = new Properties();
+			props.setProperty(COMMAND_NAMESPACE, Constants.APP_COMMAND_PREFIX);
+			props.setProperty(COMMAND, command.toString());
+			props.setProperty(COMMAND_DESCRIPTION,command.getDescription());
+			registerService(bc, commandTaskFactory, TaskFactory.class, props);		
+		}
+	}
     
 }
