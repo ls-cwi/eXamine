@@ -31,6 +31,7 @@ import static org.cytoscape.examine.internal.graphics.draw.Constants.LABEL_FONT;
 import static org.cytoscape.examine.internal.graphics.draw.Constants.NOTE_FONT;
 
 // Graphics application.
+@SuppressWarnings("serial") //TODO: We can assume we never serialize this right?
 public abstract class ApplicationFrame extends JFrame {
 
     private AnimatedGraphics animatedGraphics = new AnimatedGraphics();
@@ -181,7 +182,7 @@ public abstract class ApplicationFrame extends JFrame {
         animatedGraphics.setCanvasHeight(getHeight());
         animatedGraphics.getDrawManager().updatePickingBuffer(getWidth(), getHeight());
     }
-    
+
     public final void rootDraw() {
         DrawManager drawManager = animatedGraphics.getDrawManager();
 
