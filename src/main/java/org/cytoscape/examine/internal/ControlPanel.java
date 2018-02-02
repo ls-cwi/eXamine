@@ -9,11 +9,8 @@ import org.cytoscape.examine.internal.data.DataSet;
 import org.cytoscape.examine.internal.model.Model;
 import org.cytoscape.examine.internal.visualization.InteractiveVisualization;
 import org.cytoscape.examine.internal.visualization.SnapshotVisualization;
-import org.cytoscape.group.CyGroupFactory;
-import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.examine.internal.tasks.GenerateGroups;
 import org.cytoscape.examine.internal.tasks.RemoveGroups;
-import org.cytoscape.examine.internal.visualization.Visualization;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.events.ColumnCreatedEvent;
@@ -96,7 +93,6 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	CyReferences references = CyReferences.getInstance();
 
 	public ControlPanel() {
-
 
 		this.networkSettings = new HashMap<Long, NetworkSettings>();
 		this.itemChangeListener = new ItemChangeListener();
@@ -753,12 +749,12 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
 	}
 
     /**
-     * Open a new visualization window.
+     * Create a data set for consumption by eXamine.
      */
-    private void openVisualizationWindow(NetworkSettings networkSettings) {
-        final DataSet dataSet = new DataSet(
+    private DataSet createDataSet(NetworkSettings networkSettings) {
+        return new DataSet(
                 references.getApplicationManager().getCurrentNetwork(),
-				references.getGroupManager(),
+                references.getGroupManager(),
                 networkSettings.getSelectedLabelColumnName(),
                 networkSettings.getSelectedURLColumnName(),
                 networkSettings.getSelectedScoreColumnName(),
@@ -767,12 +763,15 @@ public class ControlPanel extends JPanel implements CytoPanelComponent,
         );
     }
 
+    /**
+     * Create a data model for keeping track of interaction state.
+     */
     private Model createModel(DataSet dataSet, NetworkSettings networkSettings) {
         return new Model(
                 dataSet,
-                applicationManager,
-                visualMappingManager,
-                groupManager,
+                references.getApplicationManager(),
+                references.getVisualMappingManager(),
+                references.getGroupManager(),
                 networkSettings.getShowScore(),
                 networkSettings.getGroupSelection());
     }
