@@ -15,16 +15,18 @@ import org.cytoscape.model.events.NetworkDestroyedListener;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.session.CySessionManager;
 import org.cytoscape.session.events.SessionLoadedListener;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
+
+import java.util.Properties;
+
 import static org.cytoscape.work.ServiceProperties.COMMAND;
 import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
-
-import java.util.Properties;
 
 /**
  * Execution body.
@@ -41,85 +43,63 @@ public class CyActivator extends AbstractCyActivator {
     /**
      * Upon bundle activation (install or startup).
      */
-    public void start(BundleContext bc) {
-        // Manager services.
-        //CySwingApplication desktopManager = getService(bc, CySwingApplication.class);
-        
-        // Basic access to current and/or currently selected networks, 
-        // views and rendering engines in an instance of Cytoscape.
-        CyApplicationManager applicationManager = getService(bc, CyApplicationManager.class);
-        
-        // Access to all root networks
-        CyRootNetworkManager rootNetworkManager = getService(bc, CyRootNetworkManager.class);
-        
-        // Access to all networks
-        CyNetworkManager networkManager = getService(bc, CyNetworkManager.class);
-        
-        // This object manages mapping from view model to VisualStyle. 
-        // User objects can access all VisualStyles and VisualMappingFunctions through this class.
-        VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
-        
-        // The CyGroupManager maintains information about all of the groups an instance of Cytoscape.
-        CyGroupManager groupManager = getService(bc, CyGroupManager.class);
-        
-        // An interface describing a factory used for creating CyGroup objects.
-        CyGroupFactory groupFactory = getService(bc, CyGroupFactory.class);
-        
-        DialogTaskManager taskManager = getService(bc, DialogTaskManager.class);
-        
-        // Action, the group viewer
-//        ViewerAction viewerAction =
-//                new ViewerAction(applicationManager,
-//                                 visualMappingManager,
-//                                 groupManager,
-//                                 groupFactory);
-        
-        // Action, the group selector
-        /*GroupsFromColumnsAction groupsAction =
-                new GroupsFromColumnsAction(applicationManager,
-                                            groupManager,
-                                            groupFactory);*/
+    public void start(BundleContext bundleContext) {
 
-        //Store services for later references TODO: Remove redundant fields throughout app
-        CyReferences.getInstance().storeReferences(networkManager, rootNetworkManager, 
-        		applicationManager, groupManager, groupFactory, taskManager, visualMappingManager);
-        
-        // The eXamine control panel
-        ControlPanel controlPanel = new ControlPanel();
+        // Show eXamine control panel
+        CyServices services = createServices(bundleContext);
+        ControlPanel controlPanel = new ControlPanel(services);
 
         // Register it as a service.
-        //registerService(bc, viewerAction, CyAction.class, new Properties());
-        //registerService(bc, groupsAction, CyAction.class, new Properties());
-        registerService(bc, controlPanel, CytoPanelComponent.class, new Properties());
-        registerService(bc, controlPanel, SetCurrentNetworkListener.class, new Properties());
-        registerService(bc, controlPanel, RowsSetListener.class, new Properties());
-        registerService(bc, controlPanel, ColumnNameChangedListener.class, new Properties());
-        registerService(bc, controlPanel, ColumnDeletedListener.class, new Properties());
-        registerService(bc, controlPanel, ColumnCreatedListener.class, new Properties());
-        registerService(bc, controlPanel, NetworkDestroyedListener.class, new Properties());
-        registerService(bc, controlPanel, SessionLoadedListener.class, new Properties());
-        
+        registerService(bundleContext, controlPanel, CytoPanelComponent.class, new Properties());
+        registerService(bundleContext, controlPanel, SetCurrentNetworkListener.class, new Properties());
+        registerService(bundleContext, controlPanel, RowsSetListener.class, new Properties());
+        registerService(bundleContext, controlPanel, ColumnNameChangedListener.class, new Properties());
+        registerService(bundleContext, controlPanel, ColumnDeletedListener.class, new Properties());
+        registerService(bundleContext, controlPanel, ColumnCreatedListener.class, new Properties());
+        registerService(bundleContext, controlPanel, NetworkDestroyedListener.class, new Properties());
+        registerService(bundleContext, controlPanel, SessionLoadedListener.class, new Properties());
+
         //Register commands to allow access via CyRest TODO: Possible to reduce number of lines by putting shared lines in a function, this might be easier to read though
-        registerCommands(bc,
-        		ExamineCommand.GENERATE_GROUPS,
-        		ExamineCommand.REMOVE_GROUPS
-        		);
+        registerCommands(bundleContext,
+                ExamineCommand.GENERATE_GROUPS,
+                ExamineCommand.REMOVE_GROUPS
+        );
+    }
+
+    /**
+     * Extracts Cytoscape services from a bundle context for propagation.
+     * TODO: Remove redundant fields throughout app
+     */
+    private CyServices createServices(BundleContext bundleContext) {
+        return new CyServices(
+                getService(bundleContext, CyNetworkManager.class),
+                getService(bundleContext, CyRootNetworkManager.class),
+                getService(bundleContext, CyApplicationManager.class),
+                getService(bundleContext, CySessionManager.class),
+                getService(bundleContext, CyGroupManager.class),
+                getService(bundleContext, CyGroupFactory.class),
+                getService(bundleContext, DialogTaskManager.class),
+                getService(bundleContext, VisualMappingManager.class)
+        );
     }
 
     /**
      * Registers the commands with the bundle context and makes them accesible via CyRest
+     *
      * @param bc
      * @param commands The commands that are to be registered
      */
-	private void registerCommands(BundleContext bc, ExamineCommand ...commands) {
-		for (ExamineCommand command : commands) {
-			TaskFactory commandTaskFactory = new CommandTaskFactory(command);
-			Properties props = new Properties();
-			props.setProperty(COMMAND_NAMESPACE, Constants.APP_COMMAND_PREFIX);
-			props.setProperty(COMMAND, command.toString());
-			props.setProperty(COMMAND_DESCRIPTION,command.getDescription());
-			registerService(bc, commandTaskFactory, TaskFactory.class, props);		
-		}
-	}
-    
+    private void registerCommands(BundleContext bc, ExamineCommand... commands) {
+        CyServices services = createServices(bc);
+
+        for (ExamineCommand command : commands) {
+            TaskFactory commandTaskFactory = new CommandTaskFactory(services, command);
+            Properties props = new Properties();
+            props.setProperty(COMMAND_NAMESPACE, Constants.APP_COMMAND_PREFIX);
+            props.setProperty(COMMAND, command.toString());
+            props.setProperty(COMMAND_DESCRIPTION, command.getDescription());
+            registerService(bc, commandTaskFactory, TaskFactory.class, props);
+        }
+    }
+
 }

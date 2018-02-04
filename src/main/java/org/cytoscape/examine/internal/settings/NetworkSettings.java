@@ -1,5 +1,6 @@
-package org.cytoscape.examine.internal;
+package org.cytoscape.examine.internal.settings;
 
+import org.cytoscape.examine.internal.Constants;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 
@@ -13,15 +14,15 @@ import java.util.Set;
  *
  * @author melkebir
  */
-class NetworkSettings {
+public class NetworkSettings {
 
     private List<String> columnNames;
-    private Set<String> columnNamesSet = new HashSet<String>();
-    private List<Integer> allGroupColumns = new ArrayList<Integer>();
-    private List<Integer> allGroupColumnSizes = new ArrayList<Integer>();
-    private List<Integer> allStringColumns = new ArrayList<Integer>();
-    private List<Integer> allDoubleColumns = new ArrayList<Integer>();
-    private List<Integer> selectedGroupColumns = new ArrayList<Integer>();
+    private Set<String> columnNamesSet = new HashSet<>();
+    private List<Integer> allGroupColumns = new ArrayList<>();
+    private List<Integer> allGroupColumnSizes = new ArrayList<>();
+    private List<Integer> allStringColumns = new ArrayList<>();
+    private List<Integer> allDoubleColumns = new ArrayList<>();
+    private List<Integer> selectedGroupColumns = new ArrayList<>();
     private int selectedLabelColumn = 0;
     private int selectedURLColumn = 0;
     private int selectedScoreColumn = 0;
@@ -34,7 +35,7 @@ class NetworkSettings {
         List<CyColumn> columns = new ArrayList<CyColumn>();
         columns.addAll(network.getDefaultNodeTable().getColumns());
 
-        columnNames = new ArrayList<String>(columns.size());
+        columnNames = new ArrayList<>(columns.size());
 
         int i = 0;
         for (CyColumn c : columns) {

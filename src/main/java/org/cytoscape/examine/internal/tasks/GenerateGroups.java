@@ -1,16 +1,8 @@
 package org.cytoscape.examine.internal.tasks;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-
 import org.cytoscape.examine.internal.Constants;
 import org.cytoscape.examine.internal.ControlPanel;
-import org.cytoscape.examine.internal.CyReferences;
+import org.cytoscape.examine.internal.CyServices;
 import org.cytoscape.examine.internal.Utilities;
 import org.cytoscape.group.CyGroup;
 import org.cytoscape.model.CyEdge;
@@ -24,6 +16,13 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
 import org.cytoscape.work.util.ListMultipleSelection;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * This class contains all the logic to generate groups.
  * 
@@ -34,37 +33,28 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	
 	//Arguments
 	
-	/**
-	 * The CyNetwork on which the groups are to be created
-	 */
+	// The CyNetwork on which the groups are to be created.
 	@Tunable(description="The network from which the groups are to be created", context="nogui")
-	public CyNetwork network = null;
+	public CyNetwork network;
 
-	/**
-	 * The columns from which the groups are to be created
-	 */
+	// The columns from which the groups are to be created.
 	@Tunable(context="nogui", description="The columns from which the groups are to be generated; provide as comma-separated list for instance selectedGroupColumns=\"a,b,c\";invalid list entries (that are not fitting column names) are ignored")
 	public ListMultipleSelection<String> selectedGroupColumns = null;
 	
 	@Tunable(description="Use all nodes (not only selected nodes)",context="nogui")
 	public boolean useAllNodes = false;
-	
-	
-	//Internal
-	
+
 	private Map<String, CyGroup> groupIndex;
-	
-	
-	//Links
-	
-	private CyReferences references = CyReferences.getInstance();
+
+	private final CyServices services;
 	
 	/**
 	 * Default constructor, can be used for argument passing via Tunables
 	 */
-	public GenerateGroups() {
+	public GenerateGroups(CyServices services) {
 		//Populate with default values, we fetch the current network and get all fitting columns
-		this.network = references.getApplicationManager().getCurrentNetwork();
+		this.services = services;
+		this.network = services.getApplicationManager().getCurrentNetwork();
         this.selectedGroupColumns = Utilities.populateColumnList(network);
 	};
 
@@ -75,9 +65,12 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 	 * @param all
 	 */
 	public GenerateGroups(
+			CyServices services,
 			CyNetwork network,
 			List<String> selectedGroupColumnNames,
 			boolean all) {
+
+		this.services = services;
         this.network = network;
         this.selectedGroupColumns = new ListMultipleSelection<String>(selectedGroupColumnNames);
         //TODO: I don't like this workaround much
@@ -90,8 +83,8 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
      * Initialize group index.
      */
     private void initGroupIndex(CyNetwork network) {
-        groupIndex = new HashMap<String, CyGroup>();
-        Set<CyGroup> groups = references.getGroupManager().getGroupSet(network);
+        groupIndex = new HashMap<>();
+        Set<CyGroup> groups = services.getGroupManager().getGroupSet(network);
         
         for (CyGroup group : groups) {
         	long SUID = group.getGroupNode().getSUID();
@@ -109,7 +102,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
         // Determine whether group already exists.
         CyGroup group = groupIndex.get(groupName);
         if (group == null) {
-            group = references.getGroupFactory().createGroup(network, members, new ArrayList<CyEdge>(), false);
+            group = services.getGroupFactory().createGroup(network, members, new ArrayList<CyEdge>(), false);
             network.getDefaultNodeTable().getRow(group.getGroupNode().getSUID()).set(CyNetwork.NAME, groupName);
             
             groupIndex.put(groupName, group);
@@ -147,7 +140,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		}
 
 		// Listeners are temporarily disabled to prevent firing of events throughout group generation
-		ControlPanel.listenersEnabled.set(false);
+		ControlPanel.LISTENERS_ENABLED.set(false);
 		
 		taskMonitor.setTitle("Generating groups");
 		
@@ -167,7 +160,7 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 			CyNode node = network.getNode(row.get(CyNetwork.SUID, Long.class));
 			
 			// skip group nodes
-			if (node == null || references.getGroupManager().isGroup(node, network)) continue;
+			if (node == null || services.getGroupManager().isGroup(node, network)) continue;
 			// skip nodes that are not selected if !all
 			if (!useAllNodes && !row.get(CyNetwork.SELECTED, Boolean.class)) continue;
 			
@@ -221,9 +214,9 @@ public class GenerateGroups implements ObservableTask, TunableValidator {
 		
 		// now finalize groups
 		taskMonitor.setStatusMessage("Finalizing groups.");
-		references.getGroupManager().addGroups(new ArrayList<CyGroup>(groupIndex.values()));
+		services.getGroupManager().addGroups(new ArrayList<CyGroup>(groupIndex.values()));
 		
-		ControlPanel.listenersEnabled.set(true);
+		ControlPanel.LISTENERS_ENABLED.set(true);
 	}
 
 	@Override

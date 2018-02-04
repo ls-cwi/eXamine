@@ -2,33 +2,40 @@ package org.cytoscape.examine.internal.tasks;
 
 /**
  * Describes commands for the eXamine application that can be invoked via REST/CyREST
- *
  */
 public enum ExamineCommand {
-	
-	GENERATE_GROUPS, /**Generates groups from TODO: Add info*/
-	REMOVE_GROUPS; /**Removes all groups for a specific network*/
 
-	@Override
-	public String toString() {
-		if (this==GENERATE_GROUPS) {
-			return "generate groups";
-		}
-		else if (this == REMOVE_GROUPS) {
-			return "remove groups";
-		}
-		return "INVALID_COMMAND";
-	}
+    // TODO: Add info.
+    GENERATE_GROUPS(
+            "generate groups",
+            "Generates eXamine groups from a given set of columns."
+    ),
+    REMOVE_GROUPS(
+            "remove groups",
+            "Removes all eXamine groups from the current session."
+    ),
+    INTERACT(
+            "interact",
+            "Shows the selected network and eXamine groups in an interactive visualization."
+    );
 
-	public String getDescription() {
-		if (this==GENERATE_GROUPS) {
-			return "Generates eXamine groups from a given set of columns";
-		}
-		else if (this == REMOVE_GROUPS) {
-			return "Removes all eXamine groups from the current session";
-		}
-		return "INVALID_COMMAND";
-	}
+    private final String name;
+    private final String description;
+
+    ExamineCommand(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
 }
 
 
