@@ -5,14 +5,10 @@ import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.examine.internal.Constants.Selection;
-import org.cytoscape.examine.internal.data.DataSet;
-import org.cytoscape.examine.internal.model.Model;
 import org.cytoscape.examine.internal.settings.NetworkSettings;
 import org.cytoscape.examine.internal.settings.SessionSettings;
 import org.cytoscape.examine.internal.tasks.GenerateGroups;
 import org.cytoscape.examine.internal.tasks.RemoveGroups;
-import org.cytoscape.examine.internal.visualization.InteractiveVisualization;
-import org.cytoscape.examine.internal.visualization.SnapshotVisualization;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.events.ColumnCreatedEvent;
 import org.cytoscape.model.events.ColumnCreatedListener;
@@ -36,12 +32,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -95,19 +87,17 @@ public class ControlPanel extends JPanel implements
 	private final CyServices services;
 
     // UI components listener as to ensure UI matches current network settings
-    private ItemChangeListener itemChangeListener;
+    private final ItemChangeListener itemChangeListener= new ItemChangeListener();
 
     // Number of selected nodes
-    private int nSelectedNodes;
+    private int nSelectedNodes = 0;
 
     // Session settings, maintained for storing and retrieval of settings upon network selection change.
-    private final SessionSettings sessionSettings = new SessionSettings();
+    private final SessionSettings sessionSettings;
 
-	public ControlPanel(CyServices services) {
-
+	public ControlPanel(CyServices services, SessionSettings settings) {
 	    this.services = services;
-		this.itemChangeListener = new ItemChangeListener();
-		this.nSelectedNodes = 0;
+	    this.sessionSettings = settings;
 
 		initUserInterface();
 		
@@ -129,7 +119,7 @@ public class ControlPanel extends JPanel implements
 	 */
 	private void updateUserInterface() {
 		GridBagConstraints gridBagConstraints;
-		NetworkSettings ns = sessionSettings.getNetworkSettings(services.getApplicationManager().getCurrentNetwork());
+		NetworkSettings ns = getCurrentNetworkSettings();
 
 		// Fill check boxes
 		List<Integer> groupColumns = ns.getAllGroupColumns();
@@ -392,43 +382,37 @@ public class ControlPanel extends JPanel implements
 		btnExamine.setEnabled(false);
 		btnExamine.addActionListener(arg0 -> {
             NetworkSettings ns = getCurrentNetworkSettings();
-            openVisualizationWindow(ns);
+            Utilities.openVisualizationWindow(services, ns);
         });
 		btnExport = new JButton("Export");
         btnExport.setFont(btnExport.getFont().deriveFont(11.f));
         btnExport.setEnabled(false);
         btnExport.addActionListener(arg0 -> {
             NetworkSettings ns = getCurrentNetworkSettings();
-            exportVisualization(ns);
+            Utilities.exportVisualization(services, ns);
         });
 		btnGenerateSelection = new JButton("Generate");
 		btnGenerateSelection.setFont(btnGenerateSelection.getFont().deriveFont(11.f));
 		btnRemoveAll = new JButton("Remove");
 		btnRemoveAll.setFont(btnRemoveAll.getFont().deriveFont(11.f));
-		btnRemoveAll.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				int selectedOption = JOptionPane.showConfirmDialog(null, 
-						"Do you want to remove all groups?", 
-						"Group removal", JOptionPane.YES_NO_OPTION);
+		btnRemoveAll.addActionListener(arg0 -> {
+            int selectedOption = JOptionPane.showConfirmDialog(null,
+                    "Do you want to remove all groups?",
+                    "Group removal", JOptionPane.YES_NO_OPTION);
 
-				if (selectedOption == JOptionPane.YES_OPTION) {
-					CyNetwork network = services.getApplicationManager().getCurrentNetwork();
-					services.getTaskManager().execute(new TaskIterator(new RemoveGroups(services, network)));
-				}
-			}
-		});
+            if (selectedOption == JOptionPane.YES_OPTION) {
+                CyNetwork network = services.getApplicationManager().getCurrentNetwork();
+                services.getTaskManager().execute(new TaskIterator(new RemoveGroups(services, network)));
+            }
+        });
 		btnGenerateSelection.setEnabled(false);
-		btnGenerateSelection.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				CyNetwork network = services.getApplicationManager().getCurrentNetwork();
-				NetworkSettings ns = getCurrentNetworkSettings();
-				List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
-				services.getTaskManager().execute(new TaskIterator(
-						new GenerateGroups(services, network, groupColumnNames, false)));
-			}
-		});
+		btnGenerateSelection.addActionListener(arg0 -> {
+            CyNetwork network = services.getApplicationManager().getCurrentNetwork();
+            NetworkSettings ns = getCurrentNetworkSettings();
+            List<String> groupColumnNames = ns.getSelectedGroupColumnNames();
+            services.getTaskManager().execute(new TaskIterator(
+                    new GenerateGroups(services, network, groupColumnNames, false)));
+        });
 		pnlButtons.add(btnGenerateSelection);
 		pnlButtons.add(btnExamine);
 		pnlButtons.add(btnRemoveAll);
@@ -442,67 +426,6 @@ public class ControlPanel extends JPanel implements
 		gridBagConstraints.insets = new Insets(10, 0, 10, 0);
 		add(pnlButtons, gridBagConstraints);
 	}
-
-    /**
-     * Create a data set for consumption by eXamine.
-     */
-    private DataSet createDataSet(NetworkSettings networkSettings) {
-        return new DataSet(
-                services.getApplicationManager().getCurrentNetwork(),
-                services.getGroupManager(),
-                networkSettings.getSelectedLabelColumnName(),
-                networkSettings.getSelectedURLColumnName(),
-                networkSettings.getSelectedScoreColumnName(),
-                networkSettings.getSelectedGroupColumnNames(),
-                networkSettings.getSelectedGroupColumnSizes()
-        );
-    }
-
-    /**
-     * Create a data model for keeping track of interaction state.
-     */
-    private Model createModel(DataSet dataSet, NetworkSettings networkSettings) {
-        return new Model(
-                dataSet,
-                services.getApplicationManager(),
-                services.getVisualMappingManager(),
-                services.getGroupManager(),
-                networkSettings.getShowScore(),
-                networkSettings.getGroupSelection());
-    }
-
-    /**
-     * Open a new visualization window.
-     */
-    private void openVisualizationWindow(NetworkSettings networkSettings) {
-        final DataSet dataSet = createDataSet(networkSettings);
-        final Model model = createModel(dataSet, networkSettings);
-
-        new InteractiveVisualization(dataSet, model);
-    }
-
-    /**
-     * Export the visualization as an image.
-     */
-    private void exportVisualization(NetworkSettings networkSettings) {
-        final DataSet dataSet = createDataSet(networkSettings);
-        final Model model = createModel(dataSet, networkSettings);
-        final SnapshotVisualization visualization = new SnapshotVisualization(dataSet, model);
-
-        // Target file via dialog.
-        final JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setName("Export SVG");
-        fileChooser.setSelectedFile(new File("eXamine-export.svg"));
-        int fileConfirm = fileChooser.showSaveDialog(this);
-
-        if (fileConfirm == JFileChooser.APPROVE_OPTION) {
-            try {
-                visualization.exportSVG(fileChooser.getSelectedFile());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     /**
 	 * Update the network/nodes table.
@@ -611,7 +534,7 @@ public class ControlPanel extends JPanel implements
 	public void handleEvent(final SetCurrentNetworkEvent e) {
 		if (LISTENERS_ENABLED.get()) {
 			System.out.println("Network selection changed event, source: " + e.getSource());
-		
+
 			SwingUtilities.invokeLater(() -> {
                 CyNetwork network = e.getNetwork();
                 if (network != null) {
@@ -634,7 +557,7 @@ public class ControlPanel extends JPanel implements
 	@Override
 	public void handleEvent(final RowsSetEvent e) {
 		if (LISTENERS_ENABLED.get()) {
-			if (services.getApplicationManager().getCurrentNetwork() == null) return;
+			if (getCurrentNetwork() == null) return;
 			
 			boolean isSelection = true;
 			for (RowSetRecord change : e.getPayloadCollection()) {
@@ -718,16 +641,14 @@ public class ControlPanel extends JPanel implements
 				System.out.println("Column created event: " + e.getColumnName() + ", source: " + e.getSource());
 				SwingUtilities.invokeLater(() -> {
                     // get the root network first
-                    if (currentNetwork != null) {
-                        CyRootNetwork rootNetwork1 = services.getRootNetworkManager().getRootNetwork(currentNetwork);
+                    CyRootNetwork rootNetwork1 = services.getRootNetworkManager().getRootNetwork(currentNetwork);
 
-                        // now for all subnetworks of this root network, update the column name
-                        for (CyNetwork network : rootNetwork1.getSubNetworkList()) {
-                        	sessionSettings.getNetworkSettings(network).addColumnName(network, e.getColumnName());
-                        }
-
-                        updateUserInterface();
+                    // now for all subnetworks of this root network, update the column name
+                    for (CyNetwork network : rootNetwork1.getSubNetworkList()) {
+                        sessionSettings.getNetworkSettings(network).addColumnName(network, e.getColumnName());
                     }
+
+                    updateUserInterface();
                 });
 			}
 		}

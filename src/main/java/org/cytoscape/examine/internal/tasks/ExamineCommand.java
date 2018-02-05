@@ -14,6 +14,10 @@ public enum ExamineCommand {
             "remove groups",
             "Removes all eXamine groups from the current session."
     ),
+    UPDATE_SETTINGS(
+            "update settings",
+            "Updates settings for the visualization, such as label and score columns"
+    ),
     INTERACT(
             "interact",
             "Shows the selected network and eXamine groups in an interactive visualization."

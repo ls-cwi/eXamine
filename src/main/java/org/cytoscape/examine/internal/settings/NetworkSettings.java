@@ -31,6 +31,8 @@ public class NetworkSettings {
 
     public NetworkSettings(CyNetwork network) {
 
+        System.out.println("Created network settings for: " + network.getSUID());
+
         // columnNames
         List<CyColumn> columns = new ArrayList<CyColumn>();
         columns.addAll(network.getDefaultNodeTable().getColumns());
@@ -91,7 +93,7 @@ public class NetworkSettings {
         if (c == null)
             return;
 
-        if (existsColumn(addedColumnName) && c != null)
+        if (existsColumn(addedColumnName))
             return;
 
         columnNamesSet.add(addedColumnName);
@@ -196,6 +198,10 @@ public class NetworkSettings {
         this.selectedLabelColumn = selectedLabelColumn;
     }
 
+    public void setSelectedLabelColumnName(String selectedLabelColumn) {
+        this.selectedLabelColumn = Math.max(0, allStringColumns.indexOf(selectedLabelColumn));
+    }
+
     public String getSelectedLabelColumnName() {
         return columnNames.get(allStringColumns.get(selectedLabelColumn));
     }
@@ -208,6 +214,10 @@ public class NetworkSettings {
         this.selectedURLColumn = selectedURLColumn;
     }
 
+    public void setSelectedURLColumnName(String selectedURLColumn) {
+        this.selectedURLColumn = Math.max(0, allStringColumns.indexOf(selectedURLColumn));
+    }
+
     public String getSelectedURLColumnName() {
         return columnNames.get(allStringColumns.get(selectedURLColumn));
     }
@@ -218,6 +228,10 @@ public class NetworkSettings {
 
     public void setSelectedScoreColumn(int selectedScoreColumn) {
         this.selectedScoreColumn = selectedScoreColumn;
+    }
+
+    public void setSelectedScoreColumnName(String selectedScoreColumn) {
+        this.selectedScoreColumn = Math.max(0, allStringColumns.indexOf(selectedScoreColumn));
     }
 
     public String getSelectedScoreColumnName() {

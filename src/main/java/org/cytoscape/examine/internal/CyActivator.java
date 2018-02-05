@@ -3,6 +3,7 @@ package org.cytoscape.examine.internal;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.examine.internal.settings.SessionSettings;
 import org.cytoscape.examine.internal.taskfactories.CommandTaskFactory;
 import org.cytoscape.examine.internal.tasks.ExamineCommand;
 import org.cytoscape.group.CyGroupFactory;
@@ -33,12 +34,8 @@ import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
  */
 public class CyActivator extends AbstractCyActivator {
 
-    /**
-     * Base constructor.
-     */
-    public CyActivator() {
-        super();
-    }
+    // TODO: is there a way to persist these settings across Cytoscape runs?
+    private final SessionSettings settings = new SessionSettings();
 
     /**
      * Upon bundle activation (install or startup).
@@ -47,7 +44,7 @@ public class CyActivator extends AbstractCyActivator {
 
         // Show eXamine control panel
         CyServices services = createServices(bundleContext);
-        ControlPanel controlPanel = new ControlPanel(services);
+        ControlPanel controlPanel = new ControlPanel(services, settings);
 
         // Register it as a service.
         registerService(bundleContext, controlPanel, CytoPanelComponent.class, new Properties());
@@ -62,7 +59,9 @@ public class CyActivator extends AbstractCyActivator {
         //Register commands to allow access via CyRest TODO: Possible to reduce number of lines by putting shared lines in a function, this might be easier to read though
         registerCommands(bundleContext,
                 ExamineCommand.GENERATE_GROUPS,
-                ExamineCommand.REMOVE_GROUPS
+                ExamineCommand.REMOVE_GROUPS,
+                ExamineCommand.UPDATE_SETTINGS,
+                ExamineCommand.INTERACT
         );
     }
 
@@ -93,7 +92,7 @@ public class CyActivator extends AbstractCyActivator {
         CyServices services = createServices(bc);
 
         for (ExamineCommand command : commands) {
-            TaskFactory commandTaskFactory = new CommandTaskFactory(services, command);
+            TaskFactory commandTaskFactory = new CommandTaskFactory(services, settings, command);
             Properties props = new Properties();
             props.setProperty(COMMAND_NAMESPACE, Constants.APP_COMMAND_PREFIX);
             props.setProperty(COMMAND, command.toString());
