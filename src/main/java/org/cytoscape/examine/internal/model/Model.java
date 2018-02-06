@@ -35,7 +35,6 @@ public final class Model {
     private final DataSet dataSet;
     private final CyApplicationManager applicationManager;
     private final VisualMappingManager visualMappingManager;
-    private final CyGroupManager groupManager;
 
     public final Selection selection;                               // Selected (visualized) sets.
     public final VolatileSet<HCategory> openedCategories;           // Opened set categories.
@@ -58,7 +57,6 @@ public final class Model {
         this.dataSet = dataSet;
         this.applicationManager = applicationManager;
         this.visualMappingManager = visualMappingManager;
-        this.groupManager = groupManager;
 
         this.selection = new Selection(this);
         this.openedCategories = new VolatileSet<HCategory>();
