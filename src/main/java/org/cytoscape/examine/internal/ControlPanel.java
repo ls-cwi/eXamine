@@ -4,11 +4,16 @@ import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.examine.internal.data.DataSet;
+import org.cytoscape.examine.internal.model.Model;
 import org.cytoscape.examine.internal.Constants.Selection;
 import org.cytoscape.examine.internal.settings.NetworkSettings;
 import org.cytoscape.examine.internal.settings.SessionSettings;
 import org.cytoscape.examine.internal.tasks.GenerateGroups;
 import org.cytoscape.examine.internal.tasks.RemoveGroups;
+import org.cytoscape.examine.internal.visualization.InteractiveVisualization;
+import org.cytoscape.examine.internal.visualization.SnapshotVisualization;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.events.ColumnCreatedEvent;
 import org.cytoscape.model.events.ColumnCreatedListener;
@@ -35,7 +40,9 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO: Move swing components with distinct function to different classes
@@ -64,19 +71,19 @@ public class ControlPanel extends JPanel implements
 	private JPanel pnlNodes;
 
 	private JLabel lblNode;
-	private JComboBox<String> cmbNodeLabel;
+	private JComboBox<CyColumn> cmbNodeLabel;
 	private JLabel lblNodeURL;
-	private JComboBox<String> cmbNodeURL;
+	private JComboBox<CyColumn> cmbNodeURL;
 
 	private JLabel lblGroupScore;
-	private JComboBox<String> cmbGroupScore;
+	private JComboBox<CyColumn> cmbGroupScore;
 	private JLabel lblGroupSelection;
-	private JComboBox<String> cmbGroupSelection;
+	private JComboBox<Constants.Selection> cmbGroupSelection;
 	private JPanel pnlGroups;
 	private JPanel pnlGroups1;
 	private JPanel pnlGroups2;
-	private JCheckBox[] checkBoxes;
-	private JSpinner[] spinners;
+	private HashMap<CyColumn,JCheckBox> checkBoxes;
+	private HashMap<CyColumn,JSpinner> spinners;
 	private JPanel pnlButtons;
 	private JButton btnRemoveAll;
 	private JButton btnGenerateSelection;
@@ -122,15 +129,15 @@ public class ControlPanel extends JPanel implements
 		NetworkSettings ns = getCurrentNetworkSettings();
 
 		// Fill check boxes
-		List<Integer> groupColumns = ns.getAllGroupColumns();
-		List<Integer> selectedGroupColumns = ns.getSelectedGroupColumns();
-		checkBoxes = new JCheckBox[groupColumns.size()];
-		spinners = new JSpinner[groupColumns.size()];
+		List<CyColumn> groupColumns = ns.getAllGroupColumns();
+		List<CyColumn> selectedGroupColumns = ns.getSelectedGroupColumns();
+		checkBoxes = new HashMap<CyColumn,JCheckBox>();
+		spinners = new HashMap<CyColumn,JSpinner>();
 
 		pnlGroups1.removeAll();
 
 		int i = 0;
-		for (Integer j : groupColumns) {
+		for (CyColumn j : groupColumns) {
 			gridBagConstraints = new GridBagConstraints();
 			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints.anchor = GridBagConstraints.WEST;
@@ -139,11 +146,11 @@ public class ControlPanel extends JPanel implements
 			gridBagConstraints.weightx = 0.5;
 			gridBagConstraints.weighty = 0.5;
 
-			JCheckBox checkBox = new JCheckBox(ns.getColumnName(j),
-					selectedGroupColumns.contains(i));
+			JCheckBox checkBox = new JCheckBox(j.getName(),
+					selectedGroupColumns.contains(j));
 			checkBox.addItemListener(itemChangeListener);
 			pnlGroups1.add(checkBox, gridBagConstraints);
-			checkBoxes[i] = checkBox;
+			checkBoxes.put(j, checkBox);
 			
 			JSpinner spinner = new JSpinner(new SpinnerNumberModel(Constants.CATEGORY_MAX_SIZE, 
 					0, 10 * Constants.CATEGORY_MAX_SIZE, 1));
@@ -163,7 +170,7 @@ public class ControlPanel extends JPanel implements
 			gridBagConstraints.weightx = 0.5;
 			gridBagConstraints.weighty = 0.5;
 			pnlGroups1.add(spinner, gridBagConstraints);
-			spinners[i] = spinner;
+			spinners.put(j, spinner);
 
 			i++;
 		}
@@ -182,29 +189,28 @@ public class ControlPanel extends JPanel implements
 		cmbNodeLabel.removeAllItems();
 		cmbNodeURL.removeAllItems();
 
-		List<Integer> stringColumns = ns.getAllStringColumns();
-		for (Integer j : stringColumns) {
-			cmbNodeLabel.addItem(ns.getColumnName(j));
-			cmbNodeURL.addItem(ns.getColumnName(j));
+		for (CyColumn clmn : ns.getAllStringColumns()) {
+			cmbNodeLabel.addItem(clmn);
+			cmbNodeURL.addItem(clmn);
 		}
 
-		if (stringColumns.size() > 0) {
-			cmbNodeLabel.setSelectedIndex(ns.getSelectedLabelColumn());
-			cmbNodeURL.setSelectedIndex(ns.getSelectedURLColumn());
+		if (!ns.getAllStringColumns().isEmpty()) {
+			cmbNodeLabel.setSelectedItem(ns.getSelectedLabelColumn());
+			cmbNodeURL.setSelectedItem(ns.getSelectedURLColumn());
 		}
 
 		cmbGroupScore.removeAllItems();
-		List<Integer> doubleColumns = ns.getAllDoubleColumns();
-		for (Integer j : doubleColumns) {
-			cmbGroupScore.addItem(ns.getColumnName(j));
+		List<CyColumn> doubleColumns = ns.getAllDoubleColumns();
+		for (CyColumn j : doubleColumns) {
+			cmbGroupScore.addItem(j);
 		}
 		
-		cmbGroupSelection.setSelectedIndex(ns.getGroupSelection().ordinal());
+		cmbGroupSelection.setSelectedIndex(ns.getGroupSelectionMode().ordinal());
 
 		cmbGroupScore.setEnabled(doubleColumns.size() > 0);
 		showScoreCheckBox.setEnabled(doubleColumns.size() > 0);
 		if (doubleColumns.size() > 0) {
-			cmbGroupScore.setSelectedIndex(ns.getSelectedScoreColumn());
+			cmbGroupScore.setSelectedItem(ns.getSelectedScoreColumn());
 		}
 
 		updateButtons();
@@ -267,7 +273,7 @@ public class ControlPanel extends JPanel implements
 		gridBagConstraints.insets = new Insets(10, 5, 0, 0);
 		pnlNodes.add(lblNode, gridBagConstraints);
 
-		cmbNodeLabel = new JComboBox<String>();
+		cmbNodeLabel = new JComboBox<CyColumn>();
 		cmbNodeLabel.addItemListener(itemChangeListener);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -285,7 +291,7 @@ public class ControlPanel extends JPanel implements
 		gridBagConstraints.insets = new Insets(10, 5, 0, 0);
 		pnlNodes.add(lblNodeURL, gridBagConstraints);
 
-		cmbNodeURL = new JComboBox<String>();
+		cmbNodeURL = new JComboBox<CyColumn>();
 		cmbNodeURL.addItemListener(itemChangeListener);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -322,7 +328,7 @@ public class ControlPanel extends JPanel implements
 		gridBagConstraints.insets = new Insets(10, 5, 0, 0);
 		pnlGroups2.add(lblGroupScore, gridBagConstraints);
 		
-		cmbGroupScore = new JComboBox<String>();
+		cmbGroupScore = new JComboBox<CyColumn>();
 		cmbGroupScore.addItemListener(itemChangeListener);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -340,10 +346,10 @@ public class ControlPanel extends JPanel implements
 		gridBagConstraints.insets = new Insets(10, 5, 0, 0);
 		pnlGroups2.add(lblGroupSelection, gridBagConstraints);
 		
-		cmbGroupSelection = new JComboBox<String>();
-		cmbGroupSelection.addItem("None");
-		cmbGroupSelection.addItem("Union");
-		cmbGroupSelection.addItem("Intersection");
+		cmbGroupSelection = new JComboBox<Constants.Selection>();
+		cmbGroupSelection.addItem(Constants.Selection.NONE);
+		cmbGroupSelection.addItem(Constants.Selection.UNION);
+		cmbGroupSelection.addItem(Constants.Selection.INTERSECTION);
 		cmbGroupSelection.addItemListener(itemChangeListener);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
@@ -451,7 +457,7 @@ public class ControlPanel extends JPanel implements
 	private void updateButtons() {
 		NetworkSettings ns = getCurrentNetworkSettings();
 		if (ns != null) {
-			List<Integer> selectedGroups = getCurrentNetworkSettings().getSelectedGroupColumns();
+			List<CyColumn> selectedGroups = getCurrentNetworkSettings().getSelectedGroupColumns();
 			boolean enabled = nSelectedNodes > 0 && selectedGroups.size() > 0;
 			btnGenerateSelection.setEnabled(enabled);
 			btnExamine.setEnabled(enabled);
@@ -586,14 +592,6 @@ public class ControlPanel extends JPanel implements
 			System.out.println("Column name changed event: " + e.getOldColumnName() + ", source: " + e.getSource());
 		
 			SwingUtilities.invokeLater(() -> {
-                // get the root network first
-                CyRootNetwork rootNetwork = services.getRootNetworkManager().getRootNetwork(getCurrentNetwork());
-
-                // now for all subnetworks of this root network, update the column name
-                for (CyNetwork network : rootNetwork.getSubNetworkList()) {
-                	sessionSettings.getNetworkSettings(network)
-							.changeColumnName(e.getOldColumnName(), e.getNewColumnName());
-                }
 
                 updateUserInterface();
             });
@@ -615,7 +613,7 @@ public class ControlPanel extends JPanel implements
                 // now for all subnetworks of this root network, update the
                 // column name
                 for (CyNetwork network : rootNetwork.getSubNetworkList()) {
-                    sessionSettings.getNetworkSettings(network).deleteColumnName(e.getColumnName());
+                    sessionSettings.getNetworkSettings(network).deleteColumn(network.getDefaultNodeTable().getColumn(e.getColumnName()));
                 }
 
                 updateUserInterface();
@@ -643,10 +641,10 @@ public class ControlPanel extends JPanel implements
                     // get the root network first
                     CyRootNetwork rootNetwork1 = services.getRootNetworkManager().getRootNetwork(currentNetwork);
 
-                    // now for all subnetworks of this root network, update the column name
-                    for (CyNetwork network : rootNetwork1.getSubNetworkList()) {
-                        sessionSettings.getNetworkSettings(network).addColumnName(network, e.getColumnName());
-                    }
+                        // now for all subnetworks of this root network, update the column name
+                        for (CyNetwork network : rootNetwork1.getSubNetworkList()) {
+                        	sessionSettings.getNetworkSettings(network).addColumn(e.getSource().getColumn(e.getColumnName()));
+                        }
 
                     updateUserInterface();
                 });
@@ -696,35 +694,33 @@ public class ControlPanel extends JPanel implements
 		@Override
 		public void itemStateChanged(ItemEvent event) {
 			// update network settings to match ui
-			int idxNodeLabel = cmbNodeLabel.getSelectedIndex();
-			int idxNodeURL = cmbNodeURL.getSelectedIndex();
-			int idxGroupScore = cmbGroupScore.getSelectedIndex();
-			int idxGroupSelection = cmbGroupSelection.getSelectedIndex();
+			CyColumn idxNodeLabel = (CyColumn) cmbNodeLabel.getSelectedItem();
+			CyColumn idxNodeURL = (CyColumn) cmbNodeURL.getSelectedItem();
+			CyColumn idxGroupScore = (CyColumn) cmbGroupScore.getSelectedItem();
+			Constants.Selection idxGroupSelection = (Constants.Selection) cmbGroupSelection.getSelectedItem();
 
 			NetworkSettings ns = getCurrentNetworkSettings();
 			if (ns != null) {
 				ns.setSelectedLabelColumn(idxNodeLabel);
 				ns.setSelectedURLColumn(idxNodeURL);
 				ns.setSelectedScoreColumn(idxGroupScore);
-				ns.setGroupSelection(Selection.values()[idxGroupSelection]);
+				ns.setGroupSelection(idxGroupSelection);
 				ns.setShowScore(showScoreCheckBox.isSelected());
 
-				ArrayList<Integer> selectedGroups = new ArrayList<Integer>();
-				ArrayList<Integer> groupSizes = new ArrayList<Integer>();
+				ArrayList<CyColumn> selectedGroups = new ArrayList<CyColumn>();
 
-				for (int idxGroup = 0; idxGroup < checkBoxes.length; idxGroup++) {
-					if (checkBoxes[idxGroup].isSelected()) {
-						selectedGroups.add(idxGroup);
-						spinners[idxGroup].setEnabled(true);
+				for (Map.Entry<CyColumn, JCheckBox> entry : checkBoxes.entrySet()) {
+					if (entry.getValue().isSelected()) {
+						selectedGroups.add(entry.getKey());
+						spinners.get(entry.getKey()).setEnabled(true);
 					} else {
-						spinners[idxGroup].setEnabled(false);
+						spinners.get(entry.getKey()).setEnabled(false);
 					}
 
-					Integer size = (Integer) spinners[idxGroup].getModel().getValue();
-					groupSizes.add(size);
+					Integer size = (Integer) spinners.get(entry.getKey()).getModel().getValue();
+					ns.setGroupColumnSize(entry.getKey(),size);
 				}
 				ns.setSelectedGroupColumns(selectedGroups);
-				ns.setAllGroupColumnSizes(groupSizes);
 				updateButtons();
 			}
 		}

@@ -1,13 +1,13 @@
 package org.cytoscape.examine.internal.settings;
 
 import org.cytoscape.examine.internal.Constants;
+import org.cytoscape.examine.internal.Constants.Selection;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Stores network settings, including selected columns and column names.
@@ -16,70 +16,78 @@ import java.util.Set;
  */
 public class NetworkSettings {
 
-    private List<String> columnNames;
-    private Set<String> columnNamesSet = new HashSet<>();
-    private List<Integer> allGroupColumns = new ArrayList<>();
-    private List<Integer> allGroupColumnSizes = new ArrayList<>();
-    private List<Integer> allStringColumns = new ArrayList<>();
-    private List<Integer> allDoubleColumns = new ArrayList<>();
-    private List<Integer> selectedGroupColumns = new ArrayList<>();
-    private int selectedLabelColumn = 0;
-    private int selectedURLColumn = 0;
-    private int selectedScoreColumn = 0;
-    private Constants.Selection groupSelection = Constants.Selection.NONE;
+	/**
+	 * Contains a list of columns that are tracked by the Settings
+	 */
+    private List<CyColumn> trackedColumns;
+
+    private List<CyColumn> allGroupColumns = new ArrayList<>();
+    private HashMap<CyColumn,Integer> allGroupColumnSizes = new HashMap<CyColumn,Integer>();
+
+    private List<CyColumn> allStringColumns = new ArrayList<>();
+    private List<CyColumn> allDoubleColumns = new ArrayList<>();
+    private List<CyColumn> selectedGroupColumns = new ArrayList<>();
+
+    private CyColumn selectedLabelColumn = null;
+    private CyColumn selectedURLColumn = null;
+
+    private CyColumn selectedScoreColumn = null;
+
+    private Selection groupSelection = null;
     private boolean showScore;
 
     public NetworkSettings(CyNetwork network) {
-
-        System.out.println("Created network settings for: " + network.getSUID());
 
         // columnNames
         List<CyColumn> columns = new ArrayList<CyColumn>();
         columns.addAll(network.getDefaultNodeTable().getColumns());
 
-        columnNames = new ArrayList<>(columns.size());
+        trackedColumns = new ArrayList<>(columns.size());
 
-        int i = 0;
         for (CyColumn c : columns) {
-            columnNames.add(c.getName());
-            columnNamesSet.add(c.getName());
+        	//TODO: We are "pre-setting" common names for columns here?
+            trackedColumns.add(c);
 
             if (c.getListElementType() == String.class) {
                 if (c.getName().equals("Pathway")) {
-                    selectedGroupColumns.add(allGroupColumns.size());
+                    selectedGroupColumns.add(c);
                 }
-                allGroupColumns.add(i);
-                allGroupColumnSizes.add(Constants.CATEGORY_MAX_SIZE);
+                allGroupColumns.add(c);
+                allGroupColumnSizes.put(c,Constants.CATEGORY_MAX_SIZE);
             } else if (c.getType() == String.class) {
                 if (c.getName().equals("URL")) {
-                    selectedURLColumn = allStringColumns.size();
+                    selectedURLColumn = c;
                 } else if (c.getName().equals("Symbol")) {
-                    selectedLabelColumn = allStringColumns.size();
+                    selectedLabelColumn = c;
                 }
-                allStringColumns.add(i);
+                allStringColumns.add(c);
             } else if (c.getType() == Double.class) {
                 if (c.getName().equals("Score")) {
-                    selectedScoreColumn = allDoubleColumns.size();
+                    selectedScoreColumn = c;
                 }
-                allDoubleColumns.add(i);
+                allDoubleColumns.add(c);
             }
 
-            i++;
         }
 
         showScore = allDoubleColumns.size() > 0;
     }
 
-    private List<String> getColumnNames(List<Integer> indices) {
+    /**
+     * Helper function that retrievs a String list of all names for a given set of CyColumns
+     * @param columns
+     * @return
+     */
+    private List<String> getColumnNames(List<CyColumn> columns) {
         ArrayList<String> res = new ArrayList<String>();
-        for (Integer i : indices) {
-            res.add(columnNames.get(i));
+        for (CyColumn i : columns) {
+            res.add(i.getName());
         }
         return res;
     }
 
-    public boolean existsColumn(String columnName) {
-        return columnNamesSet.contains(columnName);
+    public boolean existsColumn(CyColumn c) {
+        return trackedColumns.contains(c);
     }
 
     /**
@@ -88,114 +96,68 @@ public class NetworkSettings {
      * @param network
      * @param addedColumnName
      */
-    public void addColumnName(CyNetwork network, String addedColumnName) {
-        CyColumn c = network.getDefaultNodeTable().getColumn(addedColumnName);
+    public void addColumn(CyColumn c) {
         if (c == null)
+            return; //TODO: Maybe add an error message here?
+
+        if (existsColumn(c))
             return;
 
-        if (existsColumn(addedColumnName))
-            return;
-
-        columnNamesSet.add(addedColumnName);
-        columnNames.add(addedColumnName);
-        int i = columnNames.size() - 1;
+        trackedColumns.add(c);
 
         if (c.getListElementType() == String.class) {
-            allGroupColumns.add(i);
-            allGroupColumnSizes.add(Constants.CATEGORY_MAX_SIZE);
+            allGroupColumns.add(c);
         } else if (c.getType() == String.class) {
-            allStringColumns.add(i);
+            allStringColumns.add(c);
         } else if (c.getType() == Double.class) {
-            allDoubleColumns.add(i);
+            allDoubleColumns.add(c);
         }
     }
 
-    /**
-     * Changes name of column with name oldName to newName.
-     *
-     * @param oldName
-     * @param newName
-     */
-    public void changeColumnName(String oldName, String newName) {
-        for (int i = 0; i < columnNames.size(); i++) {
-            if (columnNames.get(i).equals(oldName)) {
-                columnNames.set(i, newName);
-            }
-        }
-
-        columnNamesSet.remove(oldName);
-        columnNamesSet.add(newName);
-    }
 
     /**
      * Deletes column with name deletedColumnName.
      *
      * @param deletedColumnName
      */
-    public void deleteColumnName(String deletedColumnName) {
-        boolean somethingDeleted = false;
+    public void deleteColumn(CyColumn deletedColumn) {
 
-        int deletedIdx;
-        for (deletedIdx = 0; deletedIdx < columnNames.size(); deletedIdx++) {
-            if (columnNames.get(deletedIdx).equals(deletedColumnName)) {
-                columnNames.remove(deletedIdx);
-                somethingDeleted = true;
-                break;
-            }
+        if (trackedColumns.contains(deletedColumn)) {
+            trackedColumns.remove(deletedColumn);
+        }
+        else {
+        	System.out.println("Trying to delete column: "+deletedColumn.getName()+", which wasn't registered ...");
+        	return;
         }
 
-        if (!somethingDeleted) {
-            return;
-        }
+        trackedColumns.remove(deletedColumn);
 
-        columnNamesSet.remove(deletedColumnName);
+        if (selectedLabelColumn == deletedColumn) selectedLabelColumn = null;
+        else if (selectedURLColumn == deletedColumn) selectedURLColumn = null;
 
-        int idx = 0;
-        for (Integer stringIdx : allStringColumns) {
-            if (stringIdx == deletedIdx) {
-                if (selectedLabelColumn == idx) {
-                    selectedLabelColumn = 0;
-                } else if (selectedURLColumn == idx) {
-                    selectedURLColumn = 0;
+        allStringColumns.remove(deletedColumn);
+
+        if(selectedScoreColumn == deletedColumn) selectedScoreColumn = null;
+
+        allDoubleColumns.remove(deletedColumn);
+
+        for (CyColumn grpClmn : allGroupColumns) {
+            if (grpClmn == deletedColumn) {
+                if (selectedGroupColumns.contains(deletedColumn)) {
+                    selectedGroupColumns.remove(deletedColumn);
                 }
                 break;
             }
-            idx++;
         }
-        allStringColumns.remove(deletedIdx);
-
-        idx = 0;
-        for (Integer doubleIdx : allDoubleColumns) {
-            if (doubleIdx == deletedIdx) {
-                if (selectedScoreColumn == idx) {
-                    selectedScoreColumn = 0;
-                }
-                break;
-            }
-            idx++;
-        }
-        allDoubleColumns.remove(deletedIdx);
-
-        idx = 0;
-        for (Integer grpIdx : allGroupColumns) {
-            if (grpIdx == deletedIdx) {
-                if (selectedGroupColumns.contains(idx)) {
-                    selectedGroupColumns.remove(idx);
-                }
-                break;
-            }
-            idx++;
-        }
-        allGroupColumns.remove(deletedIdx);
-        allGroupColumnSizes.remove(deletedIdx);
+        allGroupColumns.remove(deletedColumn);
     }
 
-    public int getSelectedLabelColumn() {
+    public CyColumn getSelectedLabelColumn() {
         return selectedLabelColumn;
     }
 
-    public void setSelectedLabelColumn(int selectedLabelColumn) {
-        this.selectedLabelColumn = selectedLabelColumn;
+    public void setSelectedLabelColumn(CyColumn c) {
+        this.selectedLabelColumn = c;
     }
 
     public void setSelectedLabelColumnName(String selectedLabelColumn) {
@@ -203,15 +165,15 @@ public class NetworkSettings {
     }
 
     public String getSelectedLabelColumnName() {
-        return columnNames.get(allStringColumns.get(selectedLabelColumn));
+        return selectedLabelColumn.getName();
     }
 
-    public int getSelectedURLColumn() {
+    public CyColumn getSelectedURLColumn() {
         return selectedURLColumn;
     }
 
-    public void setSelectedURLColumn(int selectedURLColumn) {
-        this.selectedURLColumn = selectedURLColumn;
+    public void setSelectedURLColumn(CyColumn c) {
+        this.selectedURLColumn = c;
     }
 
     public void setSelectedURLColumnName(String selectedURLColumn) {
@@ -219,15 +181,15 @@ public class NetworkSettings {
     }
 
     public String getSelectedURLColumnName() {
-        return columnNames.get(allStringColumns.get(selectedURLColumn));
+        return selectedURLColumn.getName();
     }
 
-    public int getSelectedScoreColumn() {
+    public CyColumn getSelectedScoreColumn() {
         return selectedScoreColumn;
     }
 
-    public void setSelectedScoreColumn(int selectedScoreColumn) {
-        this.selectedScoreColumn = selectedScoreColumn;
+    public void setSelectedScoreColumn(CyColumn c) {
+        this.selectedScoreColumn = c;
     }
 
     public void setSelectedScoreColumnName(String selectedScoreColumn) {
@@ -238,69 +200,56 @@ public class NetworkSettings {
         if (allDoubleColumns.size() == 0) {
             return null;
         } else {
-            return columnNames.get(allDoubleColumns.get(selectedScoreColumn));
+            return selectedScoreColumn.getName();
         }
     }
 
-    public List<Integer> getSelectedGroupColumns() {
+    public List<CyColumn> getSelectedGroupColumns() {
         return selectedGroupColumns;
     }
 
     public List<String> getSelectedGroupColumnNames() {
-        ArrayList<Integer> mappedIndices = new ArrayList<Integer>();
-        for (Integer i : selectedGroupColumns) {
-            mappedIndices.add(allGroupColumns.get(i));
-        }
-        return getColumnNames(mappedIndices);
+        return getColumnNames(selectedGroupColumns);
     }
 
     public List<Integer> getSelectedGroupColumnSizes() {
         ArrayList<Integer> res = new ArrayList<Integer>();
-        for (Integer i : selectedGroupColumns) {
+        for (CyColumn i : selectedGroupColumns) {
             res.add(allGroupColumnSizes.get(i));
         }
         return res;
     }
 
-    public void setSelectedGroupColumns(ArrayList<Integer> selectedGroupColumns) {
+    public void setSelectedGroupColumns(ArrayList<CyColumn> selectedGroupColumns) {
         this.selectedGroupColumns = selectedGroupColumns;
     }
 
     public List<String> getColumnNames() {
-        return columnNames;
+    	ArrayList<String> names = new ArrayList<String>();
+    	for (CyColumn c : trackedColumns) {
+    		names.add(c.getName());
+    	}
+        return names;
     }
 
-    public List<Integer> getAllGroupColumns() {
+    public List<CyColumn> getAllGroupColumns() {
         return allGroupColumns;
     }
 
-    public List<Integer> getAllGroupColumnSizes() {
-        return allGroupColumnSizes;
-    }
-
-    public void setAllGroupColumnSizes(List<Integer> allGroupColumnSizes) {
-        this.allGroupColumnSizes = allGroupColumnSizes;
-    }
-
-
-    public List<Integer> getAllStringColumns() {
+    public List<CyColumn> getAllStringColumns() {
         return allStringColumns;
     }
 
-    public List<Integer> getAllDoubleColumns() {
+    public List<CyColumn> getAllDoubleColumns() {
         return allDoubleColumns;
     }
 
-    public String getColumnName(int i) {
-        return columnNames.get(i);
-    }
-
-    public Constants.Selection getGroupSelection() {
+    public Constants.Selection getGroupSelectionMode() {
         return groupSelection;
     }
 
-    public void setGroupSelection(Constants.Selection groupSelection) {
-        this.groupSelection = groupSelection;
+    public void setGroupSelection(Constants.Selection idxGroupSelection) {
+        this.groupSelection = idxGroupSelection;
     }
 
     public boolean getShowScore() {
@@ -310,5 +259,9 @@ public class NetworkSettings {
     public void setShowScore(boolean showScore) {
         this.showScore = showScore;
     }
+
+	public void setGroupColumnSize(CyColumn key, Integer size) {
+		this.allGroupColumnSizes.put(key, size);
+	}
 
 }
