@@ -3,10 +3,15 @@ package org.cytoscape.examine.internal.tasks;
 import org.cytoscape.examine.internal.CyServices;
 import org.cytoscape.examine.internal.settings.NetworkSettings;
 import org.cytoscape.examine.internal.settings.SessionSettings;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
+import org.cytoscape.work.util.ListMultipleSelection;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UpdateSettings implements ObservableTask, TunableValidator {
 
@@ -21,6 +26,9 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
 
     @Tunable(description = "Show enrichment score of annotations", context = "nogui")
     public Boolean showScore = null;
+
+    @Tunable(context="nogui", description="The group columns that are shown in the visualization; provide as comma-separated list, for instance selectedGroupColumns=\"a,b,c\"; invalid list entries (that are not fitting column names) are ignored")
+    public ListMultipleSelection<String> selectedGroupColumns = null;
 
     private final CyServices services;
     private final SessionSettings settings;
@@ -40,19 +48,39 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
 
         NetworkSettings networkSettings = settings.getNetworkSettings(
                 services.getApplicationManager().getCurrentNetwork());
-//
-//        if (labelColumn != null) {
-//            networkSettings.setSelectedLabelColumnName(labelColumn);
-//        }
-//        if (urlColumn != null) {
-//            networkSettings.setSelectedURLColumnName(urlColumn);
-//        }
-//        if (scoreColumn != null) {
-//            networkSettings.setSelectedScoreColumnName(scoreColumn);
-//        }
-//        if (showScore != null) {
-//            networkSettings.setShowScore(showScore);
-//        }
+
+        CyColumn labelCyColumn = columnByName(labelColumn);
+        if (labelCyColumn != null) {
+            networkSettings.setSelectedLabelColumn(labelCyColumn);
+        }
+
+        CyColumn urlCyColumn = columnByName(urlColumn);
+        if (urlCyColumn != null) {
+            networkSettings.setSelectedURLColumn(urlCyColumn);
+        }
+
+        CyColumn scoreCyColumn = columnByName(scoreColumn);
+        if (scoreCyColumn != null) {
+            networkSettings.setSelectedScoreColumn(scoreCyColumn);
+        }
+
+        if (showScore != null) {
+            networkSettings.setShowScore(showScore);
+        }
+
+        List<CyColumn> selectGroupCyColumns = selectedGroupColumns.getSelectedValues().stream()
+                .map(this::columnByName)
+                .filter(group -> group != null)
+                .collect(Collectors.toList());
+        if (selectGroupCyColumns != null) {
+            networkSettings.setSelectedGroupColumns(selectGroupCyColumns);
+        }
+    }
+
+    private CyColumn columnByName(String columnName) {
+        return columnName == null ?
+                null :
+                services.getApplicationManager().getCurrentNetwork().getDefaultNodeTable().getColumn(columnName);
     }
 
     @Override

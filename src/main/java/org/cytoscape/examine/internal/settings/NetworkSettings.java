@@ -203,7 +203,7 @@ public class NetworkSettings {
         return res;
     }
 
-    public void setSelectedGroupColumns(ArrayList<CyColumn> selectedGroupColumns) {
+    public void setSelectedGroupColumns(List<CyColumn> selectedGroupColumns) {
         this.selectedGroupColumns = selectedGroupColumns;
     }
 
