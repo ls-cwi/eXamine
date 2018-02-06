@@ -92,9 +92,6 @@ public class NetworkSettings {
 
     /**
      * Adds a column to the current network settings.
-     *
-     * @param network
-     * @param addedColumnName
      */
     public void addColumn(CyColumn c) {
         if (c == null)
@@ -117,8 +114,6 @@ public class NetworkSettings {
 
     /**
      * Deletes column with name deletedColumnName.
-     *
-     * @param deletedColumnName
      */
     public void deleteColumn(CyColumn deletedColumn) {
 
@@ -160,10 +155,6 @@ public class NetworkSettings {
         this.selectedLabelColumn = c;
     }
 
-    public void setSelectedLabelColumnName(String selectedLabelColumn) {
-        this.selectedLabelColumn = Math.max(0, allStringColumns.indexOf(selectedLabelColumn));
-    }
-
     public String getSelectedLabelColumnName() {
         return selectedLabelColumn.getName();
     }
@@ -176,10 +167,6 @@ public class NetworkSettings {
         this.selectedURLColumn = c;
     }
 
-    public void setSelectedURLColumnName(String selectedURLColumn) {
-        this.selectedURLColumn = Math.max(0, allStringColumns.indexOf(selectedURLColumn));
-    }
-
     public String getSelectedURLColumnName() {
         return selectedURLColumn.getName();
     }
@@ -190,10 +177,6 @@ public class NetworkSettings {
 
     public void setSelectedScoreColumn(CyColumn c) {
         this.selectedScoreColumn = c;
-    }
-
-    public void setSelectedScoreColumnName(String selectedScoreColumn) {
-        this.selectedScoreColumn = Math.max(0, allStringColumns.indexOf(selectedScoreColumn));
     }
 
     public String getSelectedScoreColumnName() {

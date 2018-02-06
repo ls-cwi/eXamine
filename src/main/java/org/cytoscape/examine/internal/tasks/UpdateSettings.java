@@ -40,19 +40,19 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
 
         NetworkSettings networkSettings = settings.getNetworkSettings(
                 services.getApplicationManager().getCurrentNetwork());
-
-        if (labelColumn != null) {
-            networkSettings.setSelectedLabelColumnName(labelColumn);
-        }
-        if (urlColumn != null) {
-            networkSettings.setSelectedURLColumnName(urlColumn);
-        }
-        if (scoreColumn != null) {
-            networkSettings.setSelectedScoreColumnName(scoreColumn);
-        }
-        if (showScore != null) {
-            networkSettings.setShowScore(showScore);
-        }
+//
+//        if (labelColumn != null) {
+//            networkSettings.setSelectedLabelColumnName(labelColumn);
+//        }
+//        if (urlColumn != null) {
+//            networkSettings.setSelectedURLColumnName(urlColumn);
+//        }
+//        if (scoreColumn != null) {
+//            networkSettings.setSelectedScoreColumnName(scoreColumn);
+//        }
+//        if (showScore != null) {
+//            networkSettings.setShowScore(showScore);
+//        }
     }
 
     @Override

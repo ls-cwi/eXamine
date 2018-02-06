@@ -73,7 +73,7 @@ public class Utilities {
 				services.getVisualMappingManager(),
 				services.getGroupManager(),
 				networkSettings.getShowScore(),
-				networkSettings.getGroupSelection());
+				networkSettings.getGroupSelectionMode());
 	}
 
 	/**
