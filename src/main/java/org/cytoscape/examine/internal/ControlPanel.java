@@ -4,15 +4,10 @@ import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.examine.internal.data.DataSet;
-import org.cytoscape.examine.internal.model.Model;
-import org.cytoscape.examine.internal.Constants.Selection;
 import org.cytoscape.examine.internal.settings.NetworkSettings;
 import org.cytoscape.examine.internal.settings.SessionSettings;
 import org.cytoscape.examine.internal.tasks.GenerateGroups;
 import org.cytoscape.examine.internal.tasks.RemoveGroups;
-import org.cytoscape.examine.internal.visualization.InteractiveVisualization;
-import org.cytoscape.examine.internal.visualization.SnapshotVisualization;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.events.ColumnCreatedEvent;
@@ -146,8 +141,7 @@ public class ControlPanel extends JPanel implements
 			gridBagConstraints.weightx = 0.5;
 			gridBagConstraints.weighty = 0.5;
 
-			JCheckBox checkBox = new JCheckBox(j.getName(),
-					selectedGroupColumns.contains(j));
+			JCheckBox checkBox = new JCheckBox(j.getName(), selectedGroupColumns.contains(j));
 			checkBox.addItemListener(itemChangeListener);
 			pnlGroups1.add(checkBox, gridBagConstraints);
 			checkBoxes.put(j, checkBox);

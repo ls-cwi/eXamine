@@ -27,7 +27,7 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
     @Tunable(description = "Show enrichment score of annotations", context = "nogui")
     public Boolean showScore = null;
 
-    @Tunable(context="nogui", description="The group columns that are shown in the visualization; provide as comma-separated list, for instance selectedGroupColumns=\"a,b,c\"; invalid list entries (that are not fitting column names) are ignored")
+    @Tunable(description="The group columns that are shown in the visualization; provide as comma-separated list, for instance selectedGroupColumns=\"a,b,c\"; invalid list entries (that are not fitting column names) are ignored", context="nogui")
     public ListMultipleSelection<String> selectedGroupColumns = null;
 
     private final CyServices services;
@@ -68,11 +68,11 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
             networkSettings.setShowScore(showScore);
         }
 
-        List<CyColumn> selectGroupCyColumns = selectedGroupColumns.getSelectedValues().stream()
-                .map(this::columnByName)
-                .filter(group -> group != null)
-                .collect(Collectors.toList());
-        if (selectGroupCyColumns != null) {
+        if (selectedGroupColumns != null) {
+            List<CyColumn> selectGroupCyColumns = selectedGroupColumns.getSelectedValues().stream()
+                    .map(this::columnByName)
+                    .filter(group -> group != null)
+                    .collect(Collectors.toList());
             networkSettings.setSelectedGroupColumns(selectGroupCyColumns);
         }
     }

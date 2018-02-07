@@ -18,6 +18,10 @@ public enum ExamineCommand {
             "update settings",
             "Updates settings for the visualization, such as label and score columns"
     ),
+    SELECT_GROUPS(
+            "select groups",
+            "Selects groups for the visualization, by key identifier"
+    ),
     INTERACT(
             "interact",
             "Shows the selected network and eXamine groups in an interactive visualization."

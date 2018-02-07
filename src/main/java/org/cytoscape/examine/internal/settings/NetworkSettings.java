@@ -19,10 +19,10 @@ public class NetworkSettings {
 	/**
 	 * Contains a list of columns that are tracked by the Settings
 	 */
-    private List<CyColumn> trackedColumns;
+    private final List<CyColumn> trackedColumns = new ArrayList<>();
 
     private List<CyColumn> allGroupColumns = new ArrayList<>();
-    private HashMap<CyColumn,Integer> allGroupColumnSizes = new HashMap<CyColumn,Integer>();
+    private HashMap<CyColumn, Integer> allGroupColumnSizes = new HashMap<>();
 
     private List<CyColumn> allStringColumns = new ArrayList<>();
     private List<CyColumn> allDoubleColumns = new ArrayList<>();
@@ -38,36 +38,8 @@ public class NetworkSettings {
 
     public NetworkSettings(CyNetwork network) {
 
-        // columnNames
-        List<CyColumn> columns = new ArrayList<CyColumn>();
-        columns.addAll(network.getDefaultNodeTable().getColumns());
-
-        trackedColumns = new ArrayList<>(columns.size());
-
-        for (CyColumn c : columns) {
-        	//TODO: We are "pre-setting" common names for columns here?
-            trackedColumns.add(c);
-
-            if (c.getListElementType() == String.class) {
-                if (c.getName().equals("Pathway")) {
-                    selectedGroupColumns.add(c);
-                }
-                allGroupColumns.add(c);
-                allGroupColumnSizes.put(c,Constants.CATEGORY_MAX_SIZE);
-            } else if (c.getType() == String.class) {
-                if (c.getName().equals("URL")) {
-                    selectedURLColumn = c;
-                } else if (c.getName().equals("Symbol")) {
-                    selectedLabelColumn = c;
-                }
-                allStringColumns.add(c);
-            } else if (c.getType() == Double.class) {
-                if (c.getName().equals("Score")) {
-                    selectedScoreColumn = c;
-                }
-                allDoubleColumns.add(c);
-            }
-
+        for (CyColumn c : network.getDefaultNodeTable().getColumns()) {
+            addColumn(c);
         }
 
         showScore = allDoubleColumns.size() > 0;
@@ -79,7 +51,7 @@ public class NetworkSettings {
      * @return
      */
     private List<String> getColumnNames(List<CyColumn> columns) {
-        ArrayList<String> res = new ArrayList<String>();
+        ArrayList<String> res = new ArrayList<>();
         for (CyColumn i : columns) {
             res.add(i.getName());
         }
@@ -104,10 +76,25 @@ public class NetworkSettings {
 
         if (c.getListElementType() == String.class) {
             allGroupColumns.add(c);
+            selectedGroupColumns.add(c);
+            allGroupColumnSizes.put(c, Constants.CATEGORY_MAX_SIZE);
         } else if (c.getType() == String.class) {
             allStringColumns.add(c);
         } else if (c.getType() == Double.class) {
             allDoubleColumns.add(c);
+        }
+
+        // Column presets.
+        if (c.getType() == String.class) {
+            if (c.getName().equals("URL") && selectedURLColumn == null) {
+                selectedURLColumn = c;
+            } else if (c.getName().equals("Symbol") && selectedLabelColumn == null) {
+                selectedLabelColumn = c;
+            }
+        } else if (c.getType() == Double.class) {
+            if (c.getName().equals("Score") && selectedScoreColumn == null) {
+                selectedScoreColumn = c;
+            }
         }
     }
 

@@ -61,6 +61,7 @@ public class CyActivator extends AbstractCyActivator {
                 ExamineCommand.GENERATE_GROUPS,
                 ExamineCommand.REMOVE_GROUPS,
                 ExamineCommand.UPDATE_SETTINGS,
+                ExamineCommand.SELECT_GROUPS,
                 ExamineCommand.INTERACT
         );
     }

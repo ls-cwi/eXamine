@@ -5,6 +5,7 @@ import org.cytoscape.examine.internal.settings.SessionSettings;
 import org.cytoscape.examine.internal.tasks.ExamineCommand;
 import org.cytoscape.examine.internal.tasks.GenerateGroups;
 import org.cytoscape.examine.internal.tasks.Interact;
+import org.cytoscape.examine.internal.tasks.SelectGroups;
 import org.cytoscape.examine.internal.tasks.UpdateSettings;
 import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TaskIterator;
@@ -34,8 +35,9 @@ public class CommandTaskFactory implements TaskFactory {
 		switch(command) {
 			case GENERATE_GROUPS:	return new TaskIterator(new GenerateGroups(services));
 			case UPDATE_SETTINGS:	return new TaskIterator(new UpdateSettings(services, settings));
+			case SELECT_GROUPS:		return new TaskIterator(new SelectGroups(services));
 			case INTERACT:			return new TaskIterator(new Interact(services, settings));
-			default: return null;
+			default:				return null;
 		}
 		//TODO: Might be useful to generate an error/ throw an exception here as this should never be invoked
 	}
