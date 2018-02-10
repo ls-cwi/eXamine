@@ -33,7 +33,7 @@ public class NetworkSettings {
 
     private CyColumn selectedScoreColumn = null;
 
-    private Selection groupSelection = null;
+    private Selection groupSelection = Selection.NONE;
     private boolean showScore;
 
     public NetworkSettings(CyNetwork network) {

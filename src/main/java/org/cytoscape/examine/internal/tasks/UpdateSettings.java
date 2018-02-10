@@ -1,9 +1,11 @@
 package org.cytoscape.examine.internal.tasks;
 
 import org.cytoscape.examine.internal.CyServices;
+import org.cytoscape.examine.internal.Utilities;
 import org.cytoscape.examine.internal.settings.NetworkSettings;
 import org.cytoscape.examine.internal.settings.SessionSettings;
 import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
@@ -14,6 +16,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class UpdateSettings implements ObservableTask, TunableValidator {
+
+    @Tunable(description="The network from which the groups are to be created", context="nogui")
+    public CyNetwork network;
 
     @Tunable(description = "The column that contains the labels that are displayed on nodes", context = "nogui")
     public String labelColumn = null;
@@ -28,7 +33,7 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
     public Boolean showScore = null;
 
     @Tunable(description="The group columns that are shown in the visualization; provide as comma-separated list, for instance selectedGroupColumns=\"a,b,c\"; invalid list entries (that are not fitting column names) are ignored", context="nogui")
-    public ListMultipleSelection<String> selectedGroupColumns = null;
+    public ListMultipleSelection<String> selectedGroupColumns;
 
     private final CyServices services;
     private final SessionSettings settings;
@@ -36,6 +41,8 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
     public UpdateSettings(CyServices services, SessionSettings settings) {
         this.services = services;
         this.settings = settings;
+        this.network = services.getApplicationManager().getCurrentNetwork();
+        this.selectedGroupColumns = Utilities.populateColumnList(network);
     }
 
     @Override
@@ -46,8 +53,7 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
     @Override
     public void run(TaskMonitor taskMonitor) {
 
-        NetworkSettings networkSettings = settings.getNetworkSettings(
-                services.getApplicationManager().getCurrentNetwork());
+        NetworkSettings networkSettings = settings.getNetworkSettings(network);
 
         CyColumn labelCyColumn = columnByName(labelColumn);
         if (labelCyColumn != null) {
@@ -80,7 +86,7 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
     private CyColumn columnByName(String columnName) {
         return columnName == null ?
                 null :
-                services.getApplicationManager().getCurrentNetwork().getDefaultNodeTable().getColumn(columnName);
+                network.getDefaultNodeTable().getColumn(columnName);
     }
 
     @Override

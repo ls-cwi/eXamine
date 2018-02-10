@@ -16,15 +16,19 @@ public enum ExamineCommand {
     ),
     UPDATE_SETTINGS(
             "update settings",
-            "Updates settings for the visualization, such as label and score columns"
+            "Updates settings for the visualization, such as label and score columns."
     ),
     SELECT_GROUPS(
             "select groups",
-            "Selects groups for the visualization, by key identifier"
+            "Selects groups for the visualization, by key identifier."
     ),
     INTERACT(
             "interact",
             "Shows the selected network and eXamine groups in an interactive visualization."
+    ),
+    EXPORT(
+            "export",
+            "Exports a visualization of the selected visualization and eXamine groups as an SVG."
     );
 
     private final String name;

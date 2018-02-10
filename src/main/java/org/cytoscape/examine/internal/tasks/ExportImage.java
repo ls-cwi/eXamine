@@ -5,15 +5,21 @@ import org.cytoscape.examine.internal.Utilities;
 import org.cytoscape.examine.internal.settings.SessionSettings;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
 
-/** Opens the eXamine interactive window. */
-public class Interact implements ObservableTask, TunableValidator {
+import java.io.File;
+
+/** Exports an image of the eXamine visualization. */
+public class ExportImage implements ObservableTask, TunableValidator {
+
+    @Tunable(description="The file path to export to", context="nogui")
+    public String path;
 
     private final CyServices services;
     private final SessionSettings settings;
 
-    public Interact(CyServices services, SessionSettings settings) {
+    public ExportImage(CyServices services, SessionSettings settings) {
         this.services = services;
         this.settings = settings;
     }
@@ -24,10 +30,11 @@ public class Interact implements ObservableTask, TunableValidator {
     }
 
     @Override
-    public void run(TaskMonitor taskMonitor) throws Exception {
-        Utilities.openVisualizationWindow(
+    public void run(TaskMonitor taskMonitor) {
+        Utilities.exportVisualization(
                 services,
-                settings.getNetworkSettings(services.getApplicationManager().getCurrentNetwork()));
+                settings.getNetworkSettings(services.getApplicationManager().getCurrentNetwork()),
+                new File(path));
     }
 
     @Override

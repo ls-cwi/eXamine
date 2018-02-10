@@ -73,6 +73,8 @@ public final class Model {
         final CyTable groupTable = dataSet.superNetwork.get().cyNetwork.getDefaultNodeTable();
         for (final HCategory category : dataSet.categories.get().values()) {
             for (final HSet set : category.members) {
+
+                // Is selected.
                 if (groupTable.getRow(set.cyGroup.getGroupNode().getSUID()).get(CyNetwork.SELECTED, Boolean.class)) {
                     selection.add(set, 1);
                 }

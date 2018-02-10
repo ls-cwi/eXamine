@@ -87,13 +87,9 @@ public class Utilities {
 	}
 
 	/**
-	 * Export the visualization as an image.
+	 * Export the visualization as an image via a file dialog.
 	 */
 	public static void exportVisualization(CyServices services, NetworkSettings networkSettings) {
-		final DataSet dataSet = createDataSet(services, networkSettings);
-		final Model model = createModel(dataSet, services, networkSettings);
-		final SnapshotVisualization visualization = new SnapshotVisualization(dataSet, model);
-
 		// Target file via dialog.
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setName("Export SVG");
@@ -101,11 +97,21 @@ public class Utilities {
 		int fileConfirm = fileChooser.showSaveDialog(null);
 
 		if (fileConfirm == JFileChooser.APPROVE_OPTION) {
-			try {
-				visualization.exportSVG(fileChooser.getSelectedFile());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			exportVisualization(services, networkSettings, fileChooser.getSelectedFile());
+		}
+	}
+
+	/**
+	 * Export the visualization as an image to the given file path.
+	 */
+	public static void exportVisualization(CyServices services, NetworkSettings networkSettings, File targetFile) {
+		try {
+			final DataSet dataSet = createDataSet(services, networkSettings);
+			final Model model = createModel(dataSet, services, networkSettings);
+			final SnapshotVisualization visualization = new SnapshotVisualization(dataSet, model);
+			visualization.exportSVG(targetFile);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
