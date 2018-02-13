@@ -234,4 +234,12 @@ public class NetworkSettings {
 		this.allGroupColumnSizes.put(key, size);
 	}
 
+	public int getColumnSize(CyColumn col) {
+		if (this.allGroupColumnSizes.containsKey(col)) {
+			return this.allGroupColumnSizes.get(col);
+		}
+		System.out.println("Trying to receive column size for a column that was not registered with the NetworkSettings object (Column: "+col.getName()+")");
+		return 0;
+	}
+
 }

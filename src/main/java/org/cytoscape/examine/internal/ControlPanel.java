@@ -59,7 +59,6 @@ public class ControlPanel extends JPanel implements
 
 	// User interface elements
 
-	//TODO: Parameterize Generics
 	private JPanel pnlNetwork;
 	private JTable tblFeedBack;
 	private JScrollPane pnlScroll;

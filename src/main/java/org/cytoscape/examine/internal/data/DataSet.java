@@ -1,9 +1,11 @@
 package org.cytoscape.examine.internal.data;
 
 import org.cytoscape.examine.internal.Constants;
+import org.cytoscape.examine.internal.settings.NetworkSettings;
 import org.cytoscape.examine.internal.signal.Variable;
 import org.cytoscape.group.CyGroup;
 import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -45,11 +47,7 @@ public class DataSet {
     public DataSet(
             final CyNetwork cyNetwork,
             final CyGroupManager groupManager,
-            final String labelColumnName,
-            final String urlColumnName,
-            final String scoreColumnName,
-            final List<String> groupColumnNames,
-            final List<Integer> groupColumnSizes) {
+            final NetworkSettings networkSettings) {
 
         // Fields.
         this.superNetwork = new Variable<SuperNetwork>(new SuperNetwork(null, new Pseudograph<HNode, DefaultEdge>(DefaultEdge.class)));
@@ -96,8 +94,8 @@ public class DataSet {
                         cyNode,
                         row,
                         row.get(CyNetwork.NAME, String.class),
-                        row.get(labelColumnName, String.class),
-                        row.get(urlColumnName, String.class),
+                        row.get(networkSettings.getSelectedLabelColumnName(), String.class),
+                        row.get(networkSettings.getSelectedURLColumnName(), String.class),
                         score);
 
                 superGraph.addVertex(hN);
@@ -133,19 +131,21 @@ public class DataSet {
                 CyGroup catG = groupManager.getGroup(gN, cyNetwork);
                 String catName = row.get(CyNetwork.NAME, String.class).substring(Constants.CATEGORY_PREFIX.length());
 
-                int idx = 0;
+                /*A pointer to the column corresponding to the category*/
+                CyColumn categoryColumn = null;
                 boolean found = false;
-                for (String groupName : groupColumnNames) {
-                    if (catName.equals(groupName)) {
+                
+                for (CyColumn entry : networkSettings.getAllGroupColumns()) {
+                    if (catName.equals(entry.getName())) {
                         found = true;
+                        categoryColumn = entry;
                         break;
                     }
-                    idx++;
                 }
 
                 if (!found) continue;
 
-                System.out.println("Add category: " + catName);
+                System.out.println("Added category: " + catName);
 
                 // Construct member sets.
                 List<HSet> members = new ArrayList<HSet>();
@@ -160,7 +160,7 @@ public class DataSet {
                     if (mGNodes.size() == 0) continue;
 
                     // Try to get symbol name, or fall back to id.
-                    String name = mRow.get(labelColumnName, String.class);
+                    String name = mRow.get(networkSettings.getSelectedLabelColumnName(), String.class);
                     if (name == null || name.trim().isEmpty()) {
                         name = mRow.get(CyNetwork.NAME, String.class);
                     }
@@ -174,8 +174,11 @@ public class DataSet {
                     }
 
                     Double bScore = null;
-                    if (scoreColumnName != null) {
-                        bScore = mRow.get(scoreColumnName, Double.class);
+                    if (networkSettings.getSelectedScoreColumnName() != null) {
+                        bScore = mRow.get(networkSettings.getSelectedScoreColumnName(), Double.class);
+                    }
+                    else {
+                    	System.out.println("NetworkSettings does nto contain a selected score column name!");
                     }
                     double score = bScore == null ? Double.NaN : bScore;
 
@@ -184,7 +187,7 @@ public class DataSet {
                         maxScr = Math.max(maxScr, score);
                     }
 
-                    String url = mRow.get(urlColumnName, String.class);
+                    String url = mRow.get(networkSettings.getSelectedURLColumnName(), String.class);
 
                     HSet mHS = new HSet(mG, name, score, url, mmNS);
                     members.add(mHS);
@@ -203,14 +206,9 @@ public class DataSet {
                 //System.out.println(groupColumnSizes == null ? "groupColumnSizes is null" : "groupColumnSizes is not null");
                 //System.out.println(groupColumnSizes.get(idx) == null ? "groupColumnSizes.get(idx) is null" : "groupColumnSizes.get(idx) is not null");
 
-                if (null != groupColumnSizes.get(idx)) {
-                    HCategory hC = new HCategory(catG, catName, members, groupColumnSizes.get(idx));
+                HCategory hC = new HCategory(catG, catName, members,networkSettings.getColumnSize(categoryColumn));
+                cs.put(catName, hC);
 
-                    cs.put(catName, hC);
-                }
-                else {
-                	System.out.println("Warning: Did not find a corresponding group column size for category: "+catName);
-                }
                 
 
             } // End for every category node.

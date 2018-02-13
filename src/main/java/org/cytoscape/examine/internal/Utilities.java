@@ -55,11 +55,7 @@ public class Utilities {
 		return new DataSet(
 				services.getApplicationManager().getCurrentNetwork(),
 				services.getGroupManager(),
-				networkSettings.getSelectedLabelColumnName(),
-				networkSettings.getSelectedURLColumnName(),
-				networkSettings.getSelectedScoreColumnName(),
-				networkSettings.getSelectedGroupColumnNames(),
-				networkSettings.getSelectedGroupColumnSizes()
+				networkSettings
 		);
 	}
 
