@@ -148,12 +148,10 @@ public class GraphLayout<V, E> {
     
     private class DistanceEdge implements ShortestPaths.Edge {
         
-        public final E edge;                // Target edge.
         public final int source, target;    // Source and target vertex indices.
         public final double length;         // Desired edge length in layout.
 
         public DistanceEdge(E edge, double length) { 
-            this.edge = edge;
             this.length = length;
             
             V sV = graph.getEdgeSource(edge);

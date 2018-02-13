@@ -16,9 +16,16 @@ public class VolatileSet<E> extends Volatile<Set<E>> {
     private Set<E> set;
     
     /**
-     * Base constructor. Initializes set with given elements.
+     * Base constructor. Initializes an empty set
      */
-    public VolatileSet(E... elements) {
+    public VolatileSet() {
+        set = new HashSet<E>();
+    }
+    
+    /**
+     * Alternative constructor. Initializes set with given elements.
+     */
+    public VolatileSet(E[] elements) {
         set = new HashSet<E>();
         set.addAll(Arrays.asList(elements));
     }

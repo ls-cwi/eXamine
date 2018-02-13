@@ -197,6 +197,12 @@ public class DataSet {
                 }
 
                 // Add category node.
+                System.out.println(catG == null ? "catG is null" : "catG is not null");
+                System.out.println(catName == null ? "catName is null" : "catName is not null");
+                System.out.println(members == null ? "members is null" : "members is not null");
+                System.out.println(groupColumnSizes == null ? "groupColumnSizes is null" : "groupColumnSizes is not null");
+                System.out.println(groupColumnSizes.get(idx) == null ? "groupColumnSizes.get(idx) is null" : "groupColumnSizes.get(idx) is not null");
+
                 HCategory hC = new HCategory(catG, catName, members, groupColumnSizes.get(idx));
 
                 cs.put(catName, hC);

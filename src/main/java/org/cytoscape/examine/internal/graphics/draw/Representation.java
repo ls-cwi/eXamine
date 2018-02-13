@@ -25,9 +25,15 @@ public abstract class Representation<E> extends PositionedSnippet {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Representation &&
-               this.getClass().equals(obj.getClass()) &&
-               this.element.equals(((Representation) obj).element);
+    	if (obj instanceof Representation<?>) {
+    		Representation<?> otherRepr = (Representation<?>)obj;
+    		if (otherRepr.getClass() == this.getClass()) {
+    			if (this.element.equals(((Representation<?>) obj).element)) {
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
     }
     
 }

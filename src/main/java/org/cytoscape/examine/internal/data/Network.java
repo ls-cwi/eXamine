@@ -37,9 +37,9 @@ public class Network {
         }
         
         Graph<HNode, DefaultEdge> subGraph =
-                new Subgraph(superNetwork.graph, nodeSubset);
+                new Subgraph<>(superNetwork.graph, nodeSubset);
         
-        return new UndirectedSubgraph(superNetwork.graph,
+        return new UndirectedSubgraph<HNode,DefaultEdge>(superNetwork.graph,
                                       subGraph.vertexSet(),
                                       subGraph.edgeSet());
     }

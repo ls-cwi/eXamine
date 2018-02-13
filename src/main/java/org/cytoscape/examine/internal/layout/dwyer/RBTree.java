@@ -24,7 +24,7 @@ public class RBTree<T> {
             
         };
         
-        this.sortedSet = new TreeSet(uniqueComparator);
+        this.sortedSet = new TreeSet<T>(uniqueComparator);
     }
     
     public boolean insert(T data) {

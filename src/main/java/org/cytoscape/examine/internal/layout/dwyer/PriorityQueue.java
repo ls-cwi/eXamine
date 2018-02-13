@@ -19,14 +19,23 @@ class PriorityQueue<T> {
         return empty() ? null : root.min();
     }
     
-    public PairingHeap<T> push(T... elements) {
+    public PairingHeap<T> push(T[] elements) {
         PairingHeap<T> pairingNode = null;
         
         for (T e: elements) {
-            pairingNode = new PairingHeap(e);
+            pairingNode = new PairingHeap<T>(e);
             this.root = this.empty() ? pairingNode : root.merge(pairingNode, comparator);
         }
         
+        return pairingNode;
+    }
+    
+    public PairingHeap<T> push(T element) {
+        PairingHeap<T> pairingNode = null;
+        
+        pairingNode = new PairingHeap<T>(element);
+        this.root = this.empty() ? pairingNode : root.merge(pairingNode, comparator);
+
         return pairingNode;
     }
     

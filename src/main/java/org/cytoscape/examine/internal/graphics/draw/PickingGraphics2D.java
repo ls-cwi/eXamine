@@ -535,7 +535,7 @@ public class PickingGraphics2D extends Graphics2D {
 
     @Override
     public Rectangle getClipRect() {
-        return parent.getClipRect();
+        return parent.getClipBounds();
     }
 
     @Override

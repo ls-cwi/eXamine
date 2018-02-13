@@ -35,11 +35,11 @@ public class UpdateSettings implements ObservableTask, TunableValidator {
     @Tunable(description="The group columns that are shown in the visualization; provide as comma-separated list, for instance selectedGroupColumns=\"a,b,c\"; invalid list entries (that are not fitting column names) are ignored", context="nogui")
     public ListMultipleSelection<String> selectedGroupColumns;
 
-    private final CyServices services;
+    //private final CyServices services;
     private final SessionSettings settings;
 
     public UpdateSettings(CyServices services, SessionSettings settings) {
-        this.services = services;
+        //this.services = services;
         this.settings = settings;
         this.network = services.getApplicationManager().getCurrentNetwork();
         this.selectedGroupColumns = Utilities.populateColumnList(network);

@@ -12,7 +12,7 @@ import java.util.List;
 public class HCategory {
 
     // Wrapped CyGroup.
-    private final CyGroup cyGroup;
+    //private final CyGroup cyGroup;
 
     // Name.
     public final String name;
@@ -27,7 +27,7 @@ public class HCategory {
      * Base constructor.
      */
     public HCategory(CyGroup cyGroup, String name, List<HSet> members, int maxSize) {
-        this.cyGroup = cyGroup;
+        //this.cyGroup = cyGroup;
         this.name = name;
         this.members = members;
         this.maxSize = maxSize;

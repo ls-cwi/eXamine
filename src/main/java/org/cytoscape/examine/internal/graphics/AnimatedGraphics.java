@@ -128,8 +128,8 @@ public class AnimatedGraphics {
     /**
      * Draw multiple snippets (in order).
      */
-    public <E extends Snippet> void snippets(E... snippets) {
-        for(Snippet s: snippets) {
+    public <E extends Snippet> void snippets(E[] snippets) {
+        for(E s: snippets) {
             snippet(s);
         }
     }

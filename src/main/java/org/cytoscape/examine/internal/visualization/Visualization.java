@@ -6,7 +6,6 @@ import org.cytoscape.examine.internal.data.HSet;
 import org.cytoscape.examine.internal.graphics.AnimatedGraphics;
 import org.cytoscape.examine.internal.graphics.PVector;
 import org.cytoscape.examine.internal.graphics.draw.Layout;
-import org.cytoscape.examine.internal.graphics.draw.Representation;
 import org.cytoscape.examine.internal.model.Model;
 import org.cytoscape.examine.internal.signal.Observer;
 import org.cytoscape.examine.internal.visualization.overview.Overview;
@@ -76,7 +75,7 @@ abstract class Visualization {
         PVector shiftPos = PVector.v();
 
         // Left side option snippets (includes set lists).
-        List<Representation> sideSnippets = new ArrayList<Representation>();
+        List<SetList> sideSnippets = new ArrayList<SetList>();
 
         List<SetList> openSl = new ArrayList<SetList>();
         List<SetList> closedSl = new ArrayList<SetList>();

@@ -352,24 +352,24 @@ public abstract class ApplicationFrame extends JFrame {
             // Delegate.
             ApplicationFrame.this.keyTyped(e);
         }
-
-        public void keyPressed() {
-            // Send event to hovered item.
-            if(animatedGraphics.getDrawManager().hovered != null) {
-                animatedGraphics.getDrawManager().hovered.keyPressed();
-            }
-
-            ApplicationFrame.this.keyPressed();
-        }
-
-        public void keyReleased() {
-            // Send event to hovered item.
-            if(animatedGraphics.getDrawManager().hovered != null) {
-                animatedGraphics.getDrawManager().hovered.keyReleased();
-            }
-
-            ApplicationFrame.this.keyReleased();
-        }
+//
+//        public void keyPressed() {
+//            // Send event to hovered item.
+//            if(animatedGraphics.getDrawManager().hovered != null) {
+//                animatedGraphics.getDrawManager().hovered.keyPressed();
+//            }
+//
+//            ApplicationFrame.this.keyPressed();
+//        }
+//
+//        public void keyReleased() {
+//            // Send event to hovered item.
+//            if(animatedGraphics.getDrawManager().hovered != null) {
+//                animatedGraphics.getDrawManager().hovered.keyReleased();
+//            }
+//
+//            ApplicationFrame.this.keyReleased();
+//        }
 
     }
 

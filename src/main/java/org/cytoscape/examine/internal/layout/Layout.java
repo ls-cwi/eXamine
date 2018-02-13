@@ -135,7 +135,7 @@ public class Layout {
             
             // Update shortest path matrix to rich graph.
             vN = richNodes.length;
-            FloydWarshallShortestPaths paths = new FloydWarshallShortestPaths(extRichGraph);
+            FloydWarshallShortestPaths<RichNode,RichEdge> paths = new FloydWarshallShortestPaths<RichNode,RichEdge>(extRichGraph);
             D = new double[vN][vN];
             for(int i = 0; i < vN; i++)
                 for(int j = i + 1; j < vN; j++)
@@ -244,7 +244,7 @@ public class Layout {
         
         // Construct shortest path distance matrix on original graph,
         // for distance graph and node overlap constraints.
-        FloydWarshallShortestPaths paths = new FloydWarshallShortestPaths(minDistGraph);
+        FloydWarshallShortestPaths<HNode,DefaultEdge> paths = new FloydWarshallShortestPaths<HNode,DefaultEdge>(minDistGraph);
         D = new double[vN][vN];
         for(int i = 0; i < vN; i++)
             for(int j = i + 1; j < vN; j++)

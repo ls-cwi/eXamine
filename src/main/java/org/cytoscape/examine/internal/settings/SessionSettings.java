@@ -20,7 +20,13 @@ public class SessionSettings {
     }
 
     public NetworkSettings getNetworkSettings(CyNetwork network) {
-        return networkSettings.computeIfAbsent(network.getSUID(), id -> new NetworkSettings(network));
+    	if (network != null) {
+            return networkSettings.computeIfAbsent(network.getSUID(), id -> new NetworkSettings(network));
+    	}
+    	else {
+    		System.out.println("Attempted to get network settings for a network that is null");
+    		return null;
+    	}
     }
 
     public Set<Long> getCachedNetworkUUIDs() {
