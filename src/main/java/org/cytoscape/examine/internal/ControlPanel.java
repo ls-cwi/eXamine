@@ -631,11 +631,8 @@ public class ControlPanel extends JPanel implements
 			if (e.getSource() == rootNetwork.getDefaultNodeTable()) {
 				System.out.println("Column created event: " + e.getColumnName() + ", source: " + e.getSource());
 				SwingUtilities.invokeLater(() -> {
-                    // get the root network first
-                    CyRootNetwork rootNetwork1 = services.getRootNetworkManager().getRootNetwork(currentNetwork);
-
                         // now for all subnetworks of this root network, update the column name
-                        for (CyNetwork network : rootNetwork1.getSubNetworkList()) {
+                        for (CyNetwork network : rootNetwork.getSubNetworkList()) {
                         	sessionSettings.getNetworkSettings(network).addColumn(e.getSource().getColumn(e.getColumnName()));
                         }
 

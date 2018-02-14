@@ -66,9 +66,13 @@ public class NetworkSettings {
      * Adds a column to the current network settings.
      */
     public void addColumn(CyColumn c) {
-        if (c == null)
-            return; //TODO: Maybe add an error message here?
-
+    	
+        if (c == null) {
+        	//Why would this ever be the case?
+        	System.out.println("Attempting to add a column that is null to the network settings!");
+            return;
+        }
+        
         if (existsColumn(c))
             return;
 
