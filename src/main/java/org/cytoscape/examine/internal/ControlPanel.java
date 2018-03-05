@@ -622,7 +622,7 @@ public class ControlPanel extends JPanel implements
 		if (LISTENERS_ENABLED.get()) {
 			CyNetwork currentNetwork = getCurrentNetwork();
 			if (currentNetwork == null) {
-				System.out.println("Could not retrieve current network, ignoring ColumnCreatedEvent!");
+				//System.out.println("Could not retrieve current network, ignoring ColumnCreatedEvent!");
 				return;
 			}
 
