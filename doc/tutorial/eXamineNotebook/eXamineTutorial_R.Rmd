@@ -1,0 +1,72 @@
+---
+title: "eXamine automation"
+output: html_notebook
+---
+This case study demonstrates how to use the REST API of eXamine to study an annotated module in Cytoscape. The module that we study has 17 nodes and 18 edges and occurs within the KEGG mouse network consisting of 3863 nodes and 29293 edges. The module is annotated with sets from four different categories: (1) KEGG pathways and the GO categories (2) molecular process, (3) biological function and (4) cellular component.
+
+There are three steps for visualizing subnetwork modules with eXamine. In the following, we will describe and perform the steps using the Automation functionality of Cytoscape. We refer to [tutorial.pdf](https://raw.githubusercontent.com/ls-cwi/eXamine/master/doc/tutorial/tutorial.pdf) for instructions using the Cytoscape GUI.
+
+First we install the connector for R (requires R >= 3.5):
+
+```{r}
+if(!"RCy3" %in% installed.packages()){
+    install.packages("BiocManager")
+    BiocManager::install("RCy3")
+}
+library(RCy3)
+```
+Next, we test if the connection to Cytoscape works:
+
+```{r}
+cytoscapeVersionInfo()
+```
+## Importing network and node-specific annotation
+
+We start by importing the KEGG network directly from the eXamine repository on github.
+
+```{r}
+# First we import our demo network
+commandsPOST("network import url indexColumnSourceInteraction=1 indexColumnTargetInteraction=2 url= https://raw.githubusercontent.com/ls-cwi/eXamine/master/data/edges.txt")
+```
+We then import node-specific annotation directly from the eXamine repository on github. The imported file contains set membership information for each node. Note that it is important to ensure that set-membership information is imported as `List of String`, as indicated by `sl`.
+
+```{r}
+commandsPOST("table import url firstRowAsColumnNames=true keyColumnIndex=1 startLoadRow=1 dataTypeList=s,s,f,f,f,s,s,s,sl,sl,sl,sl url=https://raw.githubusercontent.com/ls-cwi/eXamine/master/data/nodes_induced.txt")
+```
+## Import set-specific annotation
+
+We now describe how to import the set-specific annotations. In order to do so, eXamine needs to generate group nodes for each of the sets present in the module. To do so, we need to select nodes present in the module; these nodes have the value `small` in column `Module`, which we do as follows.
+
+```{r}
+commandsPOST("network select nodeList=Module:small")
+```
+Now that we have selected the nodes of the module, we can proceed with generating group nodes for each set (`Process`, `Function`, `Component` and `Pathway`).
+```{r}
+commandsPOST("examine generate groups selectedGroupColumns=Process,Function,Component,Pathway")
+```
+
+We import set-specific annotation, again directly from github.
+```{r}
+commandsPOST("table import url firstRowAsColumnNames=true keyColumnIndex=1 startLoadRow=1 url=https://raw.githubusercontent.com/ls-cwi/eXamine/master/data/sets_induced.txt")
+```
+## Set-based visualization using eXamine
+
+We now describe how to visualize the current selection. First, we set the visualization options.
+```{r}
+commandsPOST("examine update settings labelColumn=Symbol urlColumn=URL scoreColumn=Score showScore=true selectedGroupColumns=Function,Pathway")
+```
+We then select five groups.
+```{r}
+commandsPOST("examine select groups selectedGroups=GO:0008013,GO:0008083,mmu04070,mmu05200,mmu04520")
+```
+There are two options: either we launch the interactive eXamine visualization, or we directly generate an SVG.
+```{r}
+commandsPOST("examine export path=your-path-here.svg")
+```
+The command below launches the eXamine window. If this window is blank, simply resize the window to force a redraw of the scene.
+```{r}
+commandsPOST("examine interact")
+```
+
+
+
