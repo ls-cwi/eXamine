@@ -1,0 +1,64 @@
+---
+title: "eXamine automation -- Zachary's karater club"
+output: html_notebook
+---
+This case study demonstrates how to use the REST API of eXamine to study a small, annotated graph in Cytoscape. The graph we study is `Zachary's karate club`.
+
+First we install the connector for R (requires R >= 3.5):
+
+```{r}
+if(!"RCy3" %in% installed.packages()){
+    install.packages("BiocManager")
+    BiocManager::install("RCy3")
+}
+library(RCy3)
+```
+Next, we test if the connection to Cytoscape works:
+
+```{r}
+cytoscapeVersionInfo()
+```
+## Importing network and node-specific annotation
+
+We start by importing the graph directly from the eXamine repository on github.
+
+```{r}
+# First we import our demo network
+commandsPOST("network import url indexColumnSourceInteraction=1 indexColumnTargetInteraction=2 url= https://raw.githubusercontent.com/ls-cwi/eXamine/master/doc/tutorial/edges_karate.gml")
+```
+We then import node-specific annotation directly from the eXamine repository on github. The imported file contains set membership information for each node. Note that it is important to ensure that set-membership information is imported as `List of String`, as indicated by `sl`. Additionaly, note that the default list separator is a pipe character.
+
+```{r}
+commandsPOST("table import url firstRowAsColumnNames=true keyColumnIndex=1 startLoadRow=1 dataTypeList=s,s,f,f,f,s,s,s,sl,sl,sl,sl url=https://raw.githubusercontent.com/ls-cwi/eXamine/master/doc/tutorial/nodes_karate.txt")
+```
+## Import set-specific annotation
+
+We now describe how to import the set-specific annotations. In order to do so, eXamine needs to generate group nodes for each of the sets present in the module. To do so, we need to select all the nodes present in the network.
+
+```{r}
+commandsPOST("network select nodeList=all")
+```
+Now that we have selected the nodes, we can proceed with generating group nodes for the single set (`Community`).
+```{r}
+commandsPOST("examine generate groups selectedGroupColumns=Community")
+```
+
+## Set-based visualization using eXamine
+
+We now describe how to visualize the current selection. First, we set the visualization options.
+```{r}
+commandsPOST("examine update settings labelColumn=label urlColumn=label showScore=false selectedGroupColumns=Community")
+```
+We then select six groups.
+```{r}
+commandsPOST("examine select groups selectedGroups=A,B,C,D,E,F")
+```
+There are two options: either we launch the interactive eXamine visualization, or we directly generate an SVG.
+```{r}
+commandsPOST("examine export path=your-path-here.svg")
+```
+The command below launches the eXamine window. If this window is blank, simply resize the window to force a redraw of the scene.
+```{r}
+commandsPOST("examine interact")
+```
+

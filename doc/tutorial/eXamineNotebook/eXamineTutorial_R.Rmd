@@ -28,7 +28,7 @@ We start by importing the KEGG network directly from the eXamine repository on g
 # First we import our demo network
 commandsPOST("network import url indexColumnSourceInteraction=1 indexColumnTargetInteraction=2 url= https://raw.githubusercontent.com/ls-cwi/eXamine/master/data/edges.txt")
 ```
-We then import node-specific annotation directly from the eXamine repository on github. The imported file contains set membership information for each node. Note that it is important to ensure that set-membership information is imported as `List of String`, as indicated by `sl`.
+We then import node-specific annotation directly from the eXamine repository on github. The imported file contains set membership information for each node. Note that it is important to ensure that set-membership information is imported as `List of String`, as indicated by `sl`. Additionaly, note that the default list separator is a pipe character.
 
 ```{r}
 commandsPOST("table import url firstRowAsColumnNames=true keyColumnIndex=1 startLoadRow=1 dataTypeList=s,s,f,f,f,s,s,s,sl,sl,sl,sl url=https://raw.githubusercontent.com/ls-cwi/eXamine/master/data/nodes_induced.txt")
@@ -67,6 +67,4 @@ The command below launches the eXamine window. If this window is blank, simply r
 ```{r}
 commandsPOST("examine interact")
 ```
-
-
 
