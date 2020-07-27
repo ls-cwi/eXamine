@@ -1,0 +1,27 @@
+package org.cwi.examine.internal.ui.controller;
+	
+import javafx.application.Application;
+
+
+
+public class Thread {
+    public  void main(String[] args) {
+    
+    javafx.application.Application.launch(Main.class);
+     // Application.launch(Main.class, args);
+    
+    /*
+        new Thread() {
+       		@Override
+        	public void run() {
+                javafx.application.Application.launch(Main.class);
+        }
+        }.start();
+        
+        Main main = Main.waitMain();
+        
+     */
+     
+     
+    }
+}

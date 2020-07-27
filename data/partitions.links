@@ -1,0 +1,19 @@
+
+1	resnr_(1)	resid_(RKEY)	atom_(O3)
+2	resnr_(1)	resid_(RKEY)	atom_(C2)
+3	resnr_(1)	resid_(RKEY)	atom_(O1)
+4	resnr_(1)	resid_(RKEY)	atom_(C4)	core_&_shell_(c&s)
+
+
+7	resnr_(1)	resid_(RKEY)	atom_(C5)	core_&_shell_(c&s)
+
+
+10	resnr_(1)	resid_(RKEY)	atom_(C6)	core_&_shell_(c&s)	core_(s)
+
+12	resnr_(1)	resid_(RKEY)	atom_(C11)	core_&_shell_(c&s)	core_(s)
+
+
+
+16	resnr_(1)	resid_(RKEY)	atom_(C8)	core_&_shell_(c&s)	core_(s)
+17	resnr_(1)	resid_(RKEY)	atom_(O9)	core_&_shell_(c&s)	core_(s)
+18	resnr_(1)	resid_(RKEY)	atom_(O10)	core_&_shell_(c&s)	core_(s)

@@ -1,0 +1,16 @@
+package org.cwi.examine.internal.option;
+import org.cwi.examine.internal.molepan.dataread.DataRead;
+import java.io.IOException;
+
+public class Signal {
+  public boolean showHydrogen;
+  public boolean showCharge;
+  public boolean showRG;
+  
+  public signal() {
+    
+    
+    
+    
+    }
+}

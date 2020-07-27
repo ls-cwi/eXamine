@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="label" prefHeight="325.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+   <children>
+      <Label fx:id="eXamol_label" layoutX="43.0" layoutY="79.0" text="eXamol: Settings">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Button fx:id="start_button" layoutX="254.0" layoutY="248.0" mnemonicParsing="false" text="Start eXamole" />
+      <Button fx:id="choose_button" layoutX="259.0" layoutY="80.0" mnemonicParsing="false" onAction="#handleButtonChoose" text="Choose File " />
+      <ToggleButton fx:id="show_h" layoutX="43.0" layoutY="248.0" mnemonicParsing="false" onAction="#handleButtonStart" text="Skeletal Formula" />
+   </children>
+</AnchorPane>

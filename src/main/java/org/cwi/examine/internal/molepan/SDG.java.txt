@@ -1,0 +1,45 @@
+package org.cwi.examine.internal.molepan.dataread;
+
+import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.*;
+import org.openscience.cdk.layout.*;
+import org.openscience.cdk.interfaces.*;
+import org.openscience.cdk.exception.*;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.Atom.*;
+import org.cwi.examine.internal.molepan.*;
+import org.openscience.cdk.ChemObject.*;
+import org.openscience.cdk.Element.*;
+import org.openscience.cdk.Isotope.*;
+import org.openscience.cdk.AtomType.*;
+
+import org.cwi.examine.internal.molepan.dataread.*;
+
+
+public class SDG {
+
+
+    public void sdg(){
+      
+      //DataRead molecule = new DataRead();
+      try{ 
+			StructureDiagramGenerator SDGen = new StructureDiagramGenerator();
+ 			SDGen.setMolecule(DataRead.mol);
+ 			SDGen.generateCoordinates();
+ 			IAtomContainer layedOutMol = SDGen.getMolecule();	
+ 			DataRead.atomNo = layedOutMol.getAtomCount();
+ 			//System.out.println(SDG.getMolecule());
+ 			coordinates = new double[2][layedOutMol.getAtomCount()];
+ 			  for(int i = 0;i<layedOutMol.getAtomCount();i++){
+ 				  coordinates[0][i] = layedOutMol.getAtom(i).getPoint2d().x;
+ 				  coordinates[1][i] = layedOutMol.getAtom(i).getPoint2d().y;	
+ 					//Map<String, int> X = new HashMap<>();
+ 					//Map<String, int> Y = new HashMap<>();	
+ 			  }	
+ 		  } 
+		  catch(CDKException ex){System.err.println("Error: " + ex);
+		  }
+   
+  }
+}

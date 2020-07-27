@@ -1,0 +1,257 @@
+package org.cwi.examine.internal.layout.mp.sssr;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.cwi.examine.internal.data.Network;
+import org.cwi.examine.internal.graphics.PVector;
+import org.cwi.examine.internal.layout.dwyer.cola.Descent;
+import org.cwi.examine.internal.layout.dwyer.vpsc.Constraint;
+import org.cwi.examine.internal.visualization.Parameters;
+import org.cwi.examine.internal.data.HNode;
+import org.cwi.examine.internal.data.HAnnotation;
+import org.cwi.examine.internal.graphics.StaticGraphics;
+import org.cwi.examine.internal.layout.dwyer.vpsc.Variable;
+import org.cwi.examine.internal.layout.dwyer.vpsc.Solver;
+import org.cwi.examine.internal.model.Selection;
+import org.jgrapht.Graph;
+import org.jgrapht.*;
+
+//import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+
+//import org.jgrapht.traverse.BreadthFirstIterator;
+
+import org.jgrapht.Graph;
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.Pseudograph;
+import org.jgrapht.graph.Subgraph;
+import org.jgrapht.graph.UndirectedSubgraph;
+
+
+import org.jgrapht.WeightedGraph;
+import org.jgrapht.alg.FloydWarshallShortestPaths;
+import org.jgrapht.alg.PrimMinimumSpanningTree;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleGraph;
+import org.jgrapht.graph.SimpleWeightedGraph;
+
+
+public class SSSR {
+			 private Network network;
+			 //public List<String> e_nodes = new ArrayList<String>();
+			 private final HNode[] nodes;
+			 private final HNode[] m_nodes;
+			 
+			 //public final HNode[] cnodes;
+			// public final HNode[] a_c_nodes;
+		
+	public SSSR(Network network){
+			this.network = network;    
+			nodes = network.graph.vertexSet().toArray(new HNode[] {});
+			int n = nodes.length;
+			int[][] adjacency_matrix = new int[n][n];
+			
+			// HNode[][] next = new HNode[n][n];
+			 /*
+			              CLONE GRAPH          
+			  UndirectedGraph<HNode, DefaultEdge> clone_graph =  new Pseudograph<>(DefaultEdge.class);
+              for(int i = 0; i < nodes.length; i++)
+            		clone_graph.addVertex(nodes[i]);
+            	  for(int i = 0; i < nodes.length; i++){
+			  		for(int j = 0; j < nodes.length; j++){
+			  			if(network.graph.containsEdge(nodes[i],nodes[j])==true){
+			  				clone_graph.addEdge(nodes[i],nodes[j]);
+			  				
+			  			}
+			 		
+			  }
+			  }*/
+			  
+			  System.out.println("test next: " + network.graph.vertexSet()+ " " + nodes.length);
+              //cnodes = clone_graph.vertexSet().toArray(new HNode[] {});
+              /*
+              for(int i = 0; i < n; i++)
+                clone_graph.containsVertex(cnodes[i]);*/
+              
+            	 
+            
+            	 
+			 
+			  
+			 // a_c_nodes = network.graph.vertexSet().toArray(new HNode[] {});
+			 			//addAllEdges  addAllVertices
+			 
+
+			  /* 	First 'Acycle' Deletion  - Initial removal of all acyclic atoms -  */
+			  boolean not_acyclic = true;
+			  while(not_acyclic==true){
+			  		not_acyclic = false;
+			 	 for(int i = 0; i < n; i++){
+			 	 	if(network.graph.containsVertex(nodes[i])==true){
+			 	 	if(network.graph.degreeOf(nodes[i])<2){
+			 	 		network.graph.removeVertex(nodes[i]);
+			 	 		not_acyclic = true;
+			 	 	}}
+			 	 }
+			  }
+			  
+			 
+			  System.out.println("");
+			  System.out.println("Acycle Deletion");
+			  System.out.println("New Vertex Set : " + network.graph.vertexSet());
+			  m_nodes = network.graph.vertexSet().toArray(new HNode[] {});
+			  double[][] dist = new double[m_nodes.length][m_nodes.length];
+			  double[][] next = new double[m_nodes.length][m_nodes.length];
+			  double inf = Double.POSITIVE_INFINITY;
+			  
+			 
+			 /* 			- Weight -  							 */
+			  for(int i = 0; i < m_nodes.length; i++){
+			  	for(int j = 0; j < m_nodes.length; j++){
+			  		if(i==j){dist[i][j]=0; next[i][j]=0;}
+			  		else if(network.graph.containsEdge(m_nodes[i],m_nodes[j])==true){dist[i][j]=1; next[i][j] = j;} 
+			  		else {dist[i][j]= inf; next[i][j]=0;}
+			  	}}	
+			  System.out.println("");
+			  System.out.println("Weight-Matrix");
+			  System.out.println(network.graph.vertexSet());
+            	 for(int i = 0; i < m_nodes.length; i++){
+			  		for(int j = 0; j < m_nodes.length; j++){
+			  			 System.out.print(dist[i][j] + " ");
+			  }
+			  			 System.out.println("");
+			  }
+			   	
+
+		/* 			- Floyd–Warshall algorithm -  							 */
+				
+			  for(int k = 0; k < m_nodes.length; k++){
+			  	for(int i = 0; i < m_nodes.length; i++){
+			   	 	for(int j = 0; j < m_nodes.length; j++){
+			   	 	     if(dist[i][j] > dist[i][k]+dist[k][j]){
+			   	 			
+			  		    dist[i][j] = dist[i][k]+dist[k][j];
+			  			next[i][j] = k;
+			  		}
+			  }}} 
+			  
+			  
+			  
+			  System.out.println("");
+			  System.out.println("Floyd–Warshall-Matrix");
+			  System.out.println(network.graph.vertexSet());
+            	 for(int i = 0; i < m_nodes.length; i++){
+			  		for(int j = 0; j < m_nodes.length; j++){
+			  			 System.out.print(dist[i][j] + " ");
+			  }
+			  			 System.out.println("");
+			  }
+			  
+			  
+			  System.out.println("");
+			  System.out.println("try PID-Matrix");
+			  System.out.println(network.graph.vertexSet());
+            	 for(int i = 0; i < m_nodes.length; i++){
+			  		for(int j = 0; j < m_nodes.length; j++){
+			  			 System.out.print(next[i][j] + " ");
+			  }
+			  			 System.out.println("");
+			  }
+			  int k ;
+			  // create PID:
+			 System.out.println("");
+			  System.out.println("Show Path, PID-Matrix");
+			   for(int i = 0; i < m_nodes.length; i++){
+			  		for(int j = 0; j < m_nodes.length; j++){
+			  		
+			  			k = i;
+			  			System.out.print(i + ":		");
+			  			while(k!=j){ 
+			  			System.out.print(next[k][j] + "   ");
+			  			  k = (int)next[k][j];
+			  			}System.out.println("");}}
+			 
+			 
+			 /*        2nd shortest path      */
+			 
+			 
+			 
+			 
+			 
+			  
+			 /* 
+		
+            		
+            	//network.graph.addEdge(nodes[1], nodes[2]);
+			 /*
+			  //GET adjacency_matrix
+			  for(int i = 0; i < m_nodes.length; i++){
+			  		for(int j = 0; j < m_nodes.length; j++){
+			  			if(network.graph.containsEdge(m_nodes[i],m_nodes[j])==true){
+			  				adjacency_matrix[i][j] = 1;
+			  			}
+			  			else{
+			  				adjacency_matrix[i][j] = 0;
+						}
+			  }
+			  }
+			
+			  for(int i = 0; i < m_nodes.length; i++){
+			  		for(int j = 0; j < m_nodes.length; j++){
+			  			 System.out.print(adjacency_matrix[i][j]);
+			  }
+			  			 System.out.println("");
+			  }
+			   
+			  */
+			  	  //repair for demonstration
+			   for(int i = 0; i < nodes.length; i++)
+            		network.graph.addVertex(nodes[i]);
+            		
+			  
+			 
+			 
+			
+			  
+			  //getEdgeTarget
+			  //getEdgeSource
+			  
+			// network.graph.edgeSet()
+			
+    /*          BreadthFirstIterator<network.graph, DefaultEdge> startVertices;
+
+	         startVertices =  new BreadthFirstIterator<String, DefaultEdge>(network.graph);
+	         System.out.println("\nOrdering:");
+	         while (startVertices.hasNext()) {
+	            v = startVertices.next();
+	            System.out.println(v);
+	         }
+        
+       
+				for(i:  0-n){
+					for(j: 0-n){
+					List<DefaultEdge> path = DijkstraShortestPath.findPathBetween(network.graph, node[i], [j]);
+					System.out.println(path);
+					}
+				}
+				
+				
+				Set<String> intersection = new HashSet<String>(s1); // use the copy constructor
+				intersection.retainAll(s2);
+*/
+        
+
+    
+	}
+
+}
+
+

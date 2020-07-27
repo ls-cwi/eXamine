@@ -1,0 +1,15 @@
+package org.cwi.examine.internal.molepan;
+
+import org.cwi.examine.internal.molepan.dataread.DataRead;
+import org.cwi.examine.internal.molepan.*;
+import java.io.IOException;
+
+public class Molepan {
+
+    public static void main(String[] args) throws IOException {
+    
+    	DataRead dataread = new DataRead();
+      SDG sdg = new SDG();
+    
+    }
+}
